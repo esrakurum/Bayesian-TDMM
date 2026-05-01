@@ -1,0 +1,580 @@
+## These helper functions support the main tdmm() and
+## tdmm.parallel() fitting functions.
+##
+## They handle:
+##   - locating the family-specific JAGS model file
+##   - preparing subject-level inputs
+##   - building the JAGS data list
+##   - selecting monitored parameters by family
+##   - recovering fitted coefficient functions
+##   - constructing the fitted TDMM output object
+##
+## These are mostly internal package helpers. Most users will
+## interact with tdmm(), tdmm.parallel(), summary.tdmm(),
+## plot.tdmm(), and plot.trace.tdmm() instead.
+
+############################################################
+## Locate the JAGS model file
+############################################################
+
+get.tdmm.model.file <- function(family, jags.dir = NULL) {
+  
+  ## Select the JAGS model file that matches the requested
+  ## response family.
+  ##
+  ## If jags.dir is supplied, the function looks there first.
+  ## This is useful during local development when the model
+  ## files are stored in the top-level jags/ folder.
+  ##
+  ## If jags.dir is not supplied, the function tries to find
+  ## the model file from the installed package.
+  
+  family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
+  
+  model.file <- switch(
+    family,
+    gaussian  = "TDMM_Gaussian_JAGS.txt",
+    bernoulli = "TDMM_Bernoulli_JAGS.txt",
+    poisson   = "TDMM_Poisson_JAGS.txt"
+  )
+  
+  ##########################################################
+  ## First try the user-supplied JAGS directory
+  ##########################################################
+  
+  if (!is.null(jags.dir)) {
+    
+    model.path <- file.path(jags.dir, model.file)
+    
+    if (file.exists(model.path)) {
+      return(model.path)
+    }
+    
+    stop(
+      "Could not find the JAGS model file: ", model.file,
+      "\nExpected location: ", model.path,
+      "\nCheck that jags.dir points to the folder containing the JAGS model files.",
+      call. = FALSE
+    )
+  }
+  
+  ##########################################################
+  ## Then try the installed package location
+  ##########################################################
+  
+  installed.path <- system.file("jags", model.file, package = "TDMM")
+  
+  if (installed.path != "") {
+    return(installed.path)
+  }
+  
+  ##########################################################
+  ## If neither location works, stop with a clear message
+  ##########################################################
+  
+  stop(
+    "Could not find the JAGS model file: ", model.file,
+    "\nIf you are working locally, try setting jags.dir = 'jags'.",
+    "\nIf the package was installed from GitHub, make sure the JAGS files are included in the installed package.",
+    call. = FALSE
+  )
+}
+
+
+############################################################
+## Family-specific model configuration
+############################################################
+
+get.tdmm.family.config <- function(family, jags.dir = NULL, p) {
+  
+  ## This helper stores the family-specific settings used by
+  ## tdmm() and tdmm.parallel().
+  ##
+  ## The monitored parameters include the spline coefficients,
+  ## smoothing parameters, random intercept variance, and, for
+  ## Gaussian outcomes, the residual variance.
+  
+  family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
+  
+  model.file <- get.tdmm.model.file(family = family, jags.dir = jags.dir)
+  
+  ## Coefficient functions include beta0(t) plus beta1(t), ...,
+  ## beta_p(t). The JAGS model should be written so the spline
+  ## coefficients are saved in a way that can be recovered after
+  ## fitting.
+  ##
+  ## This setup supports either:
+  ##   alpha0, alpha1, ..., alphap
+  ## or a matrix-style alpha object, depending on the JAGS file.
+  
+  params <- c(
+    "alpha", "alpha0", paste0("alpha", seq_len(p)), "tau.alpha", "tau.b", "sigma2.b", "sigma.b")
+  
+  if (family == "gaussian") {
+    params <- c(params, "tau.e", "sigma2.e", "sigma.e")
+  }
+  
+  list(family = family, model.file = model.file, params = unique(params))
+}
+
+
+############################################################
+## Build subject-level TDMM inputs
+############################################################
+
+build.tdmm.subject.inputs <- function(data,
+                                      nknots,
+                                      subject.var = "subject.ID",
+                                      time.var = "time",
+                                      y.var = "y",
+                                      x.var = NULL,
+                                      degree = 2) {
+  
+  ## This helper prepares the data objects used by the JAGS
+  ## fitting functions.
+  ##
+  ## The data are expected to be in long format, with repeated
+  ## observations grouped by subject and time.
+  ##
+  ## x.var can be one covariate or any number of baseline
+  ## covariates:
+  ##
+  ##   x.var = "x1"
+  ##   x.var = c("x1", "x2", ..., "xp")
+  ##
+  ## If x.var is NULL, all columns except subject, time, and y
+  ## are treated as baseline covariates.
+  
+  ##########################################################
+  ## Identify covariates
+  ##########################################################
+  
+  if (is.null(x.var)) {
+    x.var <- setdiff(names(data), c(subject.var, time.var, y.var))
+  }
+  
+  if (length(x.var) == 0) {
+    stop("No baseline covariates were provided or detected.", call. = FALSE)
+  }
+  
+  ##########################################################
+  ## Check required columns
+  ##########################################################
+  
+  required.cols <- c(subject.var, time.var, y.var, x.var)
+  missing.cols <- setdiff(required.cols, names(data))
+  
+  if (length(missing.cols) > 0) {
+    stop("data is missing required column(s): ", paste(missing.cols, collapse = ", "), call. = FALSE)
+  }
+  
+  ##########################################################
+  ## Order the data
+  ##########################################################
+  
+  ## The JAGS model uses subject-level indexing, so we keep the
+  ## data ordered by subject and time.
+  
+  data <- data[order(data[[subject.var]], data[[time.var]]), ]
+  rownames(data) <- NULL
+  
+  ##########################################################
+  ## Subject and time information
+  ##########################################################
+  
+  subject.ID <- data[[subject.var]]
+  subject.levels <- unique(subject.ID)
+  n.subject <- length(subject.levels)
+  
+  time.points <- sort(unique(data[[time.var]]))
+  n.time <- length(time.points)
+  
+  ## Number of observations per subject.
+  n.obs.subject <- as.numeric(table(subject.ID))
+  
+  ## ni is the cumulative subject index used in the JAGS loops.
+  ## For subject i, observations run from ni[i] + 1 to ni[i + 1].
+  ni <- c(0, cumsum(n.obs.subject))
+  
+  ##########################################################
+  ## Response and covariate objects
+  ##########################################################
+  
+  y <- data[[y.var]]
+  
+  ## Build subject-level covariate matrix.
+  ## Since x.var are baseline covariates, each subject should
+  ## have one value for each covariate.
+  
+  X.subject <- do.call(
+    rbind,
+    lapply(subject.levels, function(id) {
+      subject.rows <- data[data[[subject.var]] == id, , drop = FALSE]
+      as.numeric(subject.rows[1, x.var, drop = TRUE])
+    })
+  )
+  
+  X.subject <- as.matrix(X.subject)
+  colnames(X.subject) <- x.var
+  
+  p <- ncol(X.subject)
+  
+  ## Observation-level covariate matrix.
+  ## This repeats the subject-level covariates across time.
+  X <- as.matrix(data[, x.var, drop = FALSE])
+  
+  ##########################################################
+  ## Spline basis
+  ##########################################################
+  
+  tlo <- min(time.points)
+  thi <- max(time.points)
+  
+  ## nseg controls the number of intervals used in the spline
+  ## basis construction.
+  nseg <- nknots - 2
+  
+  basis <- bbase(x = time.points, xl = tlo, xr = thi, ndx = nseg, deg = degree)
+  
+  nbasis <- ncol(basis)
+  
+  ##########################################################
+  ## Penalty matrix
+  ##########################################################
+  
+  ## Second-order difference penalty for smoothing spline
+  ## coefficients.
+  
+  D2 <- diff(diag(nbasis), differences = 2)
+  Penalty.bases <- t(D2) %*% D2
+  
+  ## Small ridge term for numerical stability.
+  Penalty.bases <- Penalty.bases + diag(1e-06, nbasis)
+  
+  ##########################################################
+  ## Return processed inputs
+  ##########################################################
+  
+  list(
+    data = data,
+    y = y,
+    X = X,
+    X.subject = X.subject,
+    x.var = x.var,
+    p = p,
+    subject.ID = subject.ID,
+    subject.levels = subject.levels,
+    n.subject = n.subject,
+    n.obs.subject = n.obs.subject,
+    n.total = length(y),
+    ni = ni,
+    time.points = time.points,
+    n.time = n.time,
+    nknots = nknots,
+    degree = degree,
+    nseg = nseg,
+    tlo = tlo,
+    thi = thi,
+    basis = basis,
+    nbasis = nbasis,
+    Penalty.bases = Penalty.bases,
+    subject.var = subject.var,
+    time.var = time.var,
+    y.var = y.var
+  )
+}
+
+
+############################################################
+## Build the JAGS data list
+############################################################
+
+build.tdmm.jags.data <- function(inputs,
+                                 family = c("gaussian", "bernoulli", "poisson")) {
+  
+  ## This helper builds the list passed to JAGS.
+  ##
+  ## The object names in this list should match the variable
+  ## names used inside the JAGS model files.
+  
+  family <- match.arg(family)
+  
+  jags.data <- list(
+    y = inputs$y,
+    X = inputs$X,
+    X.subject = inputs$X.subject,
+    p = inputs$p,
+    n.subject = inputs$n.subject,
+    n.time = inputs$n.time,
+    n.total = inputs$n.total,
+    ni = inputs$ni,
+    basis = inputs$basis,
+    nbasis = inputs$nbasis,
+    Penalty.bases = inputs$Penalty.bases
+  )
+  
+  ## Family label is useful for checking/debugging, although the
+  ## JAGS model file itself determines the likelihood.
+  jags.data$family <- family
+  
+  jags.data
+}
+
+
+############################################################
+## Extract spline coefficient draws
+############################################################
+
+.extract.alpha.draws <- function(post.mat,
+                                 p,
+                                 nbasis) {
+  
+  ## This internal helper extracts posterior draws of the spline
+  ## coefficients from the matrix of posterior samples.
+  ##
+  ## It supports two naming styles:
+  ##
+  ## 1. Matrix-style coefficients:
+  ##      alpha[1,1], alpha[1,2], ...
+  ##      alpha[2,1], alpha[2,2], ...
+  ##
+  ##    where row 1 is beta0(t), row 2 is beta1(t), etc.
+  ##
+  ## 2. Separate coefficient vectors:
+  ##      alpha0[1], alpha0[2], ...
+  ##      alpha1[1], alpha1[2], ...
+  ##
+  ##    where alpha0 gives beta0(t), alpha1 gives beta1(t), etc.
+  
+  coef.names <- colnames(post.mat)
+  n.draws <- nrow(post.mat)
+  
+  ## There are p baseline covariates plus the intercept function.
+  n.functions <- p + 1
+  
+  alpha.draws <- array(
+    NA_real_,
+    dim = c(n.draws, n.functions, nbasis)
+  )
+  
+  ##########################################################
+  ## Try matrix-style alpha[k, l] first
+  ##########################################################
+  
+  matrix.style.available <- all(
+    unlist(
+      lapply(seq_len(n.functions), function(k) {
+        paste0("alpha[", k, ",", seq_len(nbasis), "]") %in% coef.names
+      })
+    )
+  )
+  
+  if (matrix.style.available) {
+    
+    for (k in seq_len(n.functions)) {
+      alpha.cols <- paste0("alpha[", k, ",", seq_len(nbasis), "]")
+      alpha.draws[, k, ] <- as.matrix(post.mat[, alpha.cols, drop = FALSE])
+    }
+    
+    return(alpha.draws)
+  }
+  
+  ##########################################################
+  ## Try separate alpha0, alpha1, ..., alphap style
+  ##########################################################
+  
+  separate.style.available <- all(
+    unlist(
+      lapply(0:p, function(k) {
+        paste0("alpha", k, "[", seq_len(nbasis), "]") %in% coef.names
+      })
+    )
+  )
+  
+  if (separate.style.available) {
+    
+    for (k in 0:p) {
+      alpha.cols <- paste0("alpha", k, "[", seq_len(nbasis), "]")
+      alpha.draws[, k + 1, ] <- as.matrix(post.mat[, alpha.cols, drop = FALSE])
+    }
+    
+    return(alpha.draws)
+  }
+  
+  ##########################################################
+  ## If neither naming style is found, stop with a clear error
+  ##########################################################
+  
+  stop(
+    "Could not find spline coefficient samples in post.mat.\n",
+    "Expected either matrix-style names like alpha[1,1] or ",
+    "separate names like alpha0[1], alpha1[1], etc.",
+    call. = FALSE
+  )
+}
+
+
+############################################################
+## Recover posterior mean coefficient functions
+############################################################
+
+recover.tdmm.betas <- function(post.mat,
+                               basis,
+                               p,
+                               x.var = NULL) {
+  
+  ## This helper converts posterior samples of spline
+  ## coefficients back into fitted time-varying coefficient
+  ## functions.
+  ##
+  ## The returned posterior mean curves correspond to:
+  ##
+  ##   beta0(t), beta1(t), ..., beta_p(t)
+  
+  nbasis <- ncol(basis)
+  
+  alpha.draws <- .extract.alpha.draws(post.mat = post.mat, p = p, nbasis = nbasis)
+  
+  n.draws <- dim(alpha.draws)[1]
+  n.functions <- dim(alpha.draws)[2]
+  n.time <- nrow(basis)
+  
+  beta.draws <- array(
+    NA_real_,
+    dim = c(n.draws, n.time, n.functions)
+  )
+  
+  for (k in seq_len(n.functions)) {
+    beta.draws[, , k] <- alpha.draws[, k, , drop = FALSE][, 1, ] %*% t(basis)
+  }
+  
+  beta.hat <- apply(beta.draws, c(2, 3), mean)
+  
+  if (is.null(x.var)) {
+    beta.names <- c("beta0", paste0("beta", seq_len(p)))
+  } else {
+    beta.names <- c("beta0", paste0("beta_", x.var))
+  }
+  
+  colnames(beta.hat) <- beta.names
+  
+  list(
+    beta.draws = beta.draws,
+    beta.hat = beta.hat,
+    beta0.hat = beta.hat[, 1],
+    beta.covariates.hat = beta.hat[, -1, drop = FALSE],
+    beta.names = beta.names
+  )
+}
+
+
+############################################################
+## Build fitted TDMM output object
+############################################################
+
+build.tdmm.output <- function(family,
+                              post.samples,
+                              inputs,
+                              model.settings) {
+  
+  ## This helper builds the object returned by tdmm() and
+  ## tdmm.parallel().
+  ##
+  ## It keeps the output structure consistent across Gaussian,
+  ## Bernoulli, and Poisson models.
+  
+  family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
+  
+  ##########################################################
+  ## Convert posterior samples to a matrix
+  ##########################################################
+  
+  ## post.samples may already be a matrix, a coda object, or an
+  ## R2jags object. This keeps the helper flexible.
+  
+  if (is.matrix(post.samples)) {
+    post.mat <- post.samples
+  } else if (!is.null(post.samples$BUGSoutput$sims.matrix)) {
+    post.mat <- post.samples$BUGSoutput$sims.matrix
+  } else {
+    post.mat <- as.matrix(post.samples)
+  }
+  
+  ##########################################################
+  ## Recover fitted beta functions
+  ##########################################################
+  
+  beta.recovered <- recover.tdmm.betas(
+    post.mat = post.mat,
+    basis = inputs$basis,
+    p = inputs$p,
+    x.var = inputs$x.var
+  )
+  
+  ##########################################################
+  ## Variance summaries
+  ##########################################################
+  
+  sigma2.b <- NA_real_
+  sigma.b <- NA_real_
+  sigma2.e <- NA_real_
+  sigma.e <- NA_real_
+  
+  if ("sigma2.b" %in% colnames(post.mat)) {
+    sigma2.b <- mean(post.mat[, "sigma2.b"])
+  }
+  
+  if ("sigma.b" %in% colnames(post.mat)) {
+    sigma.b <- mean(post.mat[, "sigma.b"])
+  } else if (!is.na(sigma2.b)) {
+    sigma.b <- sqrt(sigma2.b)
+  }
+  
+  if (family == "gaussian") {
+    
+    if ("sigma2.e" %in% colnames(post.mat)) {
+      sigma2.e <- mean(post.mat[, "sigma2.e"])
+    }
+    
+    if ("sigma.e" %in% colnames(post.mat)) {
+      sigma.e <- mean(post.mat[, "sigma.e"])
+    } else if (!is.na(sigma2.e)) {
+      sigma.e <- sqrt(sigma2.e)
+    }
+  }
+  
+  ##########################################################
+  ## Build output list
+  ##########################################################
+  
+  output <- list(
+    family = family,
+    post.samples = post.samples,
+    post.mat = post.mat,
+    beta.hat = beta.recovered$beta.hat,
+    beta0.hat = beta.recovered$beta0.hat,
+    beta.covariates.hat = beta.recovered$beta.covariates.hat,
+    beta.names = beta.recovered$beta.names,
+    time.points = inputs$time.points,
+    inputs = inputs,
+    model.settings = model.settings,
+    sigma2.b = sigma2.b,
+    sigma.b = sigma.b
+  )
+  
+  ## For backward compatibility with the one-covariate examples,
+  ## keep beta1.hat when there is exactly one baseline covariate.
+  if (inputs$p == 1) {
+    output$beta1.hat <- beta.recovered$beta.covariates.hat[, 1]
+  }
+  
+  ## Gaussian models also include residual variance summaries.
+  if (family == "gaussian") {
+    output$sigma2.e <- sigma2.e
+    output$sigma.e <- sigma.e
+  }
+  
+  class(output) <- "tdmm"
+  
+  output
+}
