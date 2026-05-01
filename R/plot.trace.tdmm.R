@@ -18,7 +18,7 @@ plot.trace.tdmm <- function(result,
                             height = NULL,
                             res = 150,
                             lwd = 0.3,
-                            col = "#2E7D32") {
+                            col = "gray25") {
   
   ########
   ## Check fitted object
