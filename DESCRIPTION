@@ -1,0 +1,25 @@
+Package: TDMM
+Type: Package
+Title: Bayesian Time-Dynamic Mixed-Effects Models
+Version: 0.1.0
+Authors@R: c(
+    person("Makena", "Grigsby", email = "makenavgrigsby@gmail.com", role = c("aut", "cre")),
+    person("Esra", "Kurum", role = "aut")
+)
+Description: Fits Bayesian time-dynamic mixed-effects models for longitudinal
+    data using JAGS. The package currently supports Gaussian, Bernoulli, and
+    Poisson outcomes with spline-based time-varying coefficient functions and
+    subject-level random effects.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports:
+    R2jags,
+    rjags,
+    coda,
+    mcmcplots,
+    parallel,
+    stats,
+    graphics
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
