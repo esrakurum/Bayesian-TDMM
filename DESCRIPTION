@@ -20,6 +20,7 @@ Imports:
     mcmcplots,
     parallel,
     stats,
-    graphics
+    graphics,
+    grDevices
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
