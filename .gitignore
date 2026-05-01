@@ -1,0 +1,38 @@
+# R session files
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user
+*.Rproj
+
+# Output folders
+results/*
+figures/*
+
+# Keep README files inside otherwise ignored folders
+!results/README.md
+!figures/README.md
+
+# Large/generated R objects
+*.rds
+*.RDS
+*.RData
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# OS files
+.DS_Store
+Thumbs.db
