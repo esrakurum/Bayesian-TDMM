@@ -8,7 +8,12 @@ export(check.gaussian.response)
 export(check.bernoulli.balance)
 export(check.poisson.counts)
 
-export(plot.trace.tdmm)
+export(data.gen.tdmm.gauss)
+export(data.gen.tdmm.bern)
+export(data.gen.tdmm.pois)
+
+export(summary.tdmm)
 export(plot.tdmm)
+export(plot.trace.tdmm)
 export(recover.tdmm.betas.ci)
 export(make.tdmm.plot.grid)
