@@ -1,0 +1,14 @@
+export(tdmm)
+export(tdmm.parallel)
+
+export(check.tdmm.data.structure)
+export(check.tdmm.subject.balance)
+export(check.tdmm.family.data)
+export(check.gaussian.response)
+export(check.bernoulli.balance)
+export(check.poisson.counts)
+
+export(plot.trace.tdmm)
+export(plot.tdmm)
+export(recover.tdmm.betas.ci)
+export(make.tdmm.plot.grid)
