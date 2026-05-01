@@ -71,7 +71,7 @@ tdmm.parallel <- function(data,
   ## The number of covariates, p, comes from the processed
   ## input data. This allows the model to support x_1, ..., x_p.
   
-  config <- get.tdmm.family.config(family = family, jags.dir = jags.dir, p = inputs$p)
+  config <- get.tdmm.family.config(family = family, jags.dir = jags.dir)
   
   #########
   ## Store model settings
@@ -95,6 +95,7 @@ tdmm.parallel <- function(data,
     y.var = y.var,
     x.var = inputs$x.var,
     p = inputs$p,
+    nX = inputs$nX,
     seed = seed,
     parallel.method = "mclapply"
   )
@@ -167,3 +168,5 @@ tdmm.parallel <- function(data,
   
   result
 }
+
+
