@@ -14,10 +14,11 @@ plot.trace.tdmm <- function(result,
                             params,
                             file = NULL,
                             ncol = 2,
-                            width = 1400,
+                            width = 1800,
                             height = NULL,
-                            res = 120,
-                            lwd = 1) {
+                            res = 150,
+                            lwd = 0.3,
+                            col = "#2E7D32") {
   
   ########
   ## Check fitted object
@@ -99,8 +100,9 @@ plot.trace.tdmm <- function(result,
       post.mat[, param],
       type = "l",
       lwd = lwd,
+      col = col,
       main = paste("Trace of", param),
-      xlab = "Saved MCMC iteration",
+      xlab = "Iteration",
       ylab = param
     )
   }
