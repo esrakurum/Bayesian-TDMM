@@ -336,13 +336,8 @@ build.tdmm.jags.data <- function(inputs,
     Penalty.bases = inputs$Penalty.bases
   )
   
-  ## Family label is useful for checking/debugging, although the
-  ## JAGS model file itself determines the likelihood.
-  jags.data$family <- family
-  
   jags.data
 }
-
 
 ##########
 ## Extract spline coefficient draws
