@@ -1,0 +1,25 @@
+model
+{
+    for (k in 1:nX) {
+        betaX[1:n.time, k] <- bases.time[1:n.time, 1:nknots] %*% 
+            alpha[k, 1:nknots]
+    }
+    for (i in 1:n.subject) {
+        b[i] ~ dnorm(0.00000E+00, tau.b)
+        for (j in (sum(ni[1:i]) + 1):sum(ni[1:(i + 1)])) {
+            tt[j] <- j - sum(ni[1:i])
+            eta[j] <- inprod(betaX[tt[j], 1:nX], X[j, 1:nX]) + 
+                b[i]
+            log(lambda[j]) <- eta[j]
+            y[j] ~ dpois(lambda[j])
+        }
+    }
+    for (k in 1:nX) {
+        alpha[k, 1:nknots] ~ dmnorm(rep(0.00000E+00, nknots), tau.alpha[k] * 
+            Penalty.bases[, ])
+        tau.alpha[k] ~ dgamma(1, 0.001)
+    }
+    tau.b ~ dgamma(1, 0.005)
+    sigma2.b <- 1/tau.b
+    sigma.b <- 1/sqrt(tau.b)
+}
