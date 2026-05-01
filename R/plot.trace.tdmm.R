@@ -28,17 +28,18 @@ plot.trace.tdmm <- function(result,
   }
   
   ########
-  ## Extract posterior samples
+  ## Extract posterior matrix
   ########
   
-  if (!is.null(result$post.samples)) {
-    post.samples <- result$post.samples
+  if (!is.null(result$post.mat)) {
+    post.mat <- result$post.mat
+  } else if (!is.null(result$post.samples$BUGSoutput$sims.matrix)) {
+    post.mat <- result$post.samples$BUGSoutput$sims.matrix
+  } else if (!is.null(result$post.samples)) {
+    post.mat <- as.matrix(result$post.samples)
   } else {
-    stop("Could not find post.samples in result.", call. = FALSE)
+    stop("Could not find posterior samples in result.", call. = FALSE)
   }
-  
-  ## Convert to matrix only for checking parameter names.
-  post.mat <- as.matrix(post.samples)
   
   ########
   ## Check requested parameters
@@ -47,8 +48,11 @@ plot.trace.tdmm <- function(result,
   missing.params <- params[!params %in% colnames(post.mat)]
   
   if (length(missing.params) > 0) {
-    stop("The following parameters were not found in the posterior samples: ",
-      paste(missing.params, collapse = ", "), call. = FALSE)
+    stop(
+      "The following parameters were not found in the posterior samples: ",
+      paste(missing.params, collapse = ", "),
+      call. = FALSE
+    )
   }
   
   ########
@@ -68,7 +72,11 @@ plot.trace.tdmm <- function(result,
   
   if (!is.null(file)) {
     grDevices::png(
-      filename = file, width = width, height = height, res = res)
+      filename = file,
+      width = width,
+      height = height,
+      res = res
+    )
     on.exit(grDevices::dev.off(), add = TRUE)
   }
   
@@ -86,12 +94,14 @@ plot.trace.tdmm <- function(result,
   ########
   
   for (param in params) {
-    coda::traceplot(
-      post.samples[, param],
+    
+    graphics::plot(
+      post.mat[, param],
+      type = "l",
+      lwd = lwd,
       main = paste("Trace of", param),
-      xlab = "Iterations",
-      ylab = param,
-      lwd = lwd
+      xlab = "Saved MCMC iteration",
+      ylab = param
     )
   }
   
