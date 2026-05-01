@@ -13,9 +13,9 @@
 ## interact with tdmm(), tdmm.parallel(), summary.tdmm(),
 ## plot.tdmm(), and plot.trace.tdmm() instead.
 
-############################################################
+########
 ## Locate the JAGS model file
-############################################################
+########
 
 get.tdmm.model.file <- function(family, jags.dir = NULL) {
   
@@ -38,9 +38,9 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
     poisson   = "TDMM_Poisson_JAGS.txt"
   )
   
-  ##########################################################
+  ##########
   ## First try the user-supplied JAGS directory
-  ##########################################################
+  ##########
   
   if (!is.null(jags.dir)) {
     
@@ -58,9 +58,9 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
     )
   }
   
-  ##########################################################
+  ##########
   ## Then try the installed package location
-  ##########################################################
+  ##########
   
   installed.path <- system.file("jags", model.file, package = "TDMM")
   
@@ -68,9 +68,9 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
     return(installed.path)
   }
   
-  ##########################################################
+  ##########
   ## If neither location works, stop with a clear message
-  ##########################################################
+  ##########
   
   stop(
     "Could not find the JAGS model file: ", model.file,
@@ -81,11 +81,11 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
 }
 
 
-############################################################
+##########
 ## Family-specific model configuration
-############################################################
+##########
 
-get.tdmm.family.config <- function(family, jags.dir = NULL, p) {
+get.tdmm.family.config <- function(family, jags.dir = NULL) {
   
   ## This helper stores the family-specific settings used by
   ## tdmm() and tdmm.parallel().
@@ -98,29 +98,36 @@ get.tdmm.family.config <- function(family, jags.dir = NULL, p) {
   
   model.file <- get.tdmm.model.file(family = family, jags.dir = jags.dir)
   
-  ## Coefficient functions include beta0(t) plus beta1(t), ...,
-  ## beta_p(t). The JAGS model should be written so the spline
-  ## coefficients are saved in a way that can be recovered after
-  ## fitting.
+  ## The JAGS model files use matrix-style spline coefficients:
+  ##   alpha[k, 1:nknots]
   ##
-  ## This setup supports either:
-  ##   alpha0, alpha1, ..., alphap
-  ## or a matrix-style alpha object, depending on the JAGS file.
+  ## where k = 1, ..., nX.
+  ##
+  ## nX includes the intercept function and all baseline
+  ## covariate coefficient functions.
   
   params <- c(
-    "alpha", "alpha0", paste0("alpha", seq_len(p)), "tau.alpha", "tau.b", "sigma2.b", "sigma.b")
+    "alpha",
+    "tau.alpha",
+    "tau.b",
+    "sigma2.b",
+    "sigma.b"
+  )
   
   if (family == "gaussian") {
     params <- c(params, "tau.e", "sigma2.e", "sigma.e")
   }
   
-  list(family = family, model.file = model.file, params = unique(params))
+  list(
+    family = family,
+    model.file = model.file,
+    params = unique(params)
+  )
 }
 
-
-############################################################
+##########
 ## Build subject-level TDMM inputs
-############################################################
+##########
 
 build.tdmm.subject.inputs <- function(data,
                                       nknots,
@@ -145,9 +152,9 @@ build.tdmm.subject.inputs <- function(data,
   ## If x.var is NULL, all columns except subject, time, and y
   ## are treated as baseline covariates.
   
-  ##########################################################
+  ##########
   ## Identify covariates
-  ##########################################################
+  ##########
   
   if (is.null(x.var)) {
     x.var <- setdiff(names(data), c(subject.var, time.var, y.var))
@@ -157,9 +164,9 @@ build.tdmm.subject.inputs <- function(data,
     stop("No baseline covariates were provided or detected.", call. = FALSE)
   }
   
-  ##########################################################
+  ##########
   ## Check required columns
-  ##########################################################
+  ##########
   
   required.cols <- c(subject.var, time.var, y.var, x.var)
   missing.cols <- setdiff(required.cols, names(data))
@@ -168,19 +175,18 @@ build.tdmm.subject.inputs <- function(data,
     stop("data is missing required column(s): ", paste(missing.cols, collapse = ", "), call. = FALSE)
   }
   
-  ##########################################################
+  ##########
   ## Order the data
-  ##########################################################
-  
+  ##########
   ## The JAGS model uses subject-level indexing, so we keep the
   ## data ordered by subject and time.
   
   data <- data[order(data[[subject.var]], data[[time.var]]), ]
   rownames(data) <- NULL
   
-  ##########################################################
+  ##########
   ## Subject and time information
-  ##########################################################
+  ##########
   
   subject.ID <- data[[subject.var]]
   subject.levels <- unique(subject.ID)
@@ -191,14 +197,18 @@ build.tdmm.subject.inputs <- function(data,
   
   ## Number of observations per subject.
   n.obs.subject <- as.numeric(table(subject.ID))
+
+  ## ni follows the indexing structure used in the current JAGS files.
+  ## The first entry is 0, followed by the number of observations for
+  ## each subject.
+  ## For example, if each subject has 20 observations, then:
+  ##   ni = c(0, 20, 20, 20, ...)
+  ## The JAGS files use sums of ni to find each subject's row range.
+  ni <- c(0, n.obs.subject)
   
-  ## ni is the cumulative subject index used in the JAGS loops.
-  ## For subject i, observations run from ni[i] + 1 to ni[i + 1].
-  ni <- c(0, cumsum(n.obs.subject))
-  
-  ##########################################################
+  ##########
   ## Response and covariate objects
-  ##########################################################
+  ##########
   
   y <- data[[y.var]]
   
@@ -217,15 +227,24 @@ build.tdmm.subject.inputs <- function(data,
   X.subject <- as.matrix(X.subject)
   colnames(X.subject) <- x.var
   
-  p <- ncol(X.subject)
+  ## Observation-level design matrix.
+  ## The first column is the intercept. The remaining columns are
+  ## the user-specified baseline covariates repeated across time.
+  ##
+  ## This matches the JAGS model files, where nX is the total
+  ## number of coefficient functions:
+  ##   beta_0(t), beta_1(t), ..., beta_p(t)
+  X <- cbind(Intercept = 1, as.matrix(data[, x.var, drop = FALSE]))
+
+  ## p is the number of user-specified baseline covariates.
+  ## nX is the total number of coefficient functions, including
+  ## the intercept.
+  p <- length(x.var)
+  nX <- ncol(X)
   
-  ## Observation-level covariate matrix.
-  ## This repeats the subject-level covariates across time.
-  X <- as.matrix(data[, x.var, drop = FALSE])
-  
-  ##########################################################
+  ##########
   ## Spline basis
-  ##########################################################
+  ##########
   
   tlo <- min(time.points)
   thi <- max(time.points)
@@ -238,9 +257,9 @@ build.tdmm.subject.inputs <- function(data,
   
   nbasis <- ncol(basis)
   
-  ##########################################################
+  ##########
   ## Penalty matrix
-  ##########################################################
+  ##########
   
   ## Second-order difference penalty for smoothing spline
   ## coefficients.
@@ -251,9 +270,9 @@ build.tdmm.subject.inputs <- function(data,
   ## Small ridge term for numerical stability.
   Penalty.bases <- Penalty.bases + diag(1e-06, nbasis)
   
-  ##########################################################
+  ##########
   ## Return processed inputs
-  ##########################################################
+  ##########
   
   list(
     data = data,
@@ -262,6 +281,7 @@ build.tdmm.subject.inputs <- function(data,
     X.subject = X.subject,
     x.var = x.var,
     p = p,
+    nX = nX,
     subject.ID = subject.ID,
     subject.levels = subject.levels,
     n.subject = n.subject,
@@ -284,32 +304,35 @@ build.tdmm.subject.inputs <- function(data,
   )
 }
 
-
-############################################################
+##########
 ## Build the JAGS data list
-############################################################
+##########
 
 build.tdmm.jags.data <- function(inputs,
                                  family = c("gaussian", "bernoulli", "poisson")) {
   
   ## This helper builds the list passed to JAGS.
   ##
-  ## The object names in this list should match the variable
-  ## names used inside the JAGS model files.
+  ## The object names in this list match the variable names used
+  ## inside the current JAGS model files.
+  ##
+  ## In the JAGS files:
+  ##   X contains the intercept column and covariates
+  ##   nX is the number of coefficient functions
+  ##   bases.time is the spline basis evaluated on the observed time grid
+  ##   nknots is the number of spline basis functions
   
   family <- match.arg(family)
   
   jags.data <- list(
     y = inputs$y,
     X = inputs$X,
-    X.subject = inputs$X.subject,
-    p = inputs$p,
+    nX = inputs$nX,
     n.subject = inputs$n.subject,
     n.time = inputs$n.time,
-    n.total = inputs$n.total,
     ni = inputs$ni,
-    basis = inputs$basis,
-    nbasis = inputs$nbasis,
+    bases.time = inputs$basis,
+    nknots = inputs$nbasis,
     Penalty.bases = inputs$Penalty.bases
   )
   
@@ -321,9 +344,9 @@ build.tdmm.jags.data <- function(inputs,
 }
 
 
-############################################################
+##########
 ## Extract spline coefficient draws
-############################################################
+##########
 
 .extract.alpha.draws <- function(post.mat,
                                  p,
@@ -357,9 +380,9 @@ build.tdmm.jags.data <- function(inputs,
     dim = c(n.draws, n.functions, nbasis)
   )
   
-  ##########################################################
+  ##########
   ## Try matrix-style alpha[k, l] first
-  ##########################################################
+  ##########
   
   matrix.style.available <- all(
     unlist(
@@ -379,9 +402,9 @@ build.tdmm.jags.data <- function(inputs,
     return(alpha.draws)
   }
   
-  ##########################################################
+  ##########
   ## Try separate alpha0, alpha1, ..., alphap style
-  ##########################################################
+  ##########
   
   separate.style.available <- all(
     unlist(
@@ -401,9 +424,9 @@ build.tdmm.jags.data <- function(inputs,
     return(alpha.draws)
   }
   
-  ##########################################################
+  ##########
   ## If neither naming style is found, stop with a clear error
-  ##########################################################
+  ##########
   
   stop(
     "Could not find spline coefficient samples in post.mat.\n",
@@ -414,9 +437,9 @@ build.tdmm.jags.data <- function(inputs,
 }
 
 
-############################################################
+##########
 ## Recover posterior mean coefficient functions
-############################################################
+##########
 
 recover.tdmm.betas <- function(post.mat,
                                basis,
@@ -468,9 +491,9 @@ recover.tdmm.betas <- function(post.mat,
 }
 
 
-############################################################
+##########
 ## Build fitted TDMM output object
-############################################################
+##########
 
 build.tdmm.output <- function(family,
                               post.samples,
@@ -485,9 +508,9 @@ build.tdmm.output <- function(family,
   
   family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
   
-  ##########################################################
+  ##########
   ## Convert posterior samples to a matrix
-  ##########################################################
+  ##########
   
   ## post.samples may already be a matrix, a coda object, or an
   ## R2jags object. This keeps the helper flexible.
@@ -500,9 +523,9 @@ build.tdmm.output <- function(family,
     post.mat <- as.matrix(post.samples)
   }
   
-  ##########################################################
+  ##########
   ## Recover fitted beta functions
-  ##########################################################
+  ##########
   
   beta.recovered <- recover.tdmm.betas(
     post.mat = post.mat,
@@ -511,9 +534,9 @@ build.tdmm.output <- function(family,
     x.var = inputs$x.var
   )
   
-  ##########################################################
+  ##########
   ## Variance summaries
-  ##########################################################
+  ##########
   
   sigma2.b <- NA_real_
   sigma.b <- NA_real_
@@ -543,9 +566,9 @@ build.tdmm.output <- function(family,
     }
   }
   
-  ##########################################################
+  ##########
   ## Build output list
-  ##########################################################
+  ##########
   
   output <- list(
     family = family,
