@@ -76,7 +76,7 @@ tdmm <- function(data,
   ## input data. This allows the model to support x_1, ..., x_p.
   
   config <- get.tdmm.family.config(
-    family = family, jags.dir = jags.dir, p = inputs$p)
+    family = family, jags.dir = jags.dir)
   
   ##########
   ## Store model settings
@@ -98,7 +98,8 @@ tdmm <- function(data,
     time.var = time.var,
     y.var = y.var,
     x.var = inputs$x.var,
-    p = inputs$p
+    p = inputs$p, 
+    nX = inputs$nX
   )
   
   ##########
