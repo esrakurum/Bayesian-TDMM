@@ -5,7 +5,7 @@ Version: 0.1.0
 Authors@R: c(
     person("Makena", "Grigsby", email = "makenavgrigsby@gmail.com", role = c("aut", "cre")),
     person("Esra", "Kurum", role = "aut")
-)
+    )
 Description: Fits Bayesian time-dynamic mixed-effects models for longitudinal
     data using JAGS. The package currently supports Gaussian, Bernoulli, and
     Poisson outcomes with spline-based time-varying coefficient functions and
