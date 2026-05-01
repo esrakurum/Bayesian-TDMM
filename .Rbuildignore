@@ -1,0 +1,9 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.git$
+^\.gitignore$
+^README_files$
+^results$
+^figures$
+^simulations$
+^examples$
