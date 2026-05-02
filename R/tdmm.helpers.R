@@ -13,6 +13,7 @@
 ## interact with tdmm(), tdmm.parallel(), summary.tdmm(),
 ## plot.tdmm(), and plot.trace.tdmm() instead.
 
+
 ########
 ## Locate the JAGS model file
 ########
@@ -125,6 +126,7 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
   )
 }
 
+
 ##########
 ## Build subject-level TDMM inputs
 ##########
@@ -147,7 +149,7 @@ build.tdmm.subject.inputs <- function(data,
   ## covariates:
   ##
   ##   x.var = "x1"
-  ##   x.var = c("x1", "x2", ..., "xp")
+  ##   x.var = c("x1", "x2", ...)
   ##
   ## If x.var is NULL, all columns except subject, time, and y
   ## are treated as baseline covariates.
@@ -172,7 +174,11 @@ build.tdmm.subject.inputs <- function(data,
   missing.cols <- setdiff(required.cols, names(data))
   
   if (length(missing.cols) > 0) {
-    stop("data is missing required column(s): ", paste(missing.cols, collapse = ", "), call. = FALSE)
+    stop(
+      "data is missing required column(s): ",
+      paste(missing.cols, collapse = ", "),
+      call. = FALSE
+    )
   }
   
   ##########
@@ -197,7 +203,7 @@ build.tdmm.subject.inputs <- function(data,
   
   ## Number of observations per subject.
   n.obs.subject <- as.numeric(table(subject.ID))
-
+  
   ## ni follows the indexing structure used in the current JAGS files.
   ## The first entry is 0, followed by the number of observations for
   ## each subject.
@@ -233,13 +239,14 @@ build.tdmm.subject.inputs <- function(data,
   ##
   ## This matches the JAGS model files, where nX is the total
   ## number of coefficient functions:
-  ##   beta_0(t), beta_1(t), ..., beta_p(t)
+  ##   beta_0(t), beta_1(t), beta_2(t), ...
+  
   X <- cbind(Intercept = 1, as.matrix(data[, x.var, drop = FALSE]))
-
+  
   ## nX is the total number of coefficient functions, including
   ## the intercept.
   nX <- ncol(X)
-
+  
   ## Store readable coefficient names.
   ## beta0(t) corresponds to the intercept.
   ## beta_x1(t), beta_x2(t), ... correspond to the selected covariates.
@@ -256,7 +263,13 @@ build.tdmm.subject.inputs <- function(data,
   ## basis construction.
   nseg <- nknots - 2
   
-  basis <- bbase(x = time.points, xl = tlo, xr = thi, ndx = nseg, deg = degree)
+  basis <- bbase(
+    x = time.points,
+    xl = tlo,
+    xr = thi,
+    ndx = nseg,
+    deg = degree
+  )
   
   nbasis <- ncol(basis)
   
@@ -307,6 +320,7 @@ build.tdmm.subject.inputs <- function(data,
   )
 }
 
+
 ##########
 ## Build the JAGS data list
 ##########
@@ -341,6 +355,7 @@ build.tdmm.jags.data <- function(inputs,
   
   jags.data
 }
+
 
 ##########
 ## Extract spline coefficient draws
@@ -392,40 +407,57 @@ build.tdmm.jags.data <- function(inputs,
     call. = FALSE
   )
 }
-  ##########
-  ## Try separate alpha0, alpha1, ..., alphap style
-  ##########
+
+
+##########
+## Recover posterior mean coefficient functions
+##########
+
+recover.tdmm.betas <- function(post.mat,
+                               basis,
+                               nX,
+                               coef.names = NULL) {
   
-  separate.style.available <- all(
-    unlist(
-      lapply(0:p, function(k) {
-        paste0("alpha", k, "[", seq_len(nbasis), "]") %in% coef.names
-      })
-    )
+  ## This helper converts posterior samples of spline
+  ## coefficients back into fitted time-varying coefficient
+  ## functions.
+  
+  nbasis <- ncol(basis)
+  
+  alpha.draws <- .extract.alpha.draws(
+    post.mat = post.mat,
+    nX = nX,
+    nbasis = nbasis
   )
   
-  if (separate.style.available) {
-    
-    for (k in 0:p) {
-      alpha.cols <- paste0("alpha", k, "[", seq_len(nbasis), "]")
-      alpha.draws[, k + 1, ] <- as.matrix(post.mat[, alpha.cols, drop = FALSE])
-    }
-    
-    return(alpha.draws)
+  n.draws <- dim(alpha.draws)[1]
+  n.time <- nrow(basis)
+  
+  beta.draws <- array(
+    NA_real_,
+    dim = c(n.draws, n.time, nX)
+  )
+  
+  for (k in seq_len(nX)) {
+    beta.draws[, , k] <- alpha.draws[, k, , drop = FALSE][, 1, ] %*% t(basis)
   }
   
-  ##########
-  ## If neither naming style is found, stop with a clear error
-  ##########
+  beta.hat <- apply(beta.draws, c(2, 3), mean)
   
-  stop(
-    "Could not find spline coefficient samples in post.mat.\n",
-    "Expected either matrix-style names like alpha[1,1] or ",
-    "separate names like alpha0[1], alpha1[1], etc.",
-    call. = FALSE
+  if (is.null(coef.names)) {
+    coef.names <- c("beta0", paste0("beta", seq_len(nX - 1)))
+  }
+  
+  colnames(beta.hat) <- coef.names
+  
+  list(
+    beta.draws = beta.draws,
+    beta.hat = beta.hat,
+    beta0.hat = beta.hat[, 1],
+    beta.covariates.hat = beta.hat[, -1, drop = FALSE],
+    beta.names = coef.names
   )
 }
-
 
 
 ##########
@@ -527,6 +559,7 @@ build.tdmm.output <- function(family,
   if (inputs$nX == 2) {
     output$beta1.hat <- beta.recovered$beta.covariates.hat[, 1]
   }
+  
   ## Gaussian models also include residual variance summaries.
   if (family == "gaussian") {
     output$sigma2.e <- sigma2.e
