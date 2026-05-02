@@ -98,8 +98,8 @@ tdmm <- function(data,
     time.var = time.var,
     y.var = y.var,
     x.var = inputs$x.var,
-    p = inputs$p, 
-    nX = inputs$nX
+    nX = inputs$nX,
+    coef.names = inputs$coef.names
   )
   
   ##########
@@ -109,7 +109,7 @@ tdmm <- function(data,
   ## The model file depends on the selected response family.
   
   if (!quiet) {
-    message("Fitting ", family, " TDMM with ", inputs$p, " baseline covariate(s).")
+    message("Fitting ", family, " TDMM with ", length(inputs$x.var), " baseline covariate(s).")
     message("Using JAGS model file: ", config$model.file)
   }
   
