@@ -68,8 +68,8 @@ tdmm.parallel <- function(data,
   #########
   ## Get the family-specific model configuration
   #########
-  ## The number of covariates, p, comes from the processed
-  ## input data. This allows the model to support x_1, ..., x_p.
+ ## The model configuration locates the JAGS file and selects
+ ## the parameters to monitor for the requested family.
   
   config <- get.tdmm.family.config(family = family, jags.dir = jags.dir)
   
@@ -94,18 +94,17 @@ tdmm.parallel <- function(data,
     time.var = time.var,
     y.var = y.var,
     x.var = inputs$x.var,
-    p = inputs$p,
     nX = inputs$nX,
+    coef.names = inputs$coef.names,
     seed = seed,
     parallel.method = "mclapply"
   )
-  
   #########
   ## Print fitting information
   #########
   
   if (!quiet) {
-    message("Fitting ", family, " TDMM with ", inputs$p, " baseline covariate(s).")
+    message("Fitting ", family, " TDMM with ", length(inputs$x.var), " baseline covariate(s).")
     message("Using JAGS model file: ", config$model.file)
     message("Running ", n.chains, " chain(s) on ", n.cores, " core(s).")
   }
