@@ -427,56 +427,6 @@ build.tdmm.jags.data <- function(inputs,
 }
 
 
-##########
-## Recover posterior mean coefficient functions
-##########
-
-recover.tdmm.betas <- function(post.mat,
-                               basis,
-                               nX,
-                               coef.names = NULL) {
-  
-  ## This helper converts posterior samples of spline
-  ## coefficients back into fitted time-varying coefficient
-  ## functions.
-  
-  nbasis <- ncol(basis)
-  
-  alpha.draws <- .extract.alpha.draws(
-    post.mat = post.mat,
-    nX = nX,
-    nbasis = nbasis
-  )
-  
-  n.draws <- dim(alpha.draws)[1]
-  n.time <- nrow(basis)
-  
-  beta.draws <- array(
-    NA_real_,
-    dim = c(n.draws, n.time, nX)
-  )
-  
-  for (k in seq_len(nX)) {
-    beta.draws[, , k] <- alpha.draws[, k, , drop = FALSE][, 1, ] %*% t(basis)
-  }
-  
-  beta.hat <- apply(beta.draws, c(2, 3), mean)
-  
-  if (is.null(coef.names)) {
-    coef.names <- c("beta0", paste0("beta", seq_len(nX - 1)))
-  }
-  
-  colnames(beta.hat) <- coef.names
-  
-  list(
-    beta.draws = beta.draws,
-    beta.hat = beta.hat,
-    beta0.hat = beta.hat[, 1],
-    beta.covariates.hat = beta.hat[, -1, drop = FALSE],
-    beta.names = coef.names
-  )
-}
-
 
 ##########
 ## Build fitted TDMM output object
