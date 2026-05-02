@@ -40,7 +40,7 @@ summary.tdmm <- function(object, ...) {
   cat("Number of subjects: ", inputs$n.subject, "\n", sep = "")
   cat("Number of time points: ", inputs$n.time, "\n", sep = "")
   cat("Total observations: ", inputs$n.total, "\n", sep = "")
-  cat("Number of baseline covariates: ", inputs$p, "\n", sep = "")
+  cat("Number of covariates: ", length(inputs$x.var), "\n", sep = "")
   cat("Number of coefficient functions: ", inputs$nX, "\n", sep = "")
   cat("Covariates: ", paste(inputs$x.var, collapse = ", "), "\n", sep = "")
   
@@ -80,7 +80,6 @@ summary.tdmm <- function(object, ...) {
       n.subject = inputs$n.subject,
       n.time = inputs$n.time,
       n.total = inputs$n.total,
-      p = inputs$p,
       nX = inputs$nX,
       covariates = inputs$x.var,
       beta.names = object$beta.names,
