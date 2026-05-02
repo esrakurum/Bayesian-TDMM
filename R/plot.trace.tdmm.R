@@ -19,7 +19,7 @@ plot.trace.tdmm <- function(result,
                             res = 150,
                             lwd = 0.4,
                             col = NULL,
-                            show.legend = TRUE) {
+                            show.legend = FALSE) {
   
   ########
   ## Check fitted object
