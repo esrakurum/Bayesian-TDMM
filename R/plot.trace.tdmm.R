@@ -17,8 +17,9 @@ plot.trace.tdmm <- function(result,
                             width = 1800,
                             height = NULL,
                             res = 150,
-                            lwd = 0.3,
-                            col = "gray25") {
+                            lwd = 0.4,
+                            col = NULL,
+                            show.legend = TRUE) {
   
   ########
   ## Check fitted object
@@ -29,7 +30,7 @@ plot.trace.tdmm <- function(result,
   }
   
   ########
-  ## Extract posterior matrix
+  ## Extract posterior matrix for checking parameter names
   ########
   
   if (!is.null(result$post.mat)) {
@@ -54,6 +55,68 @@ plot.trace.tdmm <- function(result,
       paste(missing.params, collapse = ", "),
       call. = FALSE
     )
+  }
+  
+  ########
+  ## Extract chain-specific samples
+  ########
+  
+  chain.samples <- NULL
+  
+  ## Case 1: tdmm() fitted with R2jags.
+  ## R2jags stores chain-specific samples in sims.array.
+  if (!is.null(result$post.samples$BUGSoutput$sims.array)) {
+    
+    sims.array <- result$post.samples$BUGSoutput$sims.array
+    
+    chain.samples <- lapply(seq_len(dim(sims.array)[2]), function(chain.id) {
+      sims.array[, chain.id, , drop = FALSE]
+    })
+    
+    names(chain.samples) <- paste0("Chain ", seq_along(chain.samples))
+  }
+  
+  ## Case 2: tdmm.parallel() fitted with coda::mcmc.list.
+  if (is.null(chain.samples) && inherits(result$post.samples, "mcmc.list")) {
+    
+    chain.samples <- lapply(result$post.samples, function(x) {
+      as.matrix(x)
+    })
+    
+    names(chain.samples) <- paste0("Chain ", seq_along(chain.samples))
+  }
+  
+  ## Fallback: if chain-specific samples are not available,
+  ## plot the combined posterior matrix as one trace.
+  if (is.null(chain.samples)) {
+    chain.samples <- list("Combined chains" = post.mat)
+  }
+  
+  n.chains <- length(chain.samples)
+  
+  ########
+  ## Set chain colors
+  ########
+  
+  if (is.null(col)) {
+    if (n.chains == 1) {
+      col <- "gray25"
+    } else {
+      nejm.cols <- c(
+        "#0072B5FF",  # blue
+        "#20854EFF",  # green
+        "#BC3C29FF",  # red
+        "#7876B1FF",  # purple
+        "#E18727FF",  # orange
+        "#6F99ADFF",  # light blue
+        "#FFDC91FF",  # yellow
+        "#EE4C97FF"   # pink
+      )
+      
+      col <- rep(nejm.cols, length.out = n.chains)
+    }
+  } else {
+    col <- rep(col, length.out = n.chains)
   }
   
   ########
@@ -86,8 +149,11 @@ plot.trace.tdmm <- function(result,
   
   graphics::par(
     mfrow = c(nrow, ncol),
-    mar = c(4, 4, 3, 1),
-    mgp = c(2.4, 0.8, 0)
+    mar = c(4.2, 4.4, 3.0, 1.2),
+    mgp = c(2.5, 0.8, 0),
+    cex.axis = 0.85,
+    cex.lab = 0.9,
+    cex.main = 1.0
   )
   
   ########
@@ -96,15 +162,47 @@ plot.trace.tdmm <- function(result,
   
   for (param in params) {
     
+    y.list <- lapply(chain.samples, function(chain.mat) {
+      if (is.array(chain.mat)) {
+        chain.mat[, 1, param]
+      } else {
+        chain.mat[, param]
+      }
+    })
+    
+    y.range <- range(unlist(y.list), na.rm = TRUE)
+    
     graphics::plot(
-      post.mat[, param],
+      y.list[[1]],
       type = "l",
       lwd = lwd,
-      col = col,
+      col = col[1],
+      ylim = y.range,
       main = paste("Trace of", param),
       xlab = "Iteration",
       ylab = param
     )
+    
+    if (n.chains > 1) {
+      for (chain.id in 2:n.chains) {
+        graphics::lines(
+          y.list[[chain.id]],
+          lwd = lwd,
+          col = col[chain.id]
+        )
+      }
+    }
+    
+    if (show.legend && n.chains > 1) {
+      graphics::legend(
+        "topright",
+        legend = names(chain.samples),
+        col = col,
+        lwd = 1.2,
+        bty = "n",
+        cex = 0.75
+      )
+    }
   }
   
   invisible(NULL)
