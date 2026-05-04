@@ -390,10 +390,9 @@ for (k in seq_len(ncoef)) {
     ylim = y.range,
     xaxt = "n",
     xlab = xlab,
-    ylab = "",
-    main = main.label
+    ylab = beta.label,
+    main = ""
   )
-    
     ## Add either the default numeric time axis or the custom axis.
     if (!is.null(x.axis.values) && !is.null(x.axis.labels)) {
       graphics::axis(1, at = x.axis.values, labels = x.axis.labels)
