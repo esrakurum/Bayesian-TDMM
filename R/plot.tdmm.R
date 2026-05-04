@@ -382,17 +382,17 @@ for (k in seq_len(ncoef)) {
       na.rm = TRUE
     )
     
-    graphics::plot(
-      plot.grid$grid,
-      beta.out$beta.mean[[k]],
-      type = "l",
-      lwd = lwd.mean,
-      ylim = y.range,
-      xaxt = "n",
-      xlab = xlab,
-      ylab = beta.label,
-      main = main.label
-    )
+  graphics::plot(
+    plot.grid$grid,
+    beta.out$beta.mean[[k]],
+    type = "l",
+    lwd = lwd.mean,
+    ylim = y.range,
+    xaxt = "n",
+    xlab = xlab,
+    ylab = "",
+    main = main.label
+  )
     
     ## Add either the default numeric time axis or the custom axis.
     if (!is.null(x.axis.values) && !is.null(x.axis.labels)) {
