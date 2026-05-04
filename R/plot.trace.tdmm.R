@@ -1,7 +1,3 @@
-############################################################
-## Trace plot helper for TDMM fitted objects
-############################################################
-
 ## plot.trace.tdmm() makes traceplots for selected posterior
 ## parameters from a fitted TDMM object.
 ##
