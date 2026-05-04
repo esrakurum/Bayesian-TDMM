@@ -356,15 +356,15 @@ plot.tdmm <- function(data,
   ## Plot each coefficient function
   #########
   
-  for (k in seq_len(ncoef)) {
-    
-    beta.label <- paste0("beta[", k - 1, "](t)")
-    
-    if (!is.null(coef.labels)) {
-      main.label <- coef.labels[k]
-    } else {
-      main.label <- beta.label
-    }
+for (k in seq_len(ncoef)) {
+  
+  beta.label <- bquote(hat(beta)[.(k - 1)](t))
+  
+  if (!is.null(coef.labels)) {
+    main.label <- coef.labels[k]
+  } else {
+    main.label <- beta.label
+  }
     
     ## Choose uncertainty bands.
     if (sd) {
