@@ -54,7 +54,13 @@ make.tdmm.plot.grid <- function(data,
   ## This uses the same spline basis construction as the model.
   nseg <- nknots - 2
   
-  bases.grid <- bbase(x = grid, xl = tlo, xr = thi, ndx = nseg, deg = degree)
+  bases.grid <- bbase(
+    x = grid,
+    xl = tlo,
+    xr = thi,
+    ndx = nseg,
+    deg = degree
+  )
   
   list(
     grid = grid,
@@ -74,34 +80,36 @@ make.tdmm.plot.grid <- function(data,
 
 recover.tdmm.betas.ci <- function(post.mat,
                                   bases.grid,
-                                  p,
-                                  x.var = NULL,
+                                  nX,
+                                  coef.names = NULL,
                                   level = 0.95) {
   
   ## This function recovers posterior mean curves and uncertainty
-  ## summaries for beta_0(t), beta_1(t), ..., beta_p(t).
+  ## summaries for all coefficient functions:
   ##
-  ## It uses posterior samples of the spline coefficients alpha.
+  ##   beta_0(t), beta_1(t), beta_2(t), ...
   ##
-  ## The number of baseline covariates is p, so the total number
-  ## of coefficient functions is p + 1 because the model also has
-  ## the time-varying intercept beta_0(t).
+  ## nX is the total number of coefficient functions, including
+  ## the intercept.
   
   #########
   ## Basic dimensions
   #########
   
   nbasis <- ncol(bases.grid)
-  ncoef <- p + 1
+  ncoef <- nX
   
- #########
+  #########
   ## Extract alpha draws
   #########
   ## This uses the internal helper from tdmm.helpers.R.
-  ## It supports matrix-style alpha[k,l] names and separate
-  ## alpha0, alpha1, ..., alphap naming.
+  ## It expects matrix-style alpha[k,l] names from the JAGS model.
   
-  alpha.draws <- .extract.alpha.draws(post.mat = post.mat, p = p, nbasis = nbasis)
+  alpha.draws <- .extract.alpha.draws(
+    post.mat = post.mat,
+    nX = nX,
+    nbasis = nbasis
+  )
   
   #########
   ## Set credible interval probabilities
@@ -130,8 +138,8 @@ recover.tdmm.betas.ci <- function(post.mat,
     
     beta.draws[[k]] <- beta.k.draws
     beta.mean[[k]] <- colMeans(beta.k.draws)
-    beta.lower[[k]] <- apply(beta.k.draws, 2, quantile, probs = probs[1])
-    beta.upper[[k]] <- apply(beta.k.draws, 2, quantile, probs = probs[2])
+    beta.lower[[k]] <- apply(beta.k.draws, 2, stats::quantile, probs = probs[1])
+    beta.upper[[k]] <- apply(beta.k.draws, 2, stats::quantile, probs = probs[2])
     beta.sd[[k]] <- apply(beta.k.draws, 2, stats::sd)
   }
   
@@ -139,17 +147,15 @@ recover.tdmm.betas.ci <- function(post.mat,
   ## Name coefficient function outputs
   #########
   
-  if (is.null(x.var)) {
-    beta.names <- c("beta0", paste0("beta", seq_len(p)))
-  } else {
-    beta.names <- c("beta0", paste0("beta_", x.var))
+  if (is.null(coef.names)) {
+    coef.names <- c("beta0", paste0("beta", seq_len(nX - 1)))
   }
   
-  names(beta.draws) <- paste0(beta.names, ".draws")
-  names(beta.mean) <- paste0(beta.names, ".mean")
-  names(beta.lower) <- paste0(beta.names, ".lower")
-  names(beta.upper) <- paste0(beta.names, ".upper")
-  names(beta.sd) <- paste0(beta.names, ".sd")
+  names(beta.draws) <- paste0(coef.names, ".draws")
+  names(beta.mean) <- paste0(coef.names, ".mean")
+  names(beta.lower) <- paste0(coef.names, ".lower")
+  names(beta.upper) <- paste0(coef.names, ".upper")
+  names(beta.sd) <- paste0(coef.names, ".sd")
   
   list(
     beta.draws = beta.draws,
@@ -157,9 +163,9 @@ recover.tdmm.betas.ci <- function(post.mat,
     beta.lower = beta.lower,
     beta.upper = beta.upper,
     beta.sd = beta.sd,
-    beta.names = beta.names,
+    beta.names = coef.names,
     ncoef = ncoef,
-    p = p,
+    nX = nX,
     level = level
   )
 }
@@ -200,14 +206,6 @@ plot.tdmm <- function(data,
   ## For Gaussian models this is the response scale.
   ## For Bernoulli models this is the log-odds scale.
   ## For Poisson models this is the log-mean scale.
-  ##
-  ## The main arguments are:
-  ##   data   = original data frame used to fit the model
-  ##   result = fitted TDMM object from tdmm() or tdmm.parallel()
-  ##   sd     = whether to use posterior SD bands instead of CIs
-  ##   level  = credible interval level
-  ##   grid   = optional plotting grid
-  ##   n.grid = number of plotting grid points if grid is NULL
   
   #########
   ## Check fitted object
@@ -222,7 +220,10 @@ plot.tdmm <- function(data,
   #########
   
   if (is.null(x.axis.values) != is.null(x.axis.labels)) {
-    stop("x.axis.values and x.axis.labels must either both be NULL or both be provided.", call. = FALSE)
+    stop(
+      "x.axis.values and x.axis.labels must either both be NULL or both be provided.",
+      call. = FALSE
+    )
   }
   
   if (!is.null(x.axis.values) &&
@@ -266,23 +267,34 @@ plot.tdmm <- function(data,
     }
   }
   
-  ## Extract covariate information.
-  p <- result$inputs$p
-  x.var <- result$inputs$x.var
+  ## Extract coefficient-function information.
+  nX <- result$inputs$nX
+  coef.names <- result$inputs$coef.names
   
   #########
   ## Build plotting grid
   #########
   
   plot.grid <- make.tdmm.plot.grid(
-    data = data, grid = grid, n.grid = n.grid, time.var = time.var, nknots = nknots, degree = degree)
+    data = data,
+    grid = grid,
+    n.grid = n.grid,
+    time.var = time.var,
+    nknots = nknots,
+    degree = degree
+  )
   
   #########
   ## Recover coefficient summaries
   #########
   
   beta.out <- recover.tdmm.betas.ci(
-    post.mat = post.mat, bases.grid = plot.grid$bases.grid, p = p, x.var = x.var, level = level)
+    post.mat = post.mat,
+    bases.grid = plot.grid$bases.grid,
+    nX = nX,
+    coef.names = coef.names,
+    level = level
+  )
   
   ncoef <- beta.out$ncoef
   
@@ -302,7 +314,12 @@ plot.tdmm <- function(data,
   #########
   
   if (!is.null(file)) {
-    grDevices::png(filename = file, width = width, height = height, res = res)
+    grDevices::png(
+      filename = file,
+      width = width,
+      height = height,
+      res = res
+    )
     on.exit(grDevices::dev.off(), add = TRUE)
   }
   
@@ -340,7 +357,9 @@ plot.tdmm <- function(data,
   #########
   
   for (k in seq_len(ncoef)) {
+    
     beta.label <- paste0("beta[", k - 1, "](t)")
+    
     if (!is.null(coef.labels)) {
       main.label <- coef.labels[k]
     } else {
@@ -356,7 +375,12 @@ plot.tdmm <- function(data,
       upper.band <- beta.out$beta.upper[[k]]
     }
     
-    y.range <- range(beta.out$beta.mean[[k]], lower.band, upper.band, na.rm = TRUE)
+    y.range <- range(
+      beta.out$beta.mean[[k]],
+      lower.band,
+      upper.band,
+      na.rm = TRUE
+    )
     
     graphics::plot(
       plot.grid$grid,
@@ -389,5 +413,11 @@ plot.tdmm <- function(data,
   ## Return plotting summaries invisibly
   #########
   
-  invisible(list(grid = plot.grid$grid, bases.grid = plot.grid$bases.grid, summaries = beta.out))
+  invisible(
+    list(
+      grid = plot.grid$grid,
+      bases.grid = plot.grid$bases.grid,
+      summaries = beta.out
+    )
+  )
 }
