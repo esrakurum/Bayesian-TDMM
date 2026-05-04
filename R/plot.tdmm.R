@@ -192,6 +192,7 @@ plot.tdmm <- function(data,
                       x.axis.labels = NULL,
                       xlab = "time",
                       coef.labels = NULL,
+                      ylim = NULL,
                       width = 2200,
                       height = 700,
                       res = 150) {
@@ -299,7 +300,7 @@ plot.tdmm <- function(data,
   ncoef <- beta.out$ncoef
   
   #########
-  ## Check coefficient labels
+  ## Check coefficient labels and y-axis limits
   #########
   
   if (!is.null(coef.labels) && length(coef.labels) != ncoef) {
@@ -307,6 +308,12 @@ plot.tdmm <- function(data,
       "coef.labels must have the same length as the number of coefficient functions.",
       call. = FALSE
     )
+  }
+  
+  if (!is.null(ylim)) {
+    if (!is.list(ylim) || length(ylim) != ncoef) {
+      stop("ylim must be NULL or a list with one element per coefficient function.", call. = FALSE)
+    }
   }
   
   #########
@@ -356,15 +363,15 @@ plot.tdmm <- function(data,
   ## Plot each coefficient function
   #########
   
-for (k in seq_len(ncoef)) {
-  
-  beta.label <- bquote(hat(beta)[.(k - 1)](t))
-  
-  if (!is.null(coef.labels)) {
-    main.label <- coef.labels[k]
-  } else {
-    main.label <- beta.label
-  }
+  for (k in seq_len(ncoef)) {
+    
+    beta.label <- bquote(hat(beta)[.(k - 1)](t))
+    
+    if (!is.null(coef.labels)) {
+      main.label <- coef.labels[k]
+    } else {
+      main.label <- beta.label
+    }
     
     ## Choose uncertainty bands.
     if (sd) {
@@ -375,24 +382,33 @@ for (k in seq_len(ncoef)) {
       upper.band <- beta.out$beta.upper[[k]]
     }
     
-    y.range <- range(
+    ## Choose y-axis range.
+    ## If ylim is supplied, use the kth element of the list.
+    ## Otherwise, use the automatic range based on the fitted curve
+    ## and uncertainty bands.
+    if (!is.null(ylim) && !is.null(ylim[[k]])) {
+      y.range <- ylim[[k]]
+    } else {
+      y.range <- range(
+        beta.out$beta.mean[[k]],
+        lower.band,
+        upper.band,
+        na.rm = TRUE
+      )
+    }
+    
+    graphics::plot(
+      plot.grid$grid,
       beta.out$beta.mean[[k]],
-      lower.band,
-      upper.band,
-      na.rm = TRUE
+      type = "l",
+      lwd = lwd.mean,
+      ylim = y.range,
+      xaxt = "n",
+      xlab = xlab,
+      ylab = beta.label,
+      main = ""
     )
     
-  graphics::plot(
-    plot.grid$grid,
-    beta.out$beta.mean[[k]],
-    type = "l",
-    lwd = lwd.mean,
-    ylim = y.range,
-    xaxt = "n",
-    xlab = xlab,
-    ylab = beta.label,
-    main = ""
-  )
     ## Add either the default numeric time axis or the custom axis.
     if (!is.null(x.axis.values) && !is.null(x.axis.labels)) {
       graphics::axis(1, at = x.axis.values, labels = x.axis.labels)
