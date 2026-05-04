@@ -33,8 +33,8 @@ tdmm <- function(data,
                  x.var = NULL,
                  degree = 2,
                  n.chains = 3,
-                 n.iter = 10000,
-                 n.burn = 3000,
+                 n.iter = NULL,
+                 n.burn = NULL,
                  n.thin = 5,
                  n.adapt = 10000,
                  jags.dir = NULL,
@@ -43,6 +43,30 @@ tdmm <- function(data,
   ## Match the requested family
   family <- match.arg(family)
   
+  ##########
+  ## Set family-specific default MCMC length
+  ##########
+  ## If the user does not supply n.iter, use a shorter default
+  ## for Gaussian models and a longer default for Bernoulli and
+  ## Poisson models.
+
+if (is.null(n.iter)) {
+  n.iter <- switch(
+    family,
+    gaussian = 10000,
+    bernoulli = 15000,
+    poisson = 15000
+  )
+}
+
+if (is.null(n.burn)) {
+  n.burn <- switch(
+    family,
+    gaussian = 3000,
+    bernoulli = 5000,
+    poisson = 5000
+  )
+}
   ##########
   ## Check the data before fitting
   ##########
@@ -72,8 +96,8 @@ tdmm <- function(data,
   ##########
   ## Get the family-specific model configuration
   ##########
-  ## The number of covariates, p, comes from the processed
-  ## input data. This allows the model to support x_1, ..., x_p.
+  ## The model configuration locates the JAGS file and selects
+## the parameters to monitor for the requested family.
   
   config <- get.tdmm.family.config(
     family = family, jags.dir = jags.dir)
