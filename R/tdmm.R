@@ -18,7 +18,7 @@
 ## The user can pass one covariate or several covariates:
 ##
 ##   x.var = "x1"
-##   x.var = c("x1", "x2", ..., "xp")
+##   x.var = c("x1", "x2", ...)
 ##
 ## If x.var is NULL, all columns except the subject ID, time,
 ## and response variables are treated as baseline covariates.
@@ -33,10 +33,10 @@ tdmm <- function(data,
                  x.var = NULL,
                  degree = 2,
                  n.chains = 3,
-                 n.iter = NULL,
-                 n.burn = NULL,
+                 n.iter = 10000,
+                 n.burn = 3000,
                  n.thin = 5,
-                 n.adapt = 10000,
+                 n.adapt = 5000,
                  jags.dir = NULL,
                  quiet = FALSE) {
   
@@ -44,38 +44,20 @@ tdmm <- function(data,
   family <- match.arg(family)
   
   ##########
-  ## Set family-specific default MCMC length
-  ##########
-  ## If the user does not supply n.iter, use a shorter default
-  ## for Gaussian models and a longer default for Bernoulli and
-  ## Poisson models.
-
-if (is.null(n.iter)) {
-  n.iter <- switch(
-    family,
-    gaussian = 10000,
-    bernoulli = 15000,
-    poisson = 15000
-  )
-}
-
-if (is.null(n.burn)) {
-  n.burn <- switch(
-    family,
-    gaussian = 3000,
-    bernoulli = 5000,
-    poisson = 5000
-  )
-}
-  ##########
   ## Check the data before fitting
   ##########
   ## This checks the shared TDMM data structure and the
   ## family-specific response behavior.
   
   data.check <- check.tdmm.family.data(
-    data = data, family = family, subject.var = subject.var, time.var = time.var,
-    y.var = y.var, x.var = x.var, stop.on.fail = TRUE)
+    data = data,
+    family = family,
+    subject.var = subject.var,
+    time.var = time.var,
+    y.var = y.var,
+    x.var = x.var,
+    stop.on.fail = TRUE
+  )
   
   ##########
   ## Build subject-level inputs
@@ -84,23 +66,34 @@ if (is.null(n.burn)) {
   ## subject indexing, spline basis, and penalty matrix.
   
   inputs <- build.tdmm.subject.inputs(
-    data = data, nknots = nknots, subject.var = subject.var, time.var = time.var,
-    y.var = y.var, x.var = data.check$covariates, degree = degree)
+    data = data,
+    nknots = nknots,
+    subject.var = subject.var,
+    time.var = time.var,
+    y.var = y.var,
+    x.var = data.check$covariates,
+    degree = degree
+  )
   
   ##########
   ## Build the JAGS data list
   ##########
   
-  jags.data <- build.tdmm.jags.data(inputs = inputs, family = family)
+  jags.data <- build.tdmm.jags.data(
+    inputs = inputs,
+    family = family
+  )
   
   ##########
   ## Get the family-specific model configuration
   ##########
   ## The model configuration locates the JAGS file and selects
-## the parameters to monitor for the requested family.
+  ## the parameters to monitor for the requested family.
   
   config <- get.tdmm.family.config(
-    family = family, jags.dir = jags.dir)
+    family = family,
+    jags.dir = jags.dir
+  )
   
   ##########
   ## Store model settings
@@ -153,9 +146,15 @@ if (is.null(n.burn)) {
   ##########
   
   result <- build.tdmm.output(
-    family = family, post.samples = fit, inputs = inputs, model.settings = model.settings)
+    family = family,
+    post.samples = fit,
+    inputs = inputs,
+    model.settings = model.settings
+  )
+  
   ## Add the data check output so users can inspect what was
   ## checked before fitting.
   result$data.check <- data.check
+  
   result
 }
