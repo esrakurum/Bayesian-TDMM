@@ -185,13 +185,14 @@ plot.trace.tdmm <- function(result,
   
   for (param in params) {
     
-    y.list <- lapply(chain.samples, function(chain.mat) {
-      if (is.array(chain.mat)) {
-        chain.mat[, 1, param]
-      } else {
-        chain.mat[, param]
-      }
-    })
+  y.list <- lapply(chain.samples, function(chain.mat) {
+  
+    if (length(dim(chain.mat)) == 3) {
+      chain.mat[, 1, param]
+    } else {
+      chain.mat[, param]
+    }
+  })
     
     y.range <- range(unlist(y.list), na.rm = TRUE)
     
