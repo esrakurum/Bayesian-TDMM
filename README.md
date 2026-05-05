@@ -42,7 +42,7 @@ Model fitting is done using JAGS through R.
 ## Repository structure
 
 ```text
-Bayesian-Varying-Coefficient-Models/
+Bayesian-TDMM/
 │
 ├── README.md
 ├── DESCRIPTION
@@ -66,10 +66,50 @@ Bayesian-Varying-Coefficient-Models/
 │   └── TDMM_Poisson_JAGS.txt
 │
 ├── examples/
-│   ├── gaussian_simulation_example.R
-│   ├── bernoulli_simulation_example.R
-|   ├── poisson_simulation_example.R 
-│   └── wage_data_example.R
+│   ├── tdmm()/
+│   │   ├── gaussian_simulation.R
+│   │   ├── bernoulli_simulation.R
+│   │   ├── poisson_simulation.R
+│   │   └── WageData_TDMM.R
+│   │
+│   └── tdmm.parallel()/
+│       ├── gaussian_parallel.R
+│       ├── bernoulli_parallel.R
+│       └── poisson_parallel.R
 │
-└── figures/
-    └── README.md
+├── figures/
+│   ├── tdmm/
+│   │   ├── gaussian/
+│   │   │   ├── gaussian_tdmm_beta_plot_for_handbook.png
+│   │   │   └── gaussian_tdmm_trace_variance_for_handbook.png
+│   │   │
+│   │   ├── bernoulli/
+│   │   │   ├── bernoulli_tdmm_beta_plot_for_handbook.png
+│   │   │   └── bernoulli_tdmm_trace_variance_for_handbook.png
+│   │   │
+│   │   ├── poisson/
+│   │   │   ├── poisson_tdmm_beta_plot_for_handbook.png
+│   │   │   └── poisson_tdmm_trace_variance_for_handbook.png
+│   │   │
+│   │   └── wage_data/
+│   │       ├── wage_eda_average_log_wage_by_gender.png
+│   │       ├── wage_eda_education_by_gender_boxplot.png
+│   │       ├── wage_eda_log_wage_histogram.png
+│   │       ├── wage_eda_log_wage_density_by_gender.png
+│   │       ├── wage_gaussian_tdmm_coefficient_curves_years.png
+│   │       └── wage_gaussian_tdmm_trace_variance_terms.png
+│   │
+│   ├── tdmm_parallel/
+│   │   ├── gaussian/
+│   │   │   ├── gaussian_parallel_tdmm_beta_plot_for_handbook.png
+│   │   │   └── gaussian_parallel_tdmm_trace_variance_for_handbook.png
+│   │   │
+│   │   ├── bernoulli/
+│   │   │   ├── bernoulli_parallel_tdmm_beta_plot_for_handbook.png
+│   │   │   └── bernoulli_parallel_tdmm_trace_variance_for_handbook.png
+│   │   │
+│   │   └── poisson/
+│   │       ├── poisson_parallel_tdmm_beta_plot_for_handbook.png
+│   │       └── poisson_parallel_tdmm_trace_variance_for_handbook.png
+│   │
+│   └── README.md
