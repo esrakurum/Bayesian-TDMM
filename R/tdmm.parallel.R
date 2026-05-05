@@ -195,20 +195,24 @@ tdmm.parallel <- function(data,
   
   post.samples <- coda::mcmc.list(chain.samples)
   
-  #########
-  ## Build and return the fitted TDMM object
-  #########
-  
-  result <- build.tdmm.output(
-    family = family,
-    post.samples = post.samples,
-    inputs = inputs,
-    model.settings = model.settings
-  )
-  
-  ## Add the data check output so users can inspect what was
-  ## checked before fitting.
-  result$data.check <- data.check
-  
-  result
+#########
+## Build and return the fitted TDMM object
+#########
+
+result <- build.tdmm.output(
+  family = family,
+  post.samples = post.samples,
+  inputs = inputs,
+  model.settings = model.settings
+)
+
+## Keep family available at the top level of the fitted object.
+result$family <- family
+
+## Add the data check output so users can inspect what was
+## checked before fitting.
+result$data.check <- data.check
+
+result
 }
+
