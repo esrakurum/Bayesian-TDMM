@@ -37,18 +37,24 @@ tdmm.parallel <- function(data,
   #########
   ## Match the requested family
   #########
+  
   family <- match.arg(family)
   
   #########
   ## Check the data before fitting
   #########
-  
   ## This checks the shared TDMM data structure and the
   ## family-specific response behavior.
   
   data.check <- check.tdmm.family.data(
-    data = data, family = family, subject.var = subject.var, time.var = time.var,
-    y.var = y.var, x.var = x.var, stop.on.fail = TRUE)
+    data = data,
+    family = family,
+    subject.var = subject.var,
+    time.var = time.var,
+    y.var = y.var,
+    x.var = x.var,
+    stop.on.fail = TRUE
+  )
   
   #########
   ## Build subject-level inputs
@@ -57,21 +63,34 @@ tdmm.parallel <- function(data,
   ## subject indexing, spline basis, and penalty matrix.
   
   inputs <- build.tdmm.subject.inputs(
-    data = data, nknots = nknots, subject.var = subject.var,
-    time.var = time.var, y.var = y.var, x.var = data.check$covariates, degree = degree)
+    data = data,
+    nknots = nknots,
+    subject.var = subject.var,
+    time.var = time.var,
+    y.var = y.var,
+    x.var = data.check$covariates,
+    degree = degree
+  )
   
   #########
   ## Build the JAGS data list
   #########
-  jags.data <- build.tdmm.jags.data(inputs = inputs, family = family)
+  
+  jags.data <- build.tdmm.jags.data(
+    inputs = inputs,
+    family = family
+  )
   
   #########
   ## Get the family-specific model configuration
   #########
- ## The model configuration locates the JAGS file and selects
- ## the parameters to monitor for the requested family.
+  ## The model configuration locates the JAGS file and selects
+  ## the parameters to monitor for the requested family.
   
-  config <- get.tdmm.family.config(family = family, jags.dir = jags.dir)
+  config <- get.tdmm.family.config(
+    family = family,
+    jags.dir = jags.dir
+  )
   
   #########
   ## Store model settings
@@ -99,6 +118,7 @@ tdmm.parallel <- function(data,
     seed = seed,
     parallel.method = "mclapply"
   )
+  
   #########
   ## Print fitting information
   #########
@@ -125,16 +145,24 @@ tdmm.parallel <- function(data,
     
     ## Build one JAGS model for this chain.
     model <- rjags::jags.model(
-      file = config$model.file, data = jags.data, n.chains = 1,
-      n.adapt = n.adapt, quiet = quiet)
+      file = config$model.file,
+      data = jags.data,
+      n.chains = 1,
+      n.adapt = n.adapt,
+      quiet = quiet
+    )
     
     ## Burn-in period.
-    stats::update(object = model, n.iter = n.burn)
+    update(model, n.iter = n.burn)
     
     ## Posterior sampling.
     samples <- coda::coda.samples(
-      model = model, variable.names = config$params, n.iter = n.iter - n.burn, thin = n.thin)
-
+      model = model,
+      variable.names = config$params,
+      n.iter = n.iter - n.burn,
+      thin = n.thin
+    )
+    
     ## coda.samples() returns an mcmc.list even with one chain.
     ## Return the first chain object.
     samples[[1]]
@@ -146,7 +174,19 @@ tdmm.parallel <- function(data,
   ## mclapply() runs the chains in parallel on Unix-like systems.
   ## This is appropriate for macOS and Linux/HPCC workflows.
   
-  chain.samples <- parallel::mclapply(X = seq_len(n.chains), FUN = fit.one.chain, mc.cores = n.cores)
+  chain.samples <- parallel::mclapply(
+    X = seq_len(n.chains),
+    FUN = fit.one.chain,
+    mc.cores = n.cores
+  )
+  
+  ## If any chain failed, stop before trying to combine chains.
+  chain.errors <- vapply(chain.samples, inherits, logical(1), "try-error")
+  
+  if (any(chain.errors)) {
+    print(chain.samples[chain.errors])
+    stop("At least one parallel MCMC chain failed.", call. = FALSE)
+  }
   
   #########
   ## Combine chains
@@ -159,7 +199,11 @@ tdmm.parallel <- function(data,
   #########
   
   result <- build.tdmm.output(
-    family = family, post.samples = post.samples, inputs = inputs, model.settings = model.settings)
+    family = family,
+    post.samples = post.samples,
+    inputs = inputs,
+    model.settings = model.settings
+  )
   
   ## Add the data check output so users can inspect what was
   ## checked before fitting.
@@ -167,5 +211,3 @@ tdmm.parallel <- function(data,
   
   result
 }
-
-
