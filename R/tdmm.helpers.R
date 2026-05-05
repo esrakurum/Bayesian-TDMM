@@ -1,6 +1,3 @@
-############################################################
-## TDMM helper functions
-############################################################
 ##
 ## These helper functions support the main tdmm() and
 ## tdmm.parallel() fitting functions.
