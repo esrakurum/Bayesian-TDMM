@@ -30,6 +30,15 @@ The package currently supports:
 
 Model fitting is done using JAGS through R.
 
+## Main functions
+
+- `tdmm()` fits a TDMM using the standard serial JAGS workflow.
+- `tdmm.parallel()` fits the same model using chain-level parallelization.
+- `check.tdmm.family.data()` checks the data structure and family-specific response behavior.
+- `summary.tdmm()` summarizes a fitted TDMM object.
+- `plot.tdmm()` plots estimated time-varying coefficient functions.
+- `plot.trace.tdmm()` produces traceplots for selected posterior parameters.
+
 ## Repository structure
 
 ```text
