@@ -28,6 +28,7 @@ summary.tdmm <- function(object, ...) {
   
   inputs <- object$inputs
   settings <- object$model.settings
+  family <- settings$family
   
   ########
   ## Print model summary
@@ -36,7 +37,7 @@ summary.tdmm <- function(object, ...) {
   cat("\nTDMM fit summary\n")
   cat("----------------\n")
   
-  cat("Family: ", object$family, "\n", sep = "")
+  cat("Family: ", family, "\n", sep = "")
   cat("Number of subjects: ", inputs$n.subject, "\n", sep = "")
   cat("Number of time points: ", inputs$n.time, "\n", sep = "")
   cat("Total observations: ", inputs$n.total, "\n", sep = "")
@@ -61,7 +62,7 @@ summary.tdmm <- function(object, ...) {
   cat("sigma2.b: ", object$sigma2.b, "\n", sep = "")
   cat("sigma.b: ", object$sigma.b, "\n", sep = "")
   
-  if (object$family == "gaussian") {
+  if (family == "gaussian") {
     cat("sigma2.e: ", object$sigma2.e, "\n", sep = "")
     cat("sigma.e: ", object$sigma.e, "\n", sep = "")
   }
@@ -76,7 +77,7 @@ summary.tdmm <- function(object, ...) {
   
   invisible(
     list(
-      family = object$family,
+      family = family,
       n.subject = inputs$n.subject,
       n.time = inputs$n.time,
       n.total = inputs$n.total,
@@ -85,8 +86,8 @@ summary.tdmm <- function(object, ...) {
       beta.names = object$beta.names,
       sigma2.b = object$sigma2.b,
       sigma.b = object$sigma.b,
-      sigma2.e = if (object$family == "gaussian") object$sigma2.e else NULL,
-      sigma.e = if (object$family == "gaussian") object$sigma.e else NULL,
+      sigma2.e = if (family == "gaussian") object$sigma2.e else NULL,
+      sigma.e = if (family == "gaussian") object$sigma.e else NULL,
       model.settings = settings
     )
   )
