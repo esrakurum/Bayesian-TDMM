@@ -267,7 +267,7 @@ build.tdmm.subject.inputs <- function(data,
   ##   beta_x1   -> \hat{beta}_{x1}(t)
   ##   beta_x2   -> \hat{beta}_{x2}(t)
   
-  coef.names <- c("beta0", paste0("beta_", x.var))
+  coef.names <- paste0("beta", seq_len(nX) - 1, ".hat")
   
   ##########
   ## Spline basis
