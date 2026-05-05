@@ -68,6 +68,7 @@ Bayesian-Varying-Coefficient-Models/
 ├── examples/
 │   ├── gaussian_simulation_example.R
 │   ├── bernoulli_simulation_example.R
+|   ├── poisson_simulation_example.R 
 │   └── wage_data_example.R
 │
 └── figures/
