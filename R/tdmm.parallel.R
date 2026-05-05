@@ -156,7 +156,8 @@ tdmm.parallel <- function(data,
     update(model, n.iter = n.burn)
     
     ## Posterior sampling.
-    samples <- rjags::coda.samples(
+    ## coda.samples() comes from rjags, so rjags needs to be loaded/imported.
+    samples <- coda.samples(
       model = model,
       variable.names = config$params,
       n.iter = n.iter - n.burn,
