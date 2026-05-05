@@ -1,3 +1,7 @@
+############################################################
+## TDMM helper functions
+############################################################
+##
 ## These helper functions support the main tdmm() and
 ## tdmm.parallel() fitting functions.
 ##
@@ -12,11 +16,12 @@
 ## These are mostly internal package helpers. Most users will
 ## interact with tdmm(), tdmm.parallel(), summary.tdmm(),
 ## plot.tdmm(), and plot.trace.tdmm() instead.
+############################################################
 
 
-########
+############################################################
 ## Locate the JAGS model file
-########
+############################################################
 
 get.tdmm.model.file <- function(family, jags.dir = NULL) {
   
@@ -82,9 +87,9 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
 }
 
 
-##########
+############################################################
 ## Family-specific model configuration
-##########
+############################################################
 
 get.tdmm.family.config <- function(family, jags.dir = NULL) {
   
@@ -97,7 +102,10 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
   
   family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
   
-  model.file <- get.tdmm.model.file(family = family, jags.dir = jags.dir)
+  model.file <- get.tdmm.model.file(
+    family = family,
+    jags.dir = jags.dir
+  )
   
   ## The JAGS model files use matrix-style spline coefficients:
   ##   alpha[k, 1:nknots]
@@ -127,9 +135,9 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
 }
 
 
-##########
+############################################################
 ## Build subject-level TDMM inputs
-##########
+############################################################
 
 build.tdmm.subject.inputs <- function(data,
                                       nknots,
@@ -210,6 +218,7 @@ build.tdmm.subject.inputs <- function(data,
   ## For example, if each subject has 20 observations, then:
   ##   ni = c(0, 20, 20, 20, ...)
   ## The JAGS files use sums of ni to find each subject's row range.
+  
   ni <- c(0, n.obs.subject)
   
   ##########
@@ -245,11 +254,19 @@ build.tdmm.subject.inputs <- function(data,
   
   ## nX is the total number of coefficient functions, including
   ## the intercept.
+  
   nX <- ncol(X)
   
   ## Store readable coefficient names.
-  ## beta0(t) corresponds to the intercept.
-  ## beta_x1(t), beta_x2(t), ... correspond to the selected covariates.
+  ## beta0 corresponds to the intercept.
+  ## beta_x1, beta_x2, ... correspond to the selected covariates.
+  ##
+  ## These are R column names. In the handbook/math notation,
+  ## the fitted functions can be written as beta hats:
+  ##   beta0     -> \hat{beta}_0(t)
+  ##   beta_x1   -> \hat{beta}_{x1}(t)
+  ##   beta_x2   -> \hat{beta}_{x2}(t)
+  
   coef.names <- c("beta0", paste0("beta_", x.var))
   
   ##########
@@ -261,6 +278,7 @@ build.tdmm.subject.inputs <- function(data,
   
   ## nseg controls the number of intervals used in the spline
   ## basis construction.
+  
   nseg <- nknots - 2
   
   basis <- bbase(
@@ -284,6 +302,7 @@ build.tdmm.subject.inputs <- function(data,
   Penalty.bases <- t(D2) %*% D2
   
   ## Small ridge term for numerical stability.
+  
   Penalty.bases <- Penalty.bases + diag(1e-06, nbasis)
   
   ##########
@@ -321,9 +340,9 @@ build.tdmm.subject.inputs <- function(data,
 }
 
 
-##########
+############################################################
 ## Build the JAGS data list
-##########
+############################################################
 
 build.tdmm.jags.data <- function(inputs,
                                  family = c("gaussian", "bernoulli", "poisson")) {
@@ -357,9 +376,9 @@ build.tdmm.jags.data <- function(inputs,
 }
 
 
-##########
+############################################################
 ## Extract spline coefficient draws
-##########
+############################################################
 
 .extract.alpha.draws <- function(post.mat,
                                  nX,
@@ -409,9 +428,9 @@ build.tdmm.jags.data <- function(inputs,
 }
 
 
-##########
+############################################################
 ## Recover posterior mean coefficient functions
-##########
+############################################################
 
 recover.tdmm.betas <- function(post.mat,
                                basis,
@@ -439,9 +458,11 @@ recover.tdmm.betas <- function(post.mat,
   )
   
   for (k in seq_len(nX)) {
-    beta.draws[, , k] <- alpha.draws[, k, , drop = FALSE][, 1, ] %*% t(basis)
+    beta.draws[, , k] <-
+      alpha.draws[, k, , drop = FALSE][, 1, ] %*% t(basis)
   }
   
+  ## Posterior mean fitted coefficient functions.
   beta.hat <- apply(beta.draws, c(2, 3), mean)
   
   if (is.null(coef.names)) {
@@ -460,9 +481,9 @@ recover.tdmm.betas <- function(post.mat,
 }
 
 
-##########
+############################################################
 ## Build fitted TDMM output object
-##########
+############################################################
 
 build.tdmm.output <- function(family,
                               post.samples,
@@ -474,6 +495,10 @@ build.tdmm.output <- function(family,
   ##
   ## It keeps the output structure consistent across Gaussian,
   ## Bernoulli, and Poisson models.
+  ##
+  ## Note:
+  ##   family is not stored as a top-level output element because
+  ##   it is already stored in model.settings$family.
   
   family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
   
@@ -540,13 +565,19 @@ build.tdmm.output <- function(family,
   ##########
   
   output <- list(
-    family = family,
     post.samples = post.samples,
     post.mat = post.mat,
+    
+    ## General matrix of fitted coefficient functions.
+    ## Columns are named using beta.names.
     beta.hat = beta.recovered$beta.hat,
-    beta0.hat = beta.recovered$beta0.hat,
+    
+    ## Matrix of fitted covariate effect functions only.
     beta.covariates.hat = beta.recovered$beta.covariates.hat,
+    
+    ## Names of the fitted coefficient functions.
     beta.names = beta.recovered$beta.names,
+    
     time.points = inputs$time.points,
     inputs = inputs,
     model.settings = model.settings,
@@ -554,13 +585,32 @@ build.tdmm.output <- function(family,
     sigma.b = sigma.b
   )
   
-  ## For backward compatibility with the one-covariate examples,
-  ## keep beta1.hat when there is exactly one baseline covariate.
-  if (inputs$nX == 2) {
-    output$beta1.hat <- beta.recovered$beta.covariates.hat[, 1]
+  ##########
+  ## Add numbered beta*.hat outputs
+  ##########
+  
+  ## beta0.hat is the fitted intercept function.
+  ## beta1.hat, beta2.hat, ... are fitted covariate effect
+  ## functions in the same order as x.var.
+  ##
+  ## For example:
+  ##   x.var = c("x1", "x2")
+  ## gives:
+  ##   beta0.hat = intercept function
+  ##   beta1.hat = effect of x1
+  ##   beta2.hat = effect of x2
+  
+  for (k in seq_len(inputs$nX)) {
+    output[[paste0("beta", k - 1, ".hat")]] <- beta.recovered$beta.hat[, k]
   }
   
+  ##########
+  ## Gaussian residual variance summaries
+  ##########
+  
   ## Gaussian models also include residual variance summaries.
+  ## Bernoulli and Poisson models do not include sigma2.e or sigma.e.
+  
   if (family == "gaussian") {
     output$sigma2.e <- sigma2.e
     output$sigma.e <- sigma.e
