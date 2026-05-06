@@ -192,8 +192,10 @@ plot.tdmm <- function(data,
                       x.axis.labels = NULL,
                       xlab = "time",
                       coef.labels = NULL,
+                      ylim = NULL,
                       cex.axis = 1,
                       cex.lab = 1,
+                      cex.main = 0.95,
                       font.lab = 1,
                       las = 1,
                       width = 2200,
@@ -343,22 +345,26 @@ plot.tdmm <- function(data,
   if (ncoef <= 3) {
     graphics::par(
       mfrow = c(1, ncoef),
-      mar = c(4.2, 4.2, 3.2, 1.2),
+      mar = c(4.8, 4.8, 1.6, 1.2),
       oma = c(0, 0, 1, 0),
-      mgp = c(2.4, 0.8, 0),
-      cex.axis = 0.85,
-      cex.lab = 0.95,
-      cex.main = 0.95
+      mgp = c(2.8, 0.9, 0),
+      cex.axis = cex.axis,
+      cex.lab = cex.lab,
+      cex.main = cex.main,
+      font.lab = font.lab,
+      las = las
     )
   } else {
     graphics::par(
       mfrow = c(ceiling(ncoef / 2), 2),
-      mar = c(4.2, 4.2, 3.2, 1.2),
+      mar = c(4.8, 4.8, 1.6, 1.2),
       oma = c(0, 0, 1, 0),
-      mgp = c(2.4, 0.8, 0),
-      cex.axis = 0.85,
-      cex.lab = 0.95,
-      cex.main = 0.95
+      mgp = c(2.8, 0.9, 0),
+      cex.axis = cex.axis,
+      cex.lab = cex.lab,
+      cex.main = cex.main,
+      font.lab = font.lab,
+      las = las
     )
   }
   
