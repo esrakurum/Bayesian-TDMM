@@ -46,7 +46,7 @@ In R, install the package from GitHub using:
 ```r
 devtools::install_github("esrakurum/Bayesian-TDMM")
 library(TDMM)
-
+```
 ```text
 Bayesian-TDMM/
 │
