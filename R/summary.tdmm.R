@@ -1,3 +1,6 @@
+############################################################
+## summary.tdmm()
+##
 ## summary.tdmm() gives a compact summary of a fitted TDMM
 ## object returned by tdmm() or tdmm.parallel().
 ##
@@ -9,7 +12,7 @@
 ##   - covariate names
 ##   - MCMC settings
 ##   - variance summaries
-##   - coefficient function names
+##   - combined coefficient function matrix
 ############################################################
 
 summary.tdmm <- function(object, ...) {
@@ -69,7 +72,12 @@ summary.tdmm <- function(object, ...) {
   
   cat("\nCoefficient functions\n")
   cat("---------------------\n")
-  cat(paste(object$beta.names, collapse = ", "), "\n")
+  
+  if (!is.null(object$beta.hat)) {
+    cat("  beta.hat\n")
+  } else {
+    cat("  beta.hat not found\n")
+  }
   
   ########
   ## Return an invisible summary list
@@ -83,6 +91,7 @@ summary.tdmm <- function(object, ...) {
       n.total = inputs$n.total,
       nX = inputs$nX,
       covariates = inputs$x.var,
+      beta.hat = object$beta.hat,
       beta.names = object$beta.names,
       sigma2.b = object$sigma2.b,
       sigma.b = object$sigma.b,
