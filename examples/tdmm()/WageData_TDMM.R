@@ -29,17 +29,18 @@ names(WageData)
 wage_analysis <- WageData %>%
   select(id, t, lwage, fem, ed) %>%
   mutate(
-    id = as.factor(id), t = as.numeric(t), year = 1975 + t,
-    lwage = as.numeric(lwage), fem = as.numeric(fem), ed = as.numeric(ed),
+    id = as.factor(id),
+    t = as.numeric(t),
+    year = 1975 + t,
+    lwage = as.numeric(lwage),
+    fem = as.numeric(fem),
+    ed = as.numeric(ed),
     gender = factor(
       fem,
       levels = c(0, 1),
       labels = c("Male", "Female")
-    ),
-    ## Center education so the intercept is easier to interpret.
-    ## With this centering, beta0(t) represents the baseline
-    ## log wage for males with average education.
-    ed_c = ed - mean(ed, na.rm = TRUE))
+    )
+  )
 
 head(wage_analysis)
 summary(wage_analysis)
@@ -54,7 +55,7 @@ missing_summary <- data.frame(
 
 missing_summary
 
-model.vars <- c("id", "t", "year", "lwage", "fem", "ed", "ed_c", "gender")
+model.vars <- c("id", "t", "year", "lwage", "fem", "ed", "gender")
 
 sum(complete.cases(wage_analysis[, model.vars]))
 nrow(wage_analysis)
@@ -119,7 +120,6 @@ ggsave(
 ## EDA 5: Check education
 
 summary(wage_analysis$ed)
-summary(wage_analysis$ed_c)
 
 table(wage_analysis$ed)
 
@@ -188,7 +188,7 @@ ggsave(
 ## Create TDMM-ready dataset
 ##
 ## x1 = female indicator
-## x2 = centered education
+## x2 = number of years of education
 ##
 ## The current TDMM package expects baseline covariates to be
 ## constant within subject. Education is constant within subject
@@ -197,7 +197,12 @@ ggsave(
 
 data.wage <- wage_analysis %>%
   transmute(
-    subject.ID = id, time = t, y = lwage, x1 = fem, x2 = ed_c) %>%
+    subject.ID = id,
+    time = t,
+    y = lwage,
+    x1 = fem,
+    x2 = ed
+  ) %>%
   arrange(subject.ID, time)
 
 head(data.wage)
@@ -261,18 +266,18 @@ names(fit.wage)[grepl("beta", names(fit.wage), ignore.case = TRUE)]
 colnames(fit.wage$post.mat)[grepl("alpha", colnames(fit.wage$post.mat))]
 
 ## Interpretation:
-## beta0(t): baseline log wage for males with average education
-## beta_x1(t): female-minus-male log wage difference
-## beta_x2(t): effect of one additional year of education
+## beta0.hat: fitted intercept function
+## beta1.hat: female-minus-male natural log wage difference, holding education fixed
+## beta2.hat: effect of one additional year of education, holding gender fixed
 
 ## Save fitted coefficient summaries
 
 wage.beta.summary <- data.frame(
   time = fit.wage$time.points,
   year = 1975 + fit.wage$time.points,
-  beta0.hat = fit.wage$beta.hat[, "beta0"],
-  beta_x1.hat = fit.wage$beta.hat[, "beta_x1"],
-  beta_x2.hat = fit.wage$beta.hat[, "beta_x2"]
+  beta0.hat = fit.wage$beta.hat[, "beta0.hat"],
+  beta1.hat = fit.wage$beta.hat[, "beta1.hat"],
+  beta2.hat = fit.wage$beta.hat[, "beta2.hat"]
 )
 
 head(wage.beta.summary)
