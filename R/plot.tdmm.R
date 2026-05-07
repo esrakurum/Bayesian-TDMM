@@ -192,10 +192,13 @@ plot.tdmm <- function(data,
                       x.axis.labels = NULL,
                       xlab = "time",
                       coef.labels = NULL,
+                      panel.labels = NULL,
+                      show.panel.labels = TRUE,
                       ylim = NULL,
                       cex.axis = 1,
                       cex.lab = 1,
                       cex.main = 0.95,
+                      cex.panel = 1.05,
                       font.lab = 1,
                       las = 1,
                       width = 2200,
@@ -212,6 +215,10 @@ plot.tdmm <- function(data,
   ## For Gaussian models this is the response scale.
   ## For Bernoulli models this is the log-odds scale.
   ## For Poisson models this is the log-mean scale.
+  ##
+  ## Optional panel labels can be added using panel.labels.
+  ## For example:
+  ##   panel.labels = c("(a)", "(b)", "(c)")
   
   #########
   ## Check fitted object
@@ -305,7 +312,7 @@ plot.tdmm <- function(data,
   ncoef <- beta.out$ncoef
   
   #########
-  ## Check coefficient labels and y-axis limits
+  ## Check coefficient labels, panel labels, and y-axis limits
   #########
   
   if (!is.null(coef.labels) && length(coef.labels) != ncoef) {
@@ -313,6 +320,17 @@ plot.tdmm <- function(data,
       "coef.labels must have the same length as the number of coefficient functions.",
       call. = FALSE
     )
+  }
+  
+  if (!is.null(panel.labels) && length(panel.labels) != ncoef) {
+    stop(
+      "panel.labels must have the same length as the number of coefficient functions.",
+      call. = FALSE
+    )
+  }
+  
+  if (is.null(panel.labels)) {
+    panel.labels <- paste0("(", letters[seq_len(ncoef)], ")")
   }
   
   if (!is.null(ylim)) {
@@ -345,7 +363,7 @@ plot.tdmm <- function(data,
   if (ncoef <= 3) {
     graphics::par(
       mfrow = c(1, ncoef),
-      mar = c(4.8, 4.8, 1.6, 1.2),
+      mar = c(4.8, 4.8, 2.4, 1.2),
       oma = c(0, 0, 1, 0),
       mgp = c(2.8, 0.9, 0),
       cex.axis = cex.axis,
@@ -357,7 +375,7 @@ plot.tdmm <- function(data,
   } else {
     graphics::par(
       mfrow = c(ceiling(ncoef / 2), 2),
-      mar = c(4.8, 4.8, 1.6, 1.2),
+      mar = c(4.8, 4.8, 2.4, 1.2),
       oma = c(0, 0, 1, 0),
       mgp = c(2.8, 0.9, 0),
       cex.axis = cex.axis,
@@ -379,7 +397,7 @@ plot.tdmm <- function(data,
     if (!is.null(coef.labels)) {
       main.label <- coef.labels[k]
     } else {
-      main.label <- beta.label
+      main.label <- ""
     }
     
     ## Choose uncertainty bands.
@@ -415,7 +433,7 @@ plot.tdmm <- function(data,
       xaxt = "n",
       xlab = xlab,
       ylab = beta.label,
-      main = ""
+      main = main.label
     )
     
     ## Add either the default numeric time axis or the custom axis.
@@ -431,6 +449,18 @@ plot.tdmm <- function(data,
     }
     
     graphics::abline(h = 0, lty = 2)
+    
+    ## Add optional panel labels, such as (a), (b), and (c).
+    if (show.panel.labels) {
+      graphics::mtext(
+        panel.labels[k],
+        side = 3,
+        line = 0.5,
+        adj = 0,
+        font = 2,
+        cex = cex.panel
+      )
+    }
   }
   
   #########
