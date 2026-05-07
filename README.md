@@ -4,7 +4,7 @@ This repository contains the `TDMM` R package for fitting Bayesian time-dynamic 
 
 The package provides tools for estimating time-varying coefficient functions while accounting for within-subject dependence through subject-specific random effects. The current implementation focuses on longitudinal data with baseline covariates. It can handle irregularly spaced measurement times when subjects share the same observation grid, but it assumes a balanced repeated-measures structure with the same number of observations per subject.
 
-A full package handbook/tutorial is included separately and describes the statistical model, Bayesian estimation framework, data requirements, fitting functions, diagnostics, visualization tools, and implementation examples.
+A full package tutorial is included separately and describes the statistical model, Bayesian estimation framework, data requirements, fitting functions, diagnostics, visualization tools, and implementation examples.
 
 ## Package overview
 
