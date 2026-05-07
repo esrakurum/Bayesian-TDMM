@@ -73,25 +73,14 @@ Bayesian-TDMM/
 │   └── TDMM_Poisson_JAGS.txt
 │
 ├── examples/
-│   ├── tdmm/
-│   │   ├── gaussian_simulation.R
-│   │   ├── bernoulli_simulation.R
-│   │   ├── poisson_simulation.R
-│   │   └── WageData_TDMM.R
-│   │
-│   └── tdmm.parallel/
-│       ├── gaussian_parallel.R
-│       ├── bernoulli_parallel.R
-│       └── poisson_parallel.R
-│
-└── figures/
     ├── tdmm/
-    │   ├── gaussian/
-    │   ├── bernoulli/
-    │   ├── poisson/
-    │   └── wagedata/
+    │   ├── gaussian_simulation.R
+    │   ├── bernoulli_simulation.R
+    │   ├── poisson_simulation.R
+    │   └── WageData_TDMM.R
     │
     └── tdmm.parallel/
-        ├── gaussian/
-        ├── bernoulli/
-        └── poisson/
+        ├── gaussian_parallel.R
+        ├── bernoulli_parallel.R
+        └── poisson_parallel.R
+
