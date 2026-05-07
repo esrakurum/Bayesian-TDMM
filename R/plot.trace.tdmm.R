@@ -1,3 +1,6 @@
+############################################################
+## plot.trace.tdmm()
+##
 ## plot.trace.tdmm() makes traceplots for selected posterior
 ## parameters from a fitted TDMM object.
 ##
@@ -29,7 +32,10 @@ plot.trace.tdmm <- function(result,
                             res = 150,
                             lwd = 0.4,
                             col = NULL,
-                            show.legend = FALSE) {
+                            show.legend = FALSE,
+                            cex.axis = 0.85,
+                            cex.lab = 0.9,
+                            cex.main = 1.0) {
   
   ########
   ## Check fitted object
@@ -167,16 +173,20 @@ plot.trace.tdmm <- function(result,
     on.exit(grDevices::dev.off(), add = TRUE)
   }
   
+  ########
+  ## Save and set graphical parameters
+  ########
+  
   old.par <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(old.par), add = TRUE)
   
   graphics::par(
     mfrow = c(nrow, ncol),
-    mar = c(4.2, 4.4, 3.0, 1.2),
-    mgp = c(2.5, 0.8, 0),
-    cex.axis = 0.85,
-    cex.lab = 0.9,
-    cex.main = 1.0
+    mar = c(4.8, 5.0, 3.2, 1.2),
+    mgp = c(3.0, 0.9, 0),
+    cex.axis = cex.axis,
+    cex.lab = cex.lab,
+    cex.main = cex.main
   )
   
   ########
@@ -185,14 +195,14 @@ plot.trace.tdmm <- function(result,
   
   for (param in params) {
     
-  y.list <- lapply(chain.samples, function(chain.mat) {
-  
-    if (length(dim(chain.mat)) == 3) {
-      chain.mat[, 1, param]
-    } else {
-      chain.mat[, param]
-    }
-  })
+    y.list <- lapply(chain.samples, function(chain.mat) {
+      
+      if (length(dim(chain.mat)) == 3) {
+        chain.mat[, 1, param]
+      } else {
+        chain.mat[, param]
+      }
+    })
     
     y.range <- range(unlist(y.list), na.rm = TRUE)
     
