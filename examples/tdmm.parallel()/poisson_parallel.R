@@ -2,6 +2,7 @@
 devtools::install_github("esrakurum/Bayesian-TDMM")
 library(TDMM)
 library(coda)
+library(rjags)
 
 ## Generate Poisson TDMM data
 

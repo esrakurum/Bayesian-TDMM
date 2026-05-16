@@ -3,6 +3,7 @@
 devtools::install_github("esrakurum/Bayesian-TDMM")
 library(TDMM)
 library(coda)
+library(rjags)
 
 ## Generate Gaussian TDMM data
 
