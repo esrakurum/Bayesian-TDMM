@@ -19,11 +19,10 @@ Imports:
     rjags,
     coda,
     parallel,
-    mcmcplots,
     stats,
     graphics,
     grDevices
-Suggests
+Suggests:
     panelr,
     dplyr,
     tidyr,

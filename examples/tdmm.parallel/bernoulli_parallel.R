@@ -2,6 +2,7 @@
 devtools::install_github("esrakurum/Bayesian-TDMMM")
 library(TDMM)
 library(coda)
+library(rjags)
 
 ## Generate Bernoulli TDMM data
 
