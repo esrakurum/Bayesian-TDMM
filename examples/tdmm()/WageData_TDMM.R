@@ -258,6 +258,13 @@ knot.check <- data.frame(
 )
 knot.check
 
+## Trace plots for Gaussian variance terms
+params <- c("sigma2.b", "sigma2.e")
+plot.trace.tdmm(
+  result = fit.wage,
+  params = params,
+  file = "wage_gaussian_tdmm_trace_variance_terms.png")
+
 ## Check fitted object
 summary.tdmm(fit.wage)
 
@@ -308,10 +315,3 @@ plot.tdmm(
   height = 850,
   res = 180
 )
-
-## Trace plots for Gaussian variance terms
-params <- c("sigma2.b", "sigma2.e")
-plot.trace.tdmm(
-  result = fit.wage,
-  params = params,
-  file = "wage_gaussian_tdmm_trace_variance_terms.png")
