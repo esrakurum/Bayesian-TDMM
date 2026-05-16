@@ -31,7 +31,7 @@ fit.pois <- tdmm(data = data.pois, family = "poisson", nknots = 15)
 ## Check fitted object
 summary.tdmm(fit.pois)
 
-fit.pois$family
+fit.pois$data.check$family
 fit.pois$beta.names
 
 head(fit.pois$time.points)
