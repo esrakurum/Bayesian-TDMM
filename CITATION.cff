@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "TDMM: Bayesian Time-Dynamic Mixed-Effects Models for Longitudinal Data"
+type: software
+authors:
+  - family-names: Grigsby
+    given-names: Makena
+  - family-names: Kürüm
+    given-names: Esra
+date-released: 2026-05-18
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/esrakurum/Bayesian-TDMM"
+abstract: "TDMM provides an R implementation of Bayesian time-dynamic mixed-effects models for longitudinal Gaussian, Bernoulli, and Poisson outcomes, including data checks, model fitting, posterior summarization, MCMC diagnostics, and visualization of time-varying coefficient functions."
+keywords:
+  - Bayesian modeling
+  - longitudinal data
+  - time-varying coefficients
+  - mixed-effects models
+  - P-splines
+  - JAGS
