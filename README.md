@@ -84,6 +84,10 @@ Bayesian-TDMM/
         ├── bernoulli_parallel.R
         └── poisson_parallel.R
 
+## Citation
+
+If you use this package, please cite the software using the citation information provided in the `CITATION.cff` file and the archived Zenodo DOI: https://doi.org/10.5281/zenodo.20617705
+
 ## License
 
 This package is licensed under the MIT License.
