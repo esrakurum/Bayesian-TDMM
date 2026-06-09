@@ -84,3 +84,4 @@ Bayesian-TDMM/
         ├── bernoulli_parallel.R
         └── poisson_parallel.R
 
+Copyright (c) 2026 Makena Grigsby and Esra Kürüm
