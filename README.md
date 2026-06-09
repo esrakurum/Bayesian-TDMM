@@ -83,7 +83,7 @@ Bayesian-TDMM/
         ├── gaussian_parallel.R
         ├── bernoulli_parallel.R
         └── poisson_parallel.R
-
+```
 ## Citation
 
 If you use this package, please cite the software using the citation information provided in the `CITATION.cff` file and the archived Zenodo DOI: https://doi.org/10.5281/zenodo.20617705
