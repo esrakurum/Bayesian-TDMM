@@ -12,7 +12,45 @@ expect.error <- function(expr, pattern) {
   error <- tryCatch({force(expr); NULL}, error = identity)
   stopifnot(inherits(error, "error"), grepl(pattern, conditionMessage(error), fixed = TRUE))
 }
-stopifnot(as.character(packageVersion("TDMM")) == "0.1.0.9000")
+# Pin the legacy interface, not a development-version string.
+legacy.args <- c("data", "family", "nknots", "subject.var", "time.var", "y.var",
+                 "x.var", "degree", "n.chains", "n.iter", "n.burn", "n.thin",
+                 "n.adapt", "jags.dir", "quiet")
+stopifnot(all(legacy.args %in% names(formals(tdmm))),
+          all(c(legacy.args, "n.cores", "seed") %in% names(formals(tdmm.parallel))),
+          identical(formals(tdmm)$degree, 2), identical(formals(tdmm)$nknots, 15))
+check.fit.interface <- function(fit, dat, family, method, time.var="time", nX=2L) {
+  required <- c("post.samples", "post.mat", "beta.hat", "beta.covariates.hat",
+                "beta.names", "time.points", "inputs", "model.settings",
+                "sigma.b", "sigma2.b", "beta0.hat", "beta1.hat", "data.check")
+  if (family == "gaussian") required <- c(required, "sigma.e", "sigma2.e")
+  times <- sort(unique(dat[[time.var]]))
+  stopifnot(all(required %in% names(fit)), is.matrix(fit$post.mat),
+            nrow(fit$post.mat) > 0L, all(is.finite(fit$post.mat)),
+            identical(dim(fit$beta.hat), c(length(times), nX)),
+            identical(fit$time.points, times),
+            identical(colnames(fit$beta.hat), fit$beta.names),
+            identical(dim(fit$beta.covariates.hat), c(length(times), nX-1L)),
+            fit$inputs$n.total == nrow(dat), fit$inputs$N == nrow(dat),
+            fit$inputs$nX == nX, fit$model.settings$family == family,
+            fit$model.settings$n.chains == 2L,
+            file.exists(fit$model.settings$model.file))
+  for (k in seq_len(nX)) {
+    stopifnot(isTRUE(all.equal(unname(fit[[paste0("beta", k-1, ".hat")]]),
+                              unname(fit$beta.hat[, k]))))
+    expected.alpha <- paste0("alpha[", k, ",", seq_len(fit$inputs$nbasis), "]")
+    stopifnot(all(expected.alpha %in% colnames(fit$post.mat)))
+  }
+  if (method == "parallel") {
+    stopifnot(inherits(fit$post.samples, "mcmc.list"), length(fit$post.samples) == 2L)
+  } else {
+    stopifnot(dim(fit$post.samples$BUGSoutput$sims.array)[2L] == 2L)
+  }
+  if (family != "gaussian") {
+    stopifnot(!any(c("sigma.e", "sigma2.e") %in% names(fit)),
+              identical(fit$model.settings$implementation, "V1 retained pending review"))
+  }
+}
 for (family in c("gaussian", "bernoulli", "poisson")) {
   for (method in c("serial", "parallel")) {
     dat <- balanced
@@ -23,6 +61,7 @@ for (family in c("gaussian", "bernoulli", "poisson")) {
                  n.burn=50, n.thin=1, n.adapt=100, quiet=TRUE)
     if (method == "parallel") args$n.cores <- 2
     fit <- do.call(fitter, args)
+    check.fit.interface(fit, dat, family, method)
     stopifnot(inherits(fit, "tdmm"), fit$family == family,
               all(is.finite(fit$beta.hat)), nrow(fit$beta.hat) == 5,
               all(c("sigma.b", "sigma2.b") %in% colnames(fit$post.mat)),
@@ -48,6 +87,7 @@ for (method in c("serial", "parallel")) {
                n.iter=100, n.burn=50, n.thin=1, n.adapt=100, quiet=TRUE)
   if (method == "parallel") args$n.cores <- 2
   fit <- suppressWarnings(do.call(if (method == "serial") tdmm else tdmm.parallel, args))
+  check.fit.interface(fit, dat, "gaussian", method, "visit", 3L)
   z <- fit$inputs
   stopifnot(z$N == nrow(dat), nrow(z$bases.obs) == nrow(dat),
             identical(z$time.obs, z$data$visit),

@@ -12,3 +12,5 @@
 ^PHASE2A_.*\.md$
 ^CITATION\.cff$
 ^tools$
+
+^\.github$
