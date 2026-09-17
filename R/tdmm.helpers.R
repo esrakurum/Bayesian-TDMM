@@ -21,7 +21,7 @@
 ############################################################
 
 get.tdmm.model.file <- function(family, jags.dir = NULL) {
-  
+
   ## Select the JAGS model file that matches the requested
   ## response family.
   ##
@@ -31,28 +31,28 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
   ##
   ## If jags.dir is not supplied, the function tries to find
   ## the model file from the installed package.
-  
+
   family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
-  
+
   model.file <- switch(
     family,
     gaussian  = "TDMM_Gaussian_JAGS.txt",
     bernoulli = "TDMM_Bernoulli_JAGS.txt",
     poisson   = "TDMM_Poisson_JAGS.txt"
   )
-  
+
   ##########
   ## First try the user-supplied JAGS directory
   ##########
-  
+
   if (!is.null(jags.dir)) {
-    
+
     model.path <- file.path(jags.dir, model.file)
-    
+
     if (file.exists(model.path)) {
       return(model.path)
     }
-    
+
     stop(
       "Could not find the JAGS model file: ", model.file,
       "\nExpected location: ", model.path,
@@ -60,21 +60,21 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
       call. = FALSE
     )
   }
-  
+
   ##########
   ## Then try the installed package location
   ##########
-  
+
   installed.path <- system.file("jags", model.file, package = "TDMM")
-  
+
   if (installed.path != "") {
     return(installed.path)
   }
-  
+
   ##########
   ## If neither location works, stop with a clear message
   ##########
-  
+
   stop(
     "Could not find the JAGS model file: ", model.file,
     "\nIf you are working locally, try setting jags.dir = 'jags'.",
@@ -89,21 +89,21 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
 ############################################################
 
 get.tdmm.family.config <- function(family, jags.dir = NULL) {
-  
+
   ## This helper stores the family-specific settings used by
   ## tdmm() and tdmm.parallel().
   ##
   ## The monitored parameters include the spline coefficients,
   ## smoothing parameters, random intercept variance, and, for
   ## Gaussian outcomes, the residual variance.
-  
+
   family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
-  
+
   model.file <- get.tdmm.model.file(
     family = family,
     jags.dir = jags.dir
   )
-  
+
   ## The JAGS model files use matrix-style spline coefficients:
   ##   alpha[k, 1:nknots]
   ##
@@ -111,7 +111,7 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
   ##
   ## nX includes the intercept function and all baseline
   ## covariate coefficient functions.
-  
+
   params <- c(
     "alpha",
     "tau.alpha",
@@ -119,11 +119,11 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
     "sigma2.b",
     "sigma.b"
   )
-  
+
   if (family == "gaussian") {
     params <- c(params, "tau.e", "sigma2.e", "sigma.e")
   }
-  
+
   list(
     family = family,
     model.file = model.file,
@@ -143,141 +143,144 @@ build.tdmm.subject.inputs <- function(data,
                                       y.var = "y",
                                       x.var = NULL,
                                       degree = 2) {
-  
-  ## This helper prepares the data objects used by the JAGS
-  ## fitting functions.
-  ##
-  ## The data are expected to be in long format, with repeated
-  ## observations grouped by subject and time.
-  ##
-  ## x.var can be one covariate or any number of baseline
-  ## covariates:
-  ##
-  ##   x.var = "x1"
-  ##   x.var = c("x1", "x2", ...)
-  ##
-  ## If x.var is NULL, all columns except subject, time, and y
-  ## are treated as baseline covariates.
-  
+
   ##########
-  ## Identify covariates
+  ## Basic checks
   ##########
-  
-  if (is.null(x.var)) {
-    x.var <- setdiff(names(data), c(subject.var, time.var, y.var))
+
+  if (!is.data.frame(data)) {
+    stop("data must be a data frame.", call. = FALSE)
   }
-  
-  if (length(x.var) == 0) {
-    stop("No baseline covariates were provided or detected.", call. = FALSE)
-  }
-  
-  ##########
-  ## Check required columns
-  ##########
-  
-  required.cols <- c(subject.var, time.var, y.var, x.var)
-  missing.cols <- setdiff(required.cols, names(data))
-  
-  if (length(missing.cols) > 0) {
+
+  required.cols <- c(subject.var, time.var, y.var)
+  missing.required <- setdiff(required.cols, names(data))
+
+  if (length(missing.required) > 0) {
     stop(
       "data is missing required column(s): ",
-      paste(missing.cols, collapse = ", "),
+      paste(missing.required, collapse = ", "),
       call. = FALSE
     )
   }
-  
+
   ##########
-  ## Order the data
+  ## Select covariates
   ##########
-  ## The JAGS model uses subject-level indexing, so we keep the
-  ## data ordered by subject and time.
-  
-  data <- data[order(data[[subject.var]], data[[time.var]]), ]
-  rownames(data) <- NULL
-  
+
+  if (is.null(x.var)) {
+    x.var <- setdiff(names(data), required.cols)
+  }
+
+  if (length(x.var) == 0) {
+    stop("No covariates were provided or detected.", call. = FALSE)
+  }
+
+  missing.x <- setdiff(x.var, names(data))
+
+  if (length(missing.x) > 0) {
+    stop(
+      "data is missing covariate column(s): ",
+      paste(missing.x, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
   ##########
-  ## Subject and time information
+  ## Keep complete observations
   ##########
-  
-  subject.ID <- data[[subject.var]]
-  subject.levels <- unique(subject.ID)
+
+  data.use <- data[, c(required.cols, x.var), drop = FALSE]
+  data.use <- data.use[complete.cases(data.use), , drop = FALSE]
+
+  if (nrow(data.use) == 0) {
+    stop("No complete observations remain after removing missing values.",
+         call. = FALSE)
+  }
+
+  ##########
+  ## Sort by subject and time
+  ##########
+
+  data.use <- data.use[order(data.use[[subject.var]], data.use[[time.var]]), ,
+                       drop = FALSE]
+  rownames(data.use) <- NULL
+
+  ##########
+  ## Response and time
+  ##########
+
+  y <- data.use[[y.var]]
+  time.obs <- data.use[[time.var]]
+
+  if (!is.numeric(time.obs)) {
+    stop("time.var must be numeric.", call. = FALSE)
+  }
+
+  ##########
+  ## Subject indexing
+  ##########
+
+  subject.factor <- factor(data.use[[subject.var]])
+  subject.ID <- as.integer(subject.factor)
+  subject.levels <- levels(subject.factor)
+
+  N <- length(y)
   n.subject <- length(subject.levels)
-  
-  time.points <- sort(unique(data[[time.var]]))
-  n.time <- length(time.points)
-  
-  ## Number of observations per subject.
+
   n.obs.subject <- as.numeric(table(subject.ID))
-  
-  ## ni follows the indexing structure used in the current JAGS files.
-  ## The first entry is 0, followed by the number of observations for
-  ## each subject.
-  ## For example, if each subject has 20 observations, then:
-  ##   ni = c(0, 20, 20, 20, ...)
-  ## The JAGS files use sums of ni to find each subject's row range.
-  
   ni <- c(0, n.obs.subject)
-  
+
   ##########
-  ## Response and covariate objects
+  ## Observation-level covariate matrix
   ##########
-  
-  y <- data[[y.var]]
-  
-  ## Build subject-level covariate matrix.
-  ## Since x.var are baseline covariates, each subject should
-  ## have one value for each covariate.
-  
-  X.subject <- do.call(
-    rbind,
-    lapply(subject.levels, function(id) {
-      subject.rows <- data[data[[subject.var]] == id, , drop = FALSE]
-      as.numeric(subject.rows[1, x.var, drop = TRUE])
-    })
-  )
-  
-  X.subject <- as.matrix(X.subject)
-  colnames(X.subject) <- x.var
-  
-  ## Observation-level design matrix.
-  ## The first column is the intercept. The remaining columns are
-  ## the user-specified baseline covariates repeated across time.
-  ##
-  ## This matches the JAGS model files, where nX is the total
-  ## number of coefficient functions:
-  ##   beta_0(t), beta_1(t), beta_2(t), ...
-  
-  X <- cbind(Intercept = 1, as.matrix(data[, x.var, drop = FALSE]))
-  
-  ## nX is the total number of coefficient functions, including
-  ## the intercept.
-  
-  nX <- ncol(X)
-  
-  ## Store readable coefficient names.
-  ## beta0 corresponds to the intercept.
-  ## beta_x1, beta_x2, ... correspond to the selected covariates.
-  ##
-  ## These are R column names. In the handbook/math notation,
-  ## the fitted functions can be written as beta hats:
-  ##   beta0     -> \hat{beta}_0(t)
-  ##   beta_x1   -> \hat{beta}_{x1}(t)
-  ##   beta_x2   -> \hat{beta}_{x2}(t)
-  
+
+  X.cov <- data.use[, x.var, drop = FALSE]
+
+  if (!all(sapply(X.cov, is.numeric))) {
+    stop("All covariates in x.var must be numeric. Convert factors to dummy variables first.",
+         call. = FALSE)
+  }
+
+  X.cov <- as.matrix(X.cov)
+  X.obs <- cbind(Intercept = 1, X.cov)
+
+  nX <- ncol(X.obs)
+
+  ##########
+  ## Coefficient names
+  ##########
+
   coef.names <- paste0("beta", seq_len(nX) - 1, ".hat")
-  
+  x.names <- colnames(X.obs)
+
   ##########
   ## Spline basis
   ##########
-  
-  tlo <- min(time.points)
-  thi <- max(time.points)
-  
-  ## nseg controls the number of intervals used in the spline
-  ## basis construction.
-  
+
+  tlo <- min(time.obs)
+  thi <- max(time.obs)
   nseg <- nknots - 2
-  
+
+  bases.obs <- bbase(
+    x = time.obs,
+    xl = tlo,
+    xr = thi,
+    ndx = nseg,
+    deg = degree
+  )
+
+  if (!is.matrix(bases.obs)) {
+    bases.obs <- as.matrix(bases.obs)
+  }
+
+  nbasis <- ncol(bases.obs)
+
+  ##########
+  ## Basis at unique observed time points
+  ##########
+
+  time.points <- sort(unique(time.obs))
+
   basis <- bbase(
     x = time.points,
     xl = tlo,
@@ -285,51 +288,95 @@ build.tdmm.subject.inputs <- function(data,
     ndx = nseg,
     deg = degree
   )
-  
-  nbasis <- ncol(basis)
-  
+
+  if (!is.matrix(basis)) {
+    basis <- as.matrix(basis)
+  }
+
   ##########
   ## Penalty matrix
   ##########
-  
-  ## Second-order difference penalty for smoothing spline
-  ## coefficients.
-  
+
   D2 <- diff(diag(nbasis), differences = 2)
   Penalty.bases <- t(D2) %*% D2
-  
-  ## Small ridge term for numerical stability.
-  
+
   Penalty.bases <- Penalty.bases + diag(1e-06, nbasis)
-  
+
   ##########
-  ## Return processed inputs
+  ## Dimension checks
   ##########
-  
+
+  if (nrow(X.obs) != N) {
+    stop("X.obs rows do not match the number of observations.",
+         call. = FALSE)
+  }
+
+  if (nrow(bases.obs) != N) {
+    stop("bases.obs rows do not match the number of observations.",
+         call. = FALSE)
+  }
+
+  if (ncol(bases.obs) != ncol(basis)) {
+    stop("Observed basis and unique-time basis have different numbers of columns.",
+         call. = FALSE)
+  }
+
+  if (nrow(Penalty.bases) != nbasis || ncol(Penalty.bases) != nbasis) {
+    stop("Penalty.bases dimensions do not match the number of basis functions.",
+         call. = FALSE)
+  }
+
+  ##########
+  ## First covariate row by subject
+  ##########
+
+  first.rows <- match(seq_len(n.subject), subject.ID)
+  X.subject <- X.cov[first.rows, , drop = FALSE]
+
+  ##########
+  ## Return inputs
+  ##########
+
   list(
-    data = data,
+    data = data.use,
+    data.long = data.use,
+
     y = y,
-    X = X,
+
+    X = X.obs,
+    X.obs = X.obs,
     X.subject = X.subject,
+
     x.var = x.var,
+    x.names = x.names,
     coef.names = coef.names,
     nX = nX,
+
     subject.ID = subject.ID,
     subject.levels = subject.levels,
     n.subject = n.subject,
     n.obs.subject = n.obs.subject,
-    n.total = length(y),
+    n.total = N,
+    N = N,
     ni = ni,
+
+    time.obs = time.obs,
     time.points = time.points,
-    n.time = n.time,
+    n.time = length(time.points),
+
     nknots = nknots,
     degree = degree,
     nseg = nseg,
     tlo = tlo,
     thi = thi,
+
     basis = basis,
+    bases.obs = bases.obs,
     nbasis = nbasis,
+    n.basis = nbasis,
+
     Penalty.bases = Penalty.bases,
+
     subject.var = subject.var,
     time.var = time.var,
     y.var = y.var
@@ -343,7 +390,7 @@ build.tdmm.subject.inputs <- function(data,
 
 build.tdmm.jags.data <- function(inputs,
                                  family = c("gaussian", "bernoulli", "poisson")) {
-  
+
   ## This helper builds the list passed to JAGS.
   ##
   ## The object names in this list match the variable names used
@@ -354,9 +401,19 @@ build.tdmm.jags.data <- function(inputs,
   ##   nX is the number of coefficient functions
   ##   bases.time is the spline basis evaluated on the observed time grid
   ##   nknots is the number of spline basis functions
-  
+
   family <- match.arg(family)
-  
+
+  if (family == "gaussian") {
+    return(list(N = inputs$N, n.subject = inputs$n.subject,
+                nX = inputs$nX, nknots = inputs$nbasis, y = inputs$y,
+                subject.ID = inputs$subject.ID, X = inputs$X.obs,
+                bases.obs = inputs$bases.obs,
+                Penalty.bases = inputs$Penalty.bases))
+  }
+  # Non-Gaussian models remain byte-identical to V1 pending statistical review.
+  .check.tdmm.integration.scope(inputs$data, family, inputs$subject.var,
+                                inputs$time.var, inputs$x.var)
   jags.data <- list(
     y = inputs$y,
     X = inputs$X,
@@ -368,7 +425,7 @@ build.tdmm.jags.data <- function(inputs,
     nknots = inputs$nbasis,
     Penalty.bases = inputs$Penalty.bases
   )
-  
+
   jags.data
 }
 
@@ -380,7 +437,7 @@ build.tdmm.jags.data <- function(inputs,
 .extract.alpha.draws <- function(post.mat,
                                  nX,
                                  nbasis) {
-  
+
   ## This internal helper extracts posterior draws of the spline
   ## coefficients from the matrix of posterior samples.
   ##
@@ -390,15 +447,15 @@ build.tdmm.jags.data <- function(inputs,
   ##
   ## Row 1 corresponds to beta0(t), row 2 corresponds to the
   ## first covariate effect, and so on.
-  
+
   coef.names <- colnames(post.mat)
   n.draws <- nrow(post.mat)
-  
+
   alpha.draws <- array(
     NA_real_,
     dim = c(n.draws, nX, nbasis)
   )
-  
+
   matrix.style.available <- all(
     unlist(
       lapply(seq_len(nX), function(k) {
@@ -406,17 +463,17 @@ build.tdmm.jags.data <- function(inputs,
       })
     )
   )
-  
+
   if (matrix.style.available) {
-    
+
     for (k in seq_len(nX)) {
       alpha.cols <- paste0("alpha[", k, ",", seq_len(nbasis), "]")
       alpha.draws[, k, ] <- as.matrix(post.mat[, alpha.cols, drop = FALSE])
     }
-    
+
     return(alpha.draws)
   }
-  
+
   stop(
     "Could not find spline coefficient samples in post.mat.\n",
     "Expected matrix-style names like alpha[1,1], alpha[1,2], etc.",
@@ -433,41 +490,41 @@ recover.tdmm.betas <- function(post.mat,
                                basis,
                                nX,
                                coef.names = NULL) {
-  
+
   ## This helper converts posterior samples of spline
   ## coefficients back into fitted time-varying coefficient
   ## functions.
-  
+
   nbasis <- ncol(basis)
-  
+
   alpha.draws <- .extract.alpha.draws(
     post.mat = post.mat,
     nX = nX,
     nbasis = nbasis
   )
-  
+
   n.draws <- dim(alpha.draws)[1]
   n.time <- nrow(basis)
-  
+
   beta.draws <- array(
     NA_real_,
     dim = c(n.draws, n.time, nX)
   )
-  
+
   for (k in seq_len(nX)) {
     beta.draws[, , k] <-
       alpha.draws[, k, , drop = FALSE][, 1, ] %*% t(basis)
   }
-  
+
   ## Posterior mean fitted coefficient functions.
   beta.hat <- apply(beta.draws, c(2, 3), mean)
-  
+
   if (is.null(coef.names)) {
     coef.names <- c("beta0", paste0("beta", seq_len(nX - 1)))
   }
-  
+
   colnames(beta.hat) <- coef.names
-  
+
   list(
     beta.draws = beta.draws,
     beta.hat = beta.hat,
@@ -486,7 +543,7 @@ build.tdmm.output <- function(family,
                               post.samples,
                               inputs,
                               model.settings) {
-  
+
   ## This helper builds the object returned by tdmm() and
   ## tdmm.parallel().
   ##
@@ -494,98 +551,100 @@ build.tdmm.output <- function(family,
   ## Bernoulli, and Poisson models.
   ##
   ## Note:
-  ##   family is not stored as a top-level output element because
-  ##   it is already stored in model.settings$family.
-  
+  ##   family is available at the top level and in model.settings.
+
   family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
-  
+
   ##########
   ## Convert posterior samples to a matrix
   ##########
-  
+
   ## post.samples may already be a matrix, a coda object, or an
   ## R2jags object. This keeps the helper flexible.
-  
+
   if (is.matrix(post.samples)) {
     post.mat <- post.samples
+  } else if (inherits(post.samples, "mcmc.list") || inherits(post.samples, "mcmc")) {
+    post.mat <- as.matrix(post.samples)
   } else if (!is.null(post.samples$BUGSoutput$sims.matrix)) {
     post.mat <- post.samples$BUGSoutput$sims.matrix
   } else {
     post.mat <- as.matrix(post.samples)
   }
-  
+
   ##########
   ## Recover fitted beta functions
   ##########
-  
+
   beta.recovered <- recover.tdmm.betas(
     post.mat = post.mat,
     basis = inputs$basis,
     nX = inputs$nX,
     coef.names = inputs$coef.names
   )
-  
+
   ##########
   ## Variance summaries
   ##########
-  
+
   sigma2.b <- NA_real_
   sigma.b <- NA_real_
   sigma2.e <- NA_real_
   sigma.e <- NA_real_
-  
+
   if ("sigma2.b" %in% colnames(post.mat)) {
     sigma2.b <- mean(post.mat[, "sigma2.b"])
   }
-  
+
   if ("sigma.b" %in% colnames(post.mat)) {
     sigma.b <- mean(post.mat[, "sigma.b"])
   } else if (!is.na(sigma2.b)) {
     sigma.b <- sqrt(sigma2.b)
   }
-  
+
   if (family == "gaussian") {
-    
+
     if ("sigma2.e" %in% colnames(post.mat)) {
       sigma2.e <- mean(post.mat[, "sigma2.e"])
     }
-    
+
     if ("sigma.e" %in% colnames(post.mat)) {
       sigma.e <- mean(post.mat[, "sigma.e"])
     } else if (!is.na(sigma2.e)) {
       sigma.e <- sqrt(sigma2.e)
     }
   }
-  
+
   ##########
   ## Build output list
   ##########
-  
+
   output <- list(
+    family = family,
     post.samples = post.samples,
     post.mat = post.mat,
-    
+
     ## General matrix of fitted coefficient functions.
     ## Columns are named using beta.names.
     beta.hat = beta.recovered$beta.hat,
-    
+
     ## Matrix of fitted covariate effect functions only.
     beta.covariates.hat = beta.recovered$beta.covariates.hat,
-    
+
     ## Names of the fitted coefficient functions.
     beta.names = beta.recovered$beta.names,
-    
+
     time.points = inputs$time.points,
     inputs = inputs,
     model.settings = model.settings,
     sigma2.b = sigma2.b,
     sigma.b = sigma.b
   )
-  
+
   ##########
   ## Add numbered beta*.hat outputs
   ##########
-  
+
   ## beta0.hat is the fitted intercept function.
   ## beta1.hat, beta2.hat, ... are fitted covariate effect
   ## functions in the same order as x.var.
@@ -596,24 +655,39 @@ build.tdmm.output <- function(family,
   ##   beta0.hat = intercept function
   ##   beta1.hat = effect of x1
   ##   beta2.hat = effect of x2
-  
+
   for (k in seq_len(inputs$nX)) {
     output[[paste0("beta", k - 1, ".hat")]] <- beta.recovered$beta.hat[, k]
   }
-  
+
   ##########
   ## Gaussian residual variance summaries
   ##########
-  
+
   ## Gaussian models also include residual variance summaries.
   ## Bernoulli and Poisson models do not include sigma2.e or sigma.e.
-  
+
   if (family == "gaussian") {
     output$sigma2.e <- sigma2.e
     output$sigma.e <- sigma.e
   }
-  
+
   class(output) <- "tdmm"
-  
+
   output
+}
+
+# Phase 2A hold: do not silently choose a non-Gaussian V2 statistical model.
+.check.tdmm.integration.scope <- function(data, family, subject.var, time.var, x.var) {
+  if (family == "gaussian") return(invisible(NULL))
+  balance <- check.tdmm.subject.balance(data, subject.var, time.var)
+  variation <- check.tdmm.covariate.variation(data, subject.var, x.var)
+  if (!balance$balanced || !balance$common.time.grid || variation$has.time.varying.covariates) {
+    stop("Phase 2A: V2 ", family,
+         " fitting is pending Esra K review of the random-effect prior",
+         if (family == "bernoulli") " and spline parameterization" else "",
+         ". Only the unchanged V1 common-grid, baseline-covariate model is enabled for this family.",
+         call. = FALSE)
+  }
+  invisible(NULL)
 }

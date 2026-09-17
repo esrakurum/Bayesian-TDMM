@@ -3,7 +3,7 @@
 ##
 ## The function follows the same general workflow as tdmm():
 ##   - checks the requested response family
-##   - prepares the subject-level TDMM inputs
+##   - prepares the observation-level TDMM inputs
 ##   - builds the JAGS data list
 ##   - locates the correct JAGS model file
 ##   - runs separate MCMC chains in parallel
@@ -57,11 +57,13 @@ tdmm.parallel <- function(data,
   )
   
   #########
-  ## Build subject-level inputs
+  ## Build observation-level inputs
   #########
   ## This prepares the response vector, covariate matrices,
   ## subject indexing, spline basis, and penalty matrix.
   
+  .check.tdmm.integration.scope(data, family, subject.var, time.var, data.check$covariates)
+
   inputs <- build.tdmm.subject.inputs(
     data = data,
     nknots = nknots,
@@ -114,6 +116,10 @@ tdmm.parallel <- function(data,
     y.var = y.var,
     x.var = inputs$x.var,
     nX = inputs$nX,
+    N = inputs$N,
+    n.subject = inputs$n.subject,
+    n.basis = inputs$nbasis,
+    implementation = if (family == "gaussian") "V2 observation-level" else "V1 retained pending review",
     coef.names = inputs$coef.names,
     seed = seed,
     parallel.method = "mclapply"
@@ -124,7 +130,7 @@ tdmm.parallel <- function(data,
   #########
   
   if (!quiet) {
-    message("Fitting ", family, " TDMM with ", length(inputs$x.var), " baseline covariate(s).")
+    message("Fitting ", family, " TDMM with ", length(inputs$x.var), " covariate(s).")
     message("Using JAGS model file: ", config$model.file)
     message("Running ", n.chains, " chain(s) on ", n.cores, " core(s).")
   }
@@ -153,11 +159,11 @@ tdmm.parallel <- function(data,
     )
     
     ## Burn-in period.
-    update(model, n.iter = n.burn)
+    stats::update(model, n.iter = n.burn)
     
     ## Posterior sampling.
     ## coda.samples() comes from rjags, so rjags needs to be loaded/imported.
-    samples <- coda.samples(
+    samples <- rjags::coda.samples(
       model = model,
       variable.names = config$params,
       n.iter = n.iter - n.burn,

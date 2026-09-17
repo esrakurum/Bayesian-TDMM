@@ -1,5 +1,5 @@
 ## Bernoulli TDMM simulation example
-devtools::install_github("esrakurum/Bayesian-TDMM")
+devtools::install_github("esrakurum/Bayesian-TDMM", ref = "v0.2-development")
 library(TDMM)
 
 ## Generate Bernoulli TDMM data

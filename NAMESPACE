@@ -19,3 +19,5 @@ export(plot.tdmm)
 export(plot.trace.tdmm)
 export(recover.tdmm.betas.ci)
 export(make.tdmm.plot.grid)
+
+importFrom(stats,aggregate,rnorm,rbinom,rpois,plogis)

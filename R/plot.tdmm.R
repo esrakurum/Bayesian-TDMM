@@ -280,6 +280,10 @@ plot.tdmm <- function(data,
     }
   }
   
+  if (missing(time.var) && !is.null(result$inputs$time.var)) {
+    time.var <- result$inputs$time.var
+  }
+
   ## Extract coefficient-function information.
   nX <- result$inputs$nX
   coef.names <- result$inputs$coef.names

@@ -2,7 +2,9 @@
 
 This repository contains the `TDMM` R package for fitting Bayesian time-dynamic mixed-effects models for longitudinal data.
 
-The package provides tools for estimating time-varying coefficient functions while accounting for within-subject dependence through subject-specific random effects. The current implementation focuses on longitudinal data with baseline covariates. It can handle irregularly spaced measurement times when subjects share the same observation grid, but it assumes a balanced repeated-measures structure with the same number of observations per subject.
+**Development snapshot (0.1.0.9000; not a 0.2.0 release).** Gaussian fitting now accepts subject-specific times, unequal visit counts, and observation-level covariates. Bernoulli and Poisson retain their unchanged V1 models for common-grid baseline-covariate data; their V2 fitting paths are blocked pending statistical review and newer source files. See `PHASE2A_COMPATIBILITY.md` and `PHASE2A_CHANGELOG.md`.
+
+The released V1 package provides tools for estimating time-varying coefficient functions while accounting for within-subject dependence through subject-specific random effects. The current implementation focuses on longitudinal data with baseline covariates. It can handle irregularly spaced measurement times when subjects share the same observation grid, but it assumes a balanced repeated-measures structure with the same number of observations per subject.
 
 A full package tutorial is included separately and describes the statistical model, Bayesian estimation framework, data requirements, fitting functions, diagnostics, visualization tools, and implementation examples.
 
@@ -44,7 +46,7 @@ The package depends on JAGS. Users should install JAGS before fitting models.
 In R, install the package from GitHub using:
 
 ```r
-devtools::install_github("esrakurum/Bayesian-TDMM")
+devtools::install_github("esrakurum/Bayesian-TDMM", ref = "v0.2-development")
 library(TDMM)
 ```
 ## Repository structure
@@ -60,33 +62,33 @@ Bayesian-TDMM/
 ├── R/
 │   ├── tdmm.R
 │   ├── tdmm.parallel.R
-│   ├── tdmm.data.generation.R
-│   ├── tdmm.data.checks.R
+│   ├── simulation.helpers.R
+│   ├── data.checks.R
 │   ├── tdmm.helpers.R
 │   ├── plot.tdmm.R
 │   ├── plot.trace.tdmm.R
 │   └── summary.tdmm.R
 │
-├── jags/
+├── inst/jags/
 │   ├── TDMM_Gaussian_JAGS.txt
 │   ├── TDMM_Bernoulli_JAGS.txt
 │   └── TDMM_Poisson_JAGS.txt
 │
 ├── examples/
-    ├── tdmm/
+    ├── tdmm()/
     │   ├── gaussian_simulation.R
     │   ├── bernoulli_simulation.R
     │   ├── poisson_simulation.R
     │   └── WageData_TDMM.R
     │
-    └── tdmm.parallel/
+    └── tdmm.parallel()/
         ├── gaussian_parallel.R
         ├── bernoulli_parallel.R
         └── poisson_parallel.R
 ```
 ## Citation
 
-If you use this package, please cite the software using the citation information provided in the `CITATION.cff` file and the archived Zenodo DOI: https://doi.org/10.5281/zenodo.20617705
+If you use this package, please cite the software using the citation information provided in the `CITATION.cff` file and the archived V1 release Zenodo DOI (not an archive of this development snapshot): https://doi.org/10.5281/zenodo.20617705
 
 ## License
 

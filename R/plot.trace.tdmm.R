@@ -18,9 +18,7 @@
 ##   params = paste0("alpha[1,", 1:5, "]")
 ##
 ## Note:
-## For variance-component diagnostics, this function currently
-## focuses on variance terms. If users pass sigma.b or sigma.e,
-## those are automatically replaced with sigma2.b or sigma2.e.
+## Parameter names are used exactly; sigma.b is SD and sigma2.b is variance.
 ############################################################
 
 plot.trace.tdmm <- function(result,
@@ -60,16 +58,7 @@ plot.trace.tdmm <- function(result,
   }
   
   ########
-  ## Keep variance terms only for sigma traces
-  ########
-  
-  ## For now, trace diagnostics for variance components are shown
-  ## using sigma2 terms. If users pass sigma.b or sigma.e, replace
-  ## them with the corresponding variance terms.
-  params <- gsub("^sigma\\.b$", "sigma2.b", params)
-  params <- gsub("^sigma\\.e$", "sigma2.e", params)
-  
-  ## Remove duplicates that may result from replacement.
+  ## Use exact requested parameter names, without changing scale.
   params <- unique(params)
   
   ########

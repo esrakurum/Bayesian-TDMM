@@ -8,3 +8,7 @@
 ^simulations$
 ^examples$
 ^\.DS_Store$
+
+^PHASE2A_.*\.md$
+^CITATION\.cff$
+^tools$

@@ -42,7 +42,7 @@ summary.tdmm <- function(object, ...) {
   
   cat("Family: ", family, "\n", sep = "")
   cat("Number of subjects: ", inputs$n.subject, "\n", sep = "")
-  cat("Number of time points: ", inputs$n.time, "\n", sep = "")
+  cat("Number of unique observed time points: ", inputs$n.time, "\n", sep = "")
   cat("Total observations: ", inputs$n.total, "\n", sep = "")
   cat("Number of covariates: ", length(inputs$x.var), "\n", sep = "")
   cat("Number of coefficient functions: ", inputs$nX, "\n", sep = "")
@@ -63,6 +63,7 @@ summary.tdmm <- function(object, ...) {
   cat("\nVariance summaries\n")
   cat("------------------\n")
   cat("sigma2.b: ", object$sigma2.b, "\n", sep = "")
+  cat("sigma.b: ", object$sigma.b, "\n", sep = "")
   
   if (family == "gaussian") {
     cat("sigma2.e: ", object$sigma2.e, "\n", sep = "")
@@ -87,6 +88,9 @@ summary.tdmm <- function(object, ...) {
       n.subject = inputs$n.subject,
       n.time = inputs$n.time,
       n.total = inputs$n.total,
+      N = inputs$n.total,
+      sigma.b = object$sigma.b,
+      sigma.e = if (family == "gaussian") object$sigma.e else NULL,
       nX = inputs$nX,
       covariates = inputs$x.var,
       beta.hat = object$beta.hat,

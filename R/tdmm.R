@@ -3,7 +3,7 @@
 ##
 ## The function:
 ##   - checks the requested response family
-##   - prepares the subject-level TDMM inputs
+##   - prepares the observation-level TDMM inputs
 ##   - builds the JAGS data list
 ##   - locates the correct JAGS model file
 ##   - runs the model using R2jags
@@ -14,14 +14,14 @@
 ##   - Bernoulli outcomes
 ##   - Poisson outcomes
 ##
-## Baseline covariates are supplied through x.var.
+## Covariates are supplied through x.var.
 ## The user can pass one covariate or several covariates:
 ##
 ##   x.var = "x1"
 ##   x.var = c("x1", "x2", ...)
 ##
 ## If x.var is NULL, all columns except the subject ID, time,
-## and response variables are treated as baseline covariates.
+## and response variables are treated as covariates.
 ############################################################
 
 tdmm <- function(data,
@@ -60,11 +60,13 @@ tdmm <- function(data,
   )
   
   ##########
-  ## Build subject-level inputs
+  ## Build observation-level inputs
   ##########
   ## This prepares the response vector, covariate matrices,
   ## subject indexing, spline basis, and penalty matrix.
   
+  .check.tdmm.integration.scope(data, family, subject.var, time.var, data.check$covariates)
+
   inputs <- build.tdmm.subject.inputs(
     data = data,
     nknots = nknots,
@@ -116,6 +118,10 @@ tdmm <- function(data,
     y.var = y.var,
     x.var = inputs$x.var,
     nX = inputs$nX,
+    N = inputs$N,
+    n.subject = inputs$n.subject,
+    n.basis = inputs$nbasis,
+    implementation = if (family == "gaussian") "V2 observation-level" else "V1 retained pending review",
     coef.names = inputs$coef.names
   )
   
@@ -126,7 +132,7 @@ tdmm <- function(data,
   ## The model file depends on the selected response family.
   
   if (!quiet) {
-    message("Fitting ", family, " TDMM with ", length(inputs$x.var), " baseline covariate(s).")
+    message("Fitting ", family, " TDMM with ", length(inputs$x.var), " covariate(s).")
     message("Using JAGS model file: ", config$model.file)
   }
   

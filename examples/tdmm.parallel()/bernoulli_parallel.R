@@ -1,5 +1,5 @@
 ## Bernoulli TDMM parallel simulation example
-devtools::install_github("esrakurum/Bayesian-TDMMM")
+devtools::install_github("esrakurum/Bayesian-TDMM", ref = "v0.2-development")
 library(TDMM)
 library(coda)
 

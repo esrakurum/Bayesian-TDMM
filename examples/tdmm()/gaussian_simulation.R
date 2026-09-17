@@ -1,6 +1,6 @@
 
 ## Gaussian TDMM simulation example
-devtools::install_github("esrakurum/Bayesian-Varying-Coefficient-Models")
+devtools::install_github("esrakurum/Bayesian-TDMM", ref = "v0.2-development")
 library(TDMM)
 
 ## Generate Gaussian TDMM data

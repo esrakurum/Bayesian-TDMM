@@ -1,6 +1,6 @@
 ## Real data example: Gaussian TDMM with WageData
 
-devtools::install_github("esrakurum/Bayesian-TDMM")
+devtools::install_github("esrakurum/Bayesian-TDMM", ref = "v0.2-development")
 library(TDMM)
 
 library(panelr)
