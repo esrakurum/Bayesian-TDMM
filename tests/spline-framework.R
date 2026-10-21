@@ -6,7 +6,7 @@ legacy <- getFromNamespace('.legacy.bbase','TDMM')
 fitted.spec <- getFromNamespace('.fitted.spline.spec','TDMM')
 near <- function(a,b,tol=1e-10) stopifnot(isTRUE(all.equal(a,b,tolerance=tol,check.attributes=FALSE)))
 error <- function(expr) stopifnot(inherits(tryCatch({force(expr);NULL},error=identity),'error'))
-for(d in c(1,2,3,4)) for(q in c(6L,15L,25L)) {
+for(d in c(1,2,3,4)) for(q in c(6L,8L,15L,25L)) {
   for(domain in list(c(0,1),c(-7,9),c(1976,1982),c(1e6,1e6+.01))) {
     s <- specification(domain[1],domain[2],q,d)
     x <- seq(s$tlo,s$thi,length.out=401)
@@ -26,7 +26,7 @@ s <- specification(0,1,6,3);x <- seq(0,1,length.out=301)
 near(evaluate(x,s),legacy(x,0,1,3,3))
 # Affine transformations retain the basis shape on a well-resolved scale.
 near(evaluate(x,s),evaluate(1976+6*x,specification(1976,1982,6,3)))
-stopifnot(resolve()==15L,suppressWarnings(resolve(nknots=6,degree=3))==7L,
+stopifnot(resolve()==8L,suppressWarnings(resolve(nknots=6,degree=3))==7L,
           suppressWarnings(resolve(nknots=6,degree=2))==6L)
 warned <- FALSE
 withCallingHandlers(resolve(nknots=6),warning=function(w){warned<<-TRUE;invokeRestart('muffleWarning')})

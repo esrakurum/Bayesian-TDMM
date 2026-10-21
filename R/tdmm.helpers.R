@@ -190,7 +190,7 @@ build.tdmm.subject.inputs <- function(data,
   ##########
 
   data.use <- data[, c(required.cols, x.var), drop = FALSE]
-  data.use <- data.use[complete.cases(data.use), , drop = FALSE]
+  data.use <- data.use[stats::complete.cases(data.use), , drop = FALSE]
 
   if (nrow(data.use) == 0) {
     stop("No complete observations remain after removing missing values.",

@@ -12,7 +12,7 @@ base <- data.frame(person=c("z", "a", "z", "m", "a", "z"),
                    baseline=c(30,10,30,20,10,30),
                    changing=c(11,22,33,44,55,66))
 for (ids in list(base$person, c(90,10,90,40,10,90),
-                 factor(base$person,levels=c("z","m","a")))) {
+                 factor(base$person,levels=c("z","m","a","unused")))) {
   dat <- base; dat$person <- ids
   expected <- dat[order(dat$person,dat$visit),]
   z <- build(dat, n_basis=15, subject.var="person", time.var="visit",
@@ -20,7 +20,8 @@ for (ids in list(base$person, c(90,10,90,40,10,90),
   check <- suppressWarnings(check.tdmm.family.data(dat, family="gaussian",
             subject.var="person",time.var="visit",y.var="response",
             x.var=c("baseline","changing")))
-  stopifnot(!check$structure.check$subject.balance$balanced,
+  stopifnot(check$structure.check$subject.balance$n.subject == 3L,
+            !check$structure.check$subject.balance$balanced,
             !check$structure.check$subject.balance$common.time.grid,
             identical(check$structure.check$baseline.covariates,"baseline"),
             identical(check$structure.check$time.varying.covariates,"changing"),

@@ -67,7 +67,7 @@ for (family in c("gaussian", "bernoulli", "poisson")) {
               all(c("sigma.b", "sigma2.b") %in% colnames(fit$post.mat)),
               isTRUE(fit$data.check$structure.check$x.constant.within.subject))
     sm <- summary(fit)
-    stopifnot(sm$N == 30, sm$n.total == 30, sm$n_basis == 15, sm$degree == 3)
+    stopifnot(sm$N == 30, sm$n.total == 30, sm$n_basis == 8, sm$degree == 3)
     grDevices::pdf(file = tempfile(fileext=".pdf"))
     plot.tdmm(dat, fit)
     plot.trace.tdmm(fit, c("sigma.b", "sigma2.b"))
@@ -82,14 +82,15 @@ for (family in c("gaussian", "bernoulli", "poisson")) {
 }
 for (method in c("serial", "parallel")) {
   dat <- irregular
+  dat$subject.ID <- factor(dat$subject.ID, levels=c(sort(unique(as.character(dat$subject.ID))), "unused"))
   names(dat)[names(dat) == "time"] <- "visit"
   args <- list(data=dat, family="gaussian", time.var="visit", n.chains=2,
                n.iter=100, n.burn=50, n.thin=1, n.adapt=100, quiet=TRUE)
-  if (method == "parallel") { args$n.cores <- 2; args$nknots <- 5 } else args$n_basis <- 6
+  if (method == "parallel") { args$n.cores <- 2; args$nknots <- 7 }
   fit <- suppressWarnings(do.call(if (method == "serial") tdmm else tdmm.parallel, args))
   check.fit.interface(fit, dat, "gaussian", method, "visit", 3L)
   z <- fit$inputs
-  stopifnot(z$n_basis == 6L, z$degree == 3, z$spline$intervals == 3)
+  stopifnot(z$n_basis == 8L, z$degree == 3, z$spline$order == 4, z$spline$intervals == 5)
   stopifnot(z$N == nrow(dat), nrow(z$bases.obs) == nrow(dat),
             identical(z$time.obs, z$data$visit),
             all(z$X.obs[, "x.tv"] == z$data$x.tv),
@@ -98,8 +99,15 @@ for (method in c("serial", "parallel")) {
             ncol(z$X.subject) == 2,
             isTRUE(fit$data.check$structure.check$has.time.varying.covariates))
   grDevices::pdf(file=tempfile(fileext=".pdf"))
-  plot.tdmm(dat, fit) # Uses stored custom time.var.
-  plot.trace.tdmm(fit, c("sigma.b", "sigma2.b"))
+  sm <- summary(fit)
+  stopifnot(sm$n_basis == 8L, sm$N == nrow(dat))
+  plotted <- plot.tdmm(dat, fit, grid=fit$time.points)
+  stopifnot(isTRUE(all.equal(unname(do.call(cbind, plotted$summaries$beta.mean)),
+                            unname(fit$beta.hat), tolerance=1e-10)))
+  # Stored observation, recovery and plotting grids agree exactly.
+  stopifnot(isTRUE(all.equal(unname(plotted$bases.grid),
+                            unname(z$basis), tolerance=1e-10)))
+  plot.trace.tdmm(fit, c("sigma.b", "sigma2.b", "sigma2.e", "tau.alpha[1]", "alpha[1,1]"))
   grDevices::dev.off()
   cat("PASS gaussian", method, "irregular/time-varying fit, alignment and plots\n")
 }
@@ -115,3 +123,15 @@ expect.error(tdmm(d), "Missing values")
 helper <- getFromNamespace("build.tdmm.subject.inputs", "TDMM")
 stopifnot(helper(d, n_basis=15)$N == nrow(d)-1)
 cat("PASS documented missing-value entry-point difference\n")
+
+# Invalid Gaussian inputs fail before JAGS, without changing missing-data policy.
+for (f in list(tdmm, tdmm.parallel)) {
+  d <- balanced; d$y <- as.character(d$y)
+  expect.error(f(d), "must be numeric")
+  d <- balanced; d$y[1] <- Inf
+  expect.error(f(d), "finite")
+  d <- balanced; d$x[1] <- Inf
+  expect.error(f(d), "finite")
+  d <- balanced; d$time[1] <- Inf
+  expect.error(f(d), "finite")
+}

@@ -96,12 +96,16 @@ This package is licensed under the MIT License.
 
 Copyright (c) 2026 Makena Grigsby and Esra Kürüm.
 
-## Development spline API (pending final basis-count review)
+## V2 spline defaults and Gaussian workflow
 
 New fits use cubic B-splines (`degree = 3`, order 4), evaluated with
 `splines::splineDesign()`. Supply `n_basis` for the actual number of columns.
-The temporary default is **15 basis functions**, preserving the previous
-column count rather than asserting a validated cubic model size.
+The default is **8 basis functions**. Esra selected eight after a matched
+10-dataset Gaussian cubic pilot comparing 6, 8 and 10: eight balanced curve
+recovery and shape with runtime (77.2 seconds per fit versus 129.8 for ten).
+This small pilot informed the default; it is not a formal simulation study.
+The formal argument remains `n_basis = NULL` so that omitted values resolve
+to eight while deprecated `nknots` calls retain their historical mapping.
 
 For degree `d` and `q = n_basis`, there are `q - d` equally spaced intervals
 across the fitted time range. The knot vector extends `d` intervals beyond
@@ -131,3 +135,31 @@ Poisson study, and PBC2 fits do not validate the new cubic specification.
 Their fits/results and all package example outputs require rerunning before
 being presented as V2 cubic results. No formal studies were rerun for this
 API change.
+
+A long-format Gaussian workflow requires only the installed package:
+
+```r
+library(TDMM)
+fit <- tdmm(dat, family = "gaussian", subject.var = "id",
+            time.var = "time", y.var = "y",
+            x.var = c("baseline", "time_varying"))
+summary(fit)
+plot.tdmm(dat, fit)
+plot.trace.tdmm(fit, c("sigma2.b", "sigma2.e", "tau.alpha[1]"))
+# On macOS/Linux: same interface, independent chains on two cores.
+# fit <- tdmm.parallel(dat, family="gaussian", subject.var="id",
+#                     x.var=c("baseline", "time_varying"), n.cores=2, seed=218)
+```
+
+Rows may be unsorted, subject IDs need not be consecutive, visit counts may
+differ, and covariates may vary within subject. Required columns must be
+complete; response, times and covariates must be finite numeric values.
+Encode categorical covariates as numeric indicators. Unused subject-factor
+levels are ignored. The package locates its own JAGS model, maps subject IDs,
+constructs observation-level matrices, and recovers curves on sorted unique
+observed times. Plots use the saved spline specification on a regular grid
+by default; `grid=fit$time.points` uses the exact recovery grid.
+
+See `simulations/gaussian-v2-validation.md` for a single-dataset validation
+using the installed package. Parallel execution currently uses forked chains
+on macOS/Linux; multi-core Windows execution is not implemented.

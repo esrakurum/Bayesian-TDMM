@@ -1,5 +1,5 @@
-# Shared spline specification. 15 columns is a temporary dimension-preserving
-# default pending review; it is not a validated choice for cubic studies.
+# Shared spline specification. Eight cubic bases selected by Esra after the
+# 10-dataset matched Gaussian pilot; this is not formal simulation validation.
 .resolve.n_basis <- function(n_basis = NULL, nknots = NULL, degree = 3) {
   integer.scalar <- function(x) is.numeric(x) && length(x) == 1L &&
     is.finite(x) && x == floor(x)
@@ -13,7 +13,7 @@
     warning("nknots is deprecated: intervals = nknots - 2; use n_basis = nknots + degree - 2. The default degree is now 3.", call. = FALSE)
     n_basis <- nknots + degree - 2
   }
-  if (is.null(n_basis)) n_basis <- 15L
+  if (is.null(n_basis)) n_basis <- 8L
   if (!integer.scalar(n_basis) || n_basis < max(3, degree + 1))
     stop("n_basis must be an integer >= max(3, degree + 1).", call. = FALSE)
   as.integer(n_basis)

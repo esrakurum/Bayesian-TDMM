@@ -45,13 +45,13 @@ check.tdmm.subject.balance <- function(data,
   ## Count observations per subject
   ##########
 
-  obs.per.subject <- table(data[[subject.var]])
+  obs.per.subject <- table(factor(data[[subject.var]]))
 
   ##########
   ## Store observed times by subject
   ##########
 
-  time.by.subject <- split(data[[time.var]], data[[subject.var]])
+  time.by.subject <- split(data[[time.var]], data[[subject.var]], drop = TRUE)
   time.by.subject <- lapply(time.by.subject, sort)
 
   ##########
@@ -99,7 +99,7 @@ check.tdmm.covariate.variation <- function(data,
   x.unique.by.subject <- lapply(x.var, function(x.name) {
     tapply(
       data[[x.name]],
-      data[[subject.var]],
+      factor(data[[subject.var]]),
       function(z) length(unique(z))
     )
   })
@@ -240,6 +240,13 @@ check.tdmm.data.structure <- function(data,
     }
   }
 
+  numeric.cols <- c(time.var, x.var)
+  if (all(vapply(data[, numeric.cols, drop = FALSE], is.numeric, logical(1))) &&
+      any(vapply(data[, numeric.cols, drop = FALSE],
+                 function(z) any(is.infinite(z)), logical(1)))) {
+    stop("Times and covariates must contain finite values.", call. = FALSE)
+  }
+
   ##########
   ## Summarize repeated-measure structure
   ##########
@@ -333,7 +340,11 @@ check.gaussian.response <- function(data,
   y <- data[[y.var]]
 
   if (!is.numeric(y)) {
-    warning("The Gaussian response variable is not numeric.", call. = FALSE)
+    stop("The Gaussian response variable must be numeric.", call. = FALSE)
+  }
+
+  if (any(is.infinite(y))) {
+    stop("The Gaussian response must contain finite values.", call. = FALSE)
   }
 
   ##########
