@@ -184,6 +184,8 @@ Poisson Gamma(1,0.005) precision prior for new fits, including common-grid fits.
 Historical fitted-object reconstruction remains unchanged. Bernoulli remains
 on its existing V1 path pending a separate decision.
 
-See simulations/poisson-v2-validation.md for RStudio-compatible single-dataset
-validation commands. Gaussian V2's single-dataset validation has been accepted
+See `simulations/poisson-v2-design.md` and the standalone
+`examples/poisson-v2-example.R` for the finalized Poisson example. The former
+`simulations/poisson-v2-validation.R` is retained only as a labeled confounded
+diagnostic/stress-test scenario. Gaussian V2's single-dataset validation has been accepted
 by Esra; formal repeated validation is deferred until all families are finalized.

@@ -1,3 +1,5 @@
+## Legacy common-grid example retained for provenance.
+## For the finalized irregular-time Poisson V2 design use examples/poisson-v2-example.R.
 ## Poisson TDMM simulation example
 devtools::install_github("esrakurum/Bayesian-TDMM", ref = "v0.2-development")
 library(TDMM)

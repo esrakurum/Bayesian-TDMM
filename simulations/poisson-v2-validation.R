@@ -1,3 +1,5 @@
+# DIAGNOSTIC/STRESS-TEST ONLY: sine-driven covariate confounded with intercept truth.
+# Preserved historical scenario; use poisson-v2-generator.R and examples/poisson-v2-example.R for the final design.
 # Source this file in R/RStudio, then call run_poisson_validation().
 # No model is fitted merely by sourcing the file.
 run_poisson_validation <- function(out=file.path("results","poisson-v2-validation"),

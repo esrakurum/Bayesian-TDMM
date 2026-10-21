@@ -1,4 +1,9 @@
-# Poisson V2 single-dataset validation
+# Poisson V2 diagnostic/stress-test scenario
+
+**Historical confounded design, not the final example or formal-study generator.**
+Its sine-driven covariate duplicates the intercept pattern. The code and saved
+results are retained as diagnostic provenance. Use `poisson-v2-design.md` for
+the finalized example and reusable generator.
 
 Restart R in RStudio first to avoid retaining an older loaded TDMM namespace.
 Run these commands in the R console (also compatible with ordinary R):
