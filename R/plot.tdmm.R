@@ -22,55 +22,28 @@
 ## Build plotting grid and spline basis
 #########
 
-make.tdmm.plot.grid <- function(data,
-                                grid = NULL,
-                                n.grid = 100,
-                                time.var = "time",
-                                nknots = 15,
-                                degree = 2) {
-  
-  ## Check that the time variable is present.
-  if (!time.var %in% names(data)) {
-    stop("The time variable was not found in data.", call. = FALSE)
+make.tdmm.plot.grid <- function(data, grid = NULL, n.grid = 100,
+                                time.var = "time", nknots = NULL,
+                                degree = 3, n_basis = NULL, result = NULL) {
+  if (is.null(result)) {
+    q <- .resolve.n_basis(n_basis, nknots, degree)
+    if (!time.var %in% names(data)) stop("Time variable not found.", call. = FALSE)
+    spec <- .make.spline.spec(min(data[[time.var]], na.rm = TRUE),
+                              max(data[[time.var]], na.rm = TRUE), q, degree)
+  } else {
+    spec <- .fitted.spline.spec(result)
+    if (!is.null(n_basis) || !is.null(nknots)) {
+      q <- .resolve.n_basis(n_basis, nknots, spec$degree)
+      if (q != spec$n_basis) stop("Cannot change a fitted basis dimension.", call. = FALSE)
+    }
+    if (!missing(degree) && degree != spec$degree)
+      stop("Cannot change a fitted spline degree.", call. = FALSE)
   }
-  
-  ## Determine the observed time range.
-  tlo <- min(data[[time.var]], na.rm = TRUE)
-  thi <- max(data[[time.var]], na.rm = TRUE)
-  
-  ## If the user does not provide a grid, create one over
-  ## the observed time range.
-  if (is.null(grid)) {
-    grid <- seq(tlo, thi, length.out = n.grid)
-  }
-  
-  ## If the user provides one numeric value, treat it as the
-  ## number of plotting grid points.
-  if (length(grid) == 1 && is.numeric(grid)) {
-    grid <- seq(tlo, thi, length.out = grid)
-  }
-  
-  ## Build the spline basis on the plotting grid.
-  ## This uses the same spline basis construction as the model.
-  nseg <- nknots - 2
-  
-  bases.grid <- bbase(
-    x = grid,
-    xl = tlo,
-    xr = thi,
-    ndx = nseg,
-    deg = degree
-  )
-  
-  list(
-    grid = grid,
-    bases.grid = bases.grid,
-    tlo = tlo,
-    thi = thi,
-    nseg = nseg,
-    nknots = nknots,
-    degree = degree
-  )
+  if (is.null(grid)) grid <- seq(spec$tlo, spec$thi, length.out = n.grid)
+  else if (length(grid) == 1L) grid <- seq(spec$tlo, spec$thi, length.out = grid)
+  list(grid = grid, bases.grid = .evaluate.spline(grid, spec),
+       tlo = spec$tlo, thi = spec$thi, nseg = spec$intervals,
+       n_basis = spec$n_basis, degree = spec$degree, spline = spec)
 }
 
 
@@ -203,7 +176,8 @@ plot.tdmm <- function(data,
                       las = 1,
                       width = 2200,
                       height = 700,
-                      res = 150) {
+                      res = 150,
+                      n_basis = NULL) {
   
   ## This is the main plotting function for fitted TDMM objects.
   ##
@@ -260,26 +234,10 @@ plot.tdmm <- function(data,
   ## Extract model settings
   #########
   
-  if (is.null(nknots)) {
-    if (!is.null(result$model.settings$nknots)) {
-      nknots <- result$model.settings$nknots
-    } else if (!is.null(result$inputs$nknots)) {
-      nknots <- result$inputs$nknots
-    } else {
-      stop("nknots was not found in result. Please supply nknots manually.", call. = FALSE)
-    }
-  }
-  
-  if (is.null(degree)) {
-    if (!is.null(result$model.settings$degree)) {
-      degree <- result$model.settings$degree
-    } else if (!is.null(result$inputs$degree)) {
-      degree <- result$inputs$degree
-    } else {
-      degree <- 2
-    }
-  }
-  
+  spec <- .fitted.spline.spec(result)
+  if (!is.null(degree) && degree != spec$degree)
+    stop("Cannot change a fitted spline degree.", call. = FALSE)
+
   if (missing(time.var) && !is.null(result$inputs$time.var)) {
     time.var <- result$inputs$time.var
   }
@@ -298,7 +256,8 @@ plot.tdmm <- function(data,
     n.grid = n.grid,
     time.var = time.var,
     nknots = nknots,
-    degree = degree
+    n_basis = n_basis,
+    result = result
   )
   
   #########

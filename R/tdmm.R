@@ -26,21 +26,23 @@
 
 tdmm <- function(data,
                  family = c("gaussian", "bernoulli", "poisson"),
-                 nknots = 15,
+                 nknots = NULL,
                  subject.var = "subject.ID",
                  time.var = "time",
                  y.var = "y",
                  x.var = NULL,
-                 degree = 2,
+                 degree = 3,
                  n.chains = 3,
                  n.iter = 10000,
                  n.burn = 3000,
                  n.thin = 5,
                  n.adapt = 5000,
                  jags.dir = NULL,
-                 quiet = FALSE) {
+                 quiet = FALSE,
+                 n_basis = NULL) {
   
   ## Match the requested family
+  n_basis <- .resolve.n_basis(n_basis, nknots, degree)
   family <- match.arg(family)
   
   ##########
@@ -69,7 +71,7 @@ tdmm <- function(data,
 
   inputs <- build.tdmm.subject.inputs(
     data = data,
-    nknots = nknots,
+    n_basis = n_basis,
     subject.var = subject.var,
     time.var = time.var,
     y.var = y.var,
@@ -103,7 +105,7 @@ tdmm <- function(data,
   
   model.settings <- list(
     family = family,
-    nknots = nknots,
+    n_basis = n_basis,
     degree = degree,
     n.chains = n.chains,
     n.iter = n.iter,

@@ -32,6 +32,8 @@ summary.tdmm <- function(object, ...) {
   inputs <- object$inputs
   settings <- object$model.settings
   family <- settings$family
+  n_basis <- if (!is.null(inputs$n_basis)) inputs$n_basis else ncol(inputs$basis)
+  degree <- if (!is.null(inputs$degree)) inputs$degree else settings$degree
   
   ########
   ## Print model summary
@@ -46,6 +48,8 @@ summary.tdmm <- function(object, ...) {
   cat("Total observations: ", inputs$n.total, "\n", sep = "")
   cat("Number of covariates: ", length(inputs$x.var), "\n", sep = "")
   cat("Number of coefficient functions: ", inputs$nX, "\n", sep = "")
+  cat("Spline basis functions: ", n_basis, "\n", sep = "")
+  cat("Polynomial degree: ", degree, "; spline order: ", degree + 1, "\n", sep = "")
   cat("Covariates: ", paste(inputs$x.var, collapse = ", "), "\n", sep = "")
   
   cat("\nMCMC settings\n")
@@ -92,6 +96,8 @@ summary.tdmm <- function(object, ...) {
       sigma.b = object$sigma.b,
       sigma.e = if (family == "gaussian") object$sigma.e else NULL,
       nX = inputs$nX,
+      n_basis = n_basis,
+      degree = degree,
       covariates = inputs$x.var,
       beta.hat = object$beta.hat,
       beta.names = object$beta.names,

@@ -95,3 +95,39 @@ If you use this package, please cite the software using the citation information
 This package is licensed under the MIT License.
 
 Copyright (c) 2026 Makena Grigsby and Esra Kürüm.
+
+## Development spline API (pending final basis-count review)
+
+New fits use cubic B-splines (`degree = 3`, order 4), evaluated with
+`splines::splineDesign()`. Supply `n_basis` for the actual number of columns.
+The temporary default is **15 basis functions**, preserving the previous
+column count rather than asserting a validated cubic model size.
+
+For degree `d` and `q = n_basis`, there are `q - d` equally spaced intervals
+across the fitted time range. The knot vector extends `d` intervals beyond
+both ends. The second-order coefficient-difference penalty and existing
+family priors are unchanged. The JAGS dimension is named `n_basis`.
+
+`nknots` remains in its original argument position but is deprecated. Its
+historical rule is `intervals = nknots - 2`, so the actual dimension is
+`nknots + degree - 2`. For example, `nknots = 6` now gives seven cubic bases;
+`n_basis = 6` gives six. Supplying both arguments is an error. The cubic
+default is an intentional behavior change; selecting `degree = 2` for a new
+fit still uses the conventional positive basis, not the old signed raw-alpha
+convention.
+
+New fitted objects retain the exact knots, degree, dimension, and convention
+in `inputs$spline`. Plotting uses this fitted specification, not the range
+of replacement plotting data. Older objects retain their recorded degree;
+for objects without convention metadata, reconstruction checks their saved
+basis against the standard and historical signed constructors. Ambiguous or
+incomplete objects fail explicitly rather than being reinterpreted as cubic.
+The old signed evaluator is used only to reconstruct legacy objects.
+There is no separate prediction method; the shared plot-grid/reconstruction
+helpers evaluate new times from the same stored specification.
+
+The quadratic Gaussian studies, basis sensitivity, Bernoulli diagnostics,
+Poisson study, and PBC2 fits do not validate the new cubic specification.
+Their fits/results and all package example outputs require rerunning before
+being presented as V2 cubic results. No formal studies were rerun for this
+API change.

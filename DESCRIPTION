@@ -21,6 +21,7 @@ Imports:
     coda,
     parallel,
     stats,
+    splines,
     graphics,
     grDevices
 Suggests:

@@ -105,7 +105,7 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
   )
 
   ## The JAGS model files use matrix-style spline coefficients:
-  ##   alpha[k, 1:nknots]
+  ##   alpha[k, 1:n_basis]
   ##
   ## where k = 1, ..., nX.
   ##
@@ -137,12 +137,12 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
 ############################################################
 
 build.tdmm.subject.inputs <- function(data,
-                                      nknots,
+                                      n_basis,
                                       subject.var = "subject.ID",
                                       time.var = "time",
                                       y.var = "y",
                                       x.var = NULL,
-                                      degree = 2) {
+                                      degree = 3) {
 
   ##########
   ## Basic checks
@@ -259,39 +259,12 @@ build.tdmm.subject.inputs <- function(data,
 
   tlo <- min(time.obs)
   thi <- max(time.obs)
-  nseg <- nknots - 2
-
-  bases.obs <- bbase(
-    x = time.obs,
-    xl = tlo,
-    xr = thi,
-    ndx = nseg,
-    deg = degree
-  )
-
-  if (!is.matrix(bases.obs)) {
-    bases.obs <- as.matrix(bases.obs)
-  }
-
-  nbasis <- ncol(bases.obs)
-
-  ##########
-  ## Basis at unique observed time points
-  ##########
-
+  spline <- .make.spline.spec(tlo, thi, n_basis, degree)
+  nseg <- spline$intervals
+  bases.obs <- .evaluate.spline(time.obs, spline)
+  nbasis <- spline$n_basis
   time.points <- sort(unique(time.obs))
-
-  basis <- bbase(
-    x = time.points,
-    xl = tlo,
-    xr = thi,
-    ndx = nseg,
-    deg = degree
-  )
-
-  if (!is.matrix(basis)) {
-    basis <- as.matrix(basis)
-  }
+  basis <- .evaluate.spline(time.points, spline)
 
   ##########
   ## Penalty matrix
@@ -364,7 +337,9 @@ build.tdmm.subject.inputs <- function(data,
     time.points = time.points,
     n.time = length(time.points),
 
-    nknots = nknots,
+    n_basis = nbasis,
+    spline = spline,
+    basis.convention = spline$convention,
     degree = degree,
     nseg = nseg,
     tlo = tlo,
@@ -400,13 +375,13 @@ build.tdmm.jags.data <- function(inputs,
   ##   X contains the intercept column and covariates
   ##   nX is the number of coefficient functions
   ##   bases.time is the spline basis evaluated on the observed time grid
-  ##   nknots is the number of spline basis functions
+  ##   n_basis is the number of spline basis functions
 
   family <- match.arg(family)
 
   if (family == "gaussian") {
     return(list(N = inputs$N, n.subject = inputs$n.subject,
-                nX = inputs$nX, nknots = inputs$nbasis, y = inputs$y,
+                nX = inputs$nX, n_basis = inputs$n_basis, y = inputs$y,
                 subject.ID = inputs$subject.ID, X = inputs$X.obs,
                 bases.obs = inputs$bases.obs,
                 Penalty.bases = inputs$Penalty.bases))
@@ -422,7 +397,7 @@ build.tdmm.jags.data <- function(inputs,
     n.time = inputs$n.time,
     ni = inputs$ni,
     bases.time = inputs$basis,
-    nknots = inputs$nbasis,
+    n_basis = inputs$n_basis,
     Penalty.bases = inputs$Penalty.bases
   )
 

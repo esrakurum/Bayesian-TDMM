@@ -18,12 +18,12 @@
 
 tdmm.parallel <- function(data,
                           family = c("gaussian", "bernoulli", "poisson"),
-                          nknots = 15,
+                          nknots = NULL,
                           subject.var = "subject.ID",
                           time.var = "time",
                           y.var = "y",
                           x.var = NULL,
-                          degree = 2,
+                          degree = 3,
                           n.chains = 3,
                           n.iter = 10000,
                           n.burn = 3000,
@@ -32,12 +32,14 @@ tdmm.parallel <- function(data,
                           n.cores = min(n.chains, parallel::detectCores()),
                           jags.dir = NULL,
                           quiet = FALSE,
-                          seed = NULL) {
+                          seed = NULL,
+                          n_basis = NULL) {
   
   #########
   ## Match the requested family
   #########
   
+  n_basis <- .resolve.n_basis(n_basis, nknots, degree)
   family <- match.arg(family)
   
   #########
@@ -66,7 +68,7 @@ tdmm.parallel <- function(data,
 
   inputs <- build.tdmm.subject.inputs(
     data = data,
-    nknots = nknots,
+    n_basis = n_basis,
     subject.var = subject.var,
     time.var = time.var,
     y.var = y.var,
@@ -100,7 +102,7 @@ tdmm.parallel <- function(data,
   
   model.settings <- list(
     family = family,
-    nknots = nknots,
+    n_basis = n_basis,
     degree = degree,
     n.chains = n.chains,
     n.iter = n.iter,

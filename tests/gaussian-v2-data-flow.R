@@ -15,7 +15,7 @@ for (ids in list(base$person, c(90,10,90,40,10,90),
                  factor(base$person,levels=c("z","m","a")))) {
   dat <- base; dat$person <- ids
   expected <- dat[order(dat$person,dat$visit),]
-  z <- build(dat, nknots=15, subject.var="person", time.var="visit",
+  z <- build(dat, n_basis=15, subject.var="person", time.var="visit",
              y.var="response", x.var=c("baseline","changing"))
   check <- suppressWarnings(check.tdmm.family.data(dat, family="gaussian",
             subject.var="person",time.var="visit",y.var="response",
@@ -38,14 +38,14 @@ for (ids in list(base$person, c(90,10,90,40,10,90),
   # Evaluate each expected observation independently, then restore input order.
   for (j in seq_len(nrow(expected))) {
     near(z$bases.obs[j,], bbase(c(expected$visit[j],expected$visit[j]),
-                              min(base$visit),max(base$visit),13,2)[1,])
+                              min(base$visit),max(base$visit),12,3)[1,])
   }
   jd <- jags.data(z,"gaussian")
-  stopifnot(setequal(names(jd),c("N","n.subject","nX","nknots","y",
+  stopifnot(setequal(names(jd),c("N","n.subject","nX","n_basis","y",
                                 "subject.ID","X","bases.obs","Penalty.bases")),
             identical(jd$y,z$y), identical(jd$subject.ID,z$subject.ID),
             identical(jd$X,z$X.obs), identical(jd$bases.obs,z$bases.obs),
-            jd$nknots == ncol(z$bases.obs))
+            jd$n_basis == ncol(z$bases.obs))
   # Reordering the same observations must not change prepared model inputs.
   revz <- build(dat[6:1,],15,"person","visit","response",c("baseline","changing"))
   stopifnot(identical(jd,jags.data(revz,"gaussian")))

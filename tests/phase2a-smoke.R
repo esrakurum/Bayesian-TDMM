@@ -18,7 +18,7 @@ legacy.args <- c("data", "family", "nknots", "subject.var", "time.var", "y.var",
                  "n.adapt", "jags.dir", "quiet")
 stopifnot(all(legacy.args %in% names(formals(tdmm))),
           all(c(legacy.args, "n.cores", "seed") %in% names(formals(tdmm.parallel))),
-          identical(formals(tdmm)$degree, 2), identical(formals(tdmm)$nknots, 15))
+          identical(formals(tdmm)$degree, 3), is.null(formals(tdmm)$nknots))
 check.fit.interface <- function(fit, dat, family, method, time.var="time", nX=2L) {
   required <- c("post.samples", "post.mat", "beta.hat", "beta.covariates.hat",
                 "beta.names", "time.points", "inputs", "model.settings",
@@ -67,7 +67,7 @@ for (family in c("gaussian", "bernoulli", "poisson")) {
               all(c("sigma.b", "sigma2.b") %in% colnames(fit$post.mat)),
               isTRUE(fit$data.check$structure.check$x.constant.within.subject))
     sm <- summary(fit)
-    stopifnot(sm$N == 30, sm$n.total == 30)
+    stopifnot(sm$N == 30, sm$n.total == 30, sm$n_basis == 15, sm$degree == 3)
     grDevices::pdf(file = tempfile(fileext=".pdf"))
     plot.tdmm(dat, fit)
     plot.trace.tdmm(fit, c("sigma.b", "sigma2.b"))
@@ -85,10 +85,11 @@ for (method in c("serial", "parallel")) {
   names(dat)[names(dat) == "time"] <- "visit"
   args <- list(data=dat, family="gaussian", time.var="visit", n.chains=2,
                n.iter=100, n.burn=50, n.thin=1, n.adapt=100, quiet=TRUE)
-  if (method == "parallel") args$n.cores <- 2
+  if (method == "parallel") { args$n.cores <- 2; args$nknots <- 5 } else args$n_basis <- 6
   fit <- suppressWarnings(do.call(if (method == "serial") tdmm else tdmm.parallel, args))
   check.fit.interface(fit, dat, "gaussian", method, "visit", 3L)
   z <- fit$inputs
+  stopifnot(z$n_basis == 6L, z$degree == 3, z$spline$intervals == 3)
   stopifnot(z$N == nrow(dat), nrow(z$bases.obs) == nrow(dat),
             identical(z$time.obs, z$data$visit),
             all(z$X.obs[, "x.tv"] == z$data$x.tv),
@@ -112,5 +113,5 @@ for (family in c("bernoulli", "poisson")) {
 d <- balanced; d$y[1] <- NA
 expect.error(tdmm(d), "Missing values")
 helper <- getFromNamespace("build.tdmm.subject.inputs", "TDMM")
-stopifnot(helper(d, nknots=15)$N == nrow(d)-1)
+stopifnot(helper(d, n_basis=15)$N == nrow(d)-1)
 cat("PASS documented missing-value entry-point difference\n")
