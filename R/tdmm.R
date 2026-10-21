@@ -123,7 +123,7 @@ tdmm <- function(data,
     N = inputs$N,
     n.subject = inputs$n.subject,
     n.basis = inputs$nbasis,
-    implementation = if (family == "gaussian") "V2 observation-level" else "V1 retained pending review",
+    implementation = if (family != "bernoulli") "V2 observation-level" else "V1 retained pending review",
     coef.names = inputs$coef.names
   )
   

@@ -497,6 +497,10 @@ check.poisson.counts <- function(data,
 
   y <- data[[y.var]]
 
+  if (!is.numeric(y) || any(is.infinite(y))) {
+    stop("For Poisson data, y must contain finite numeric counts.", call. = FALSE)
+  }
+
   if (any(y < 0, na.rm = TRUE)) {
     stop("For Poisson data, y must be nonnegative.",
          call. = FALSE)

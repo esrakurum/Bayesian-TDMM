@@ -124,6 +124,8 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
     params <- c(params, "tau.e", "sigma2.e", "sigma.e")
   }
 
+  if (family == "poisson") params <- c(params, "b")
+
   list(
     family = family,
     model.file = model.file,
@@ -379,14 +381,14 @@ build.tdmm.jags.data <- function(inputs,
 
   family <- match.arg(family)
 
-  if (family == "gaussian") {
+  if (family %in% c("gaussian", "poisson")) {
     return(list(N = inputs$N, n.subject = inputs$n.subject,
                 nX = inputs$nX, n_basis = inputs$n_basis, y = inputs$y,
                 subject.ID = inputs$subject.ID, X = inputs$X.obs,
                 bases.obs = inputs$bases.obs,
                 Penalty.bases = inputs$Penalty.bases))
   }
-  # Non-Gaussian models remain byte-identical to V1 pending statistical review.
+  # Bernoulli retains its V1 formulation pending statistical review.
   .check.tdmm.integration.scope(inputs$data, family, inputs$subject.var,
                                 inputs$time.var, inputs$x.var)
   jags.data <- list(
@@ -652,9 +654,9 @@ build.tdmm.output <- function(family,
   output
 }
 
-# Phase 2A hold: do not silently choose a non-Gaussian V2 statistical model.
+# Bernoulli V2 remains on hold; Gaussian and Poisson use observation-level models.
 .check.tdmm.integration.scope <- function(data, family, subject.var, time.var, x.var) {
-  if (family == "gaussian") return(invisible(NULL))
+  if (family != "bernoulli") return(invisible(NULL))
   balance <- check.tdmm.subject.balance(data, subject.var, time.var)
   variation <- check.tdmm.covariate.variation(data, subject.var, x.var)
   if (!balance$balanced || !balance$common.time.grid || variation$has.time.varying.covariates) {

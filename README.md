@@ -2,7 +2,7 @@
 
 This repository contains the `TDMM` R package for fitting Bayesian time-dynamic mixed-effects models for longitudinal data.
 
-**Development snapshot (0.1.0.9000; not a 0.2.0 release).** Gaussian fitting now accepts subject-specific times, unequal visit counts, and observation-level covariates. Bernoulli and Poisson retain their unchanged V1 models for common-grid baseline-covariate data; their V2 fitting paths are blocked pending statistical review and newer source files. See `PHASE2A_COMPATIBILITY.md` and `PHASE2A_CHANGELOG.md`.
+**Development snapshot (0.1.0.9000; not a 0.2.0 release).** Gaussian and Poisson fitting now accept subject-specific times, unequal visit counts, and observation-level covariates. Bernoulli retains its V1 model for common-grid baseline-covariate data; its V2 fitting path remains blocked pending statistical review. See `PHASE2A_COMPATIBILITY.md` and `PHASE2A_CHANGELOG.md`.
 
 The released V1 package provides tools for estimating time-varying coefficient functions while accounting for within-subject dependence through subject-specific random effects. The current implementation focuses on longitudinal data with baseline covariates. It can handle irregularly spaced measurement times when subjects share the same observation grid, but it assumes a balanced repeated-measures structure with the same number of observations per subject.
 
@@ -163,3 +163,27 @@ by default; `grid=fit$time.points` uses the exact recovery grid.
 See `simulations/gaussian-v2-validation.md` for a single-dataset validation
 using the installed package. Parallel execution currently uses forked chains
 on macOS/Linux; multi-core Windows execution is not implemented.
+
+## Poisson V2 workflow
+
+Poisson now supports the same irregular-time, unequal-visit, baseline and
+time-varying covariate workflow: use family="poisson" with tdmm() or
+tdmm.parallel(), then summary(fit), plot.tdmm(data,fit) and
+plot.trace.tdmm(fit,c("sigma.b","sigma2.b","tau.alpha[1]")).
+Responses must be finite nonnegative integer counts. Coefficient curves are
+on the log-rate scale. The package monitors alpha, tau.alpha, sigma.b,
+sigma2.b, tau.b and subject intercepts b in chain-resolved posterior draws.
+
+The supplied Makena Poisson V2 prior is preserved: sigma.b ~ Uniform(0,5),
+tau.b=1/sigma.b^2; b_i ~ Normal(0,1/tau.b). Spline vectors have zero-mean
+multivariate Normal priors with precision tau.alpha[k] times the existing
+second-difference penalty plus 1e-6 identity; tau.alpha[k] ~ Gamma(1,0.001)
+(shape, rate). There is no residual variance parameter or separate null-space
+prior. This intentionally replaces the development branch's retained V1
+Poisson Gamma(1,0.005) precision prior for new fits, including common-grid fits.
+Historical fitted-object reconstruction remains unchanged. Bernoulli remains
+on its existing V1 path pending a separate decision.
+
+See simulations/poisson-v2-validation.md for RStudio-compatible single-dataset
+validation commands. Gaussian V2's single-dataset validation has been accepted
+by Esra; formal repeated validation is deferred until all families are finalized.

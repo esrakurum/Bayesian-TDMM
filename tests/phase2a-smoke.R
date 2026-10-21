@@ -48,7 +48,7 @@ check.fit.interface <- function(fit, dat, family, method, time.var="time", nX=2L
   }
   if (family != "gaussian") {
     stopifnot(!any(c("sigma.e", "sigma2.e") %in% names(fit)),
-              identical(fit$model.settings$implementation, "V1 retained pending review"))
+              identical(fit$model.settings$implementation, if (family=="bernoulli") "V1 retained pending review" else "V2 observation-level"))
   }
 }
 for (family in c("gaussian", "bernoulli", "poisson")) {
@@ -111,7 +111,7 @@ for (method in c("serial", "parallel")) {
   grDevices::dev.off()
   cat("PASS gaussian", method, "irregular/time-varying fit, alignment and plots\n")
 }
-for (family in c("bernoulli", "poisson")) {
+for (family in "bernoulli") {
   d <- irregular; d$y <- rep(c(0,1), length.out=nrow(d))
   for (f in list(tdmm, tdmm.parallel)) {
     expect.error(suppressWarnings(f(d, family=family)), "pending Esra K review")
