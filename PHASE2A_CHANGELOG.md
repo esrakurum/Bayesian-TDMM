@@ -68,3 +68,11 @@ Each candidate was compared individually. The Gaussian model, structural checks 
 | R/plot.tdmm.R; R/summary.tdmm.R | Generic plot(fit) unavailable and priors not visible | Register S3 plot using stored data; show resolved priors when present | Interface only | No |
 | tests/structured-interface.R; existing family tests | Missing structured-control regression tests | Test defaults, invalid controls, serial/parallel workflows, plots, and saved-object compatibility | Software tests | No |
 | README.md; PHASE2A_COMPATIBILITY.md | Stale V1 scope and undocumented public controls | Document workflow, sensitivity parameters, and compatibility | Documentation | No |
+
+## Unified V2 fitter
+
+| File | Issue | Change made | Mechanical or statistical | Needs Esra K review? |
+|---|---|---|---|---|
+| R/tdmm.R; R/tdmm.parallel.R | Separate public fitting paths | tdmm() selects serial or parallel by control; tdmm.parallel() delegates as a legacy wrapper | Interface only | No |
+| R/interface.controls.R; NAMESPACE; man/tdmm.control.Rd | Parallel setting lacked unified control | Add tdmm_control() alias and validated parallel/cores settings | Interface only | No |
+| README.md; PHASE2A_COMPATIBILITY.md; tests/structured-interface.R | Guidance and regression checks targeted separate fitter | Recommend unified workflow and test both new and legacy calls | Documentation/software tests | No |

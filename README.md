@@ -146,9 +146,10 @@ fit <- tdmm(dat, family = "gaussian", subject.var = "id",
 summary(fit)
 plot.tdmm(dat, fit)
 plot.trace.tdmm(fit, c("sigma2.b", "sigma2.e", "tau.alpha[1]"))
-# On macOS/Linux: same interface, independent chains on two cores.
-# fit <- tdmm.parallel(dat, family="gaussian", subject.var="id",
-#                     x.var=c("baseline", "time_varying"), n.cores=2, seed=218)
+# On macOS/Linux: use the same fitter with independent chains on two cores.
+# fit <- tdmm(dat, family="gaussian", subject.var="id",
+#             x.var=c("baseline", "time_varying"),
+#             control=tdmm_control(parallel=TRUE, cores=2, seed=218))
 ```
 
 Rows may be unsorted, subject IDs need not be consecutive, visit counts may
@@ -167,8 +168,8 @@ on macOS/Linux; multi-core Windows execution is not implemented.
 ## Poisson V2 workflow
 
 Poisson now supports the same irregular-time, unequal-visit, baseline and
-time-varying covariate workflow: use family="poisson" with tdmm() or
-tdmm.parallel(), then summary(fit), plot.tdmm(data,fit) and
+time-varying covariate workflow: use family="poisson" with tdmm(), then
+summary(fit), plot(fit) and
 plot.trace.tdmm(fit,c("sigma.b","sigma2.b","tau.alpha[1]")).
 Responses must be finite nonnegative integer counts. Coefficient curves are
 on the log-rate scale. The package monitors alpha, tau.alpha, sigma.b,
@@ -204,7 +205,7 @@ null-space matrices are constructed by the package.
 library(TDMM)
 fit <- tdmm(dat, family="bernoulli", subject.var="id",
             x.var=c("baseline", "changing"), n_basis=8,
-            control=tdmm.control(chains=3, iterations=10000,
+            control=tdmm_control(chains=3, iterations=10000,
                                  burn_in=3000, thin=5, adapt=5000,
                                  seed=218),
             priors=list(smoothing=list(rate=0.002)))
@@ -236,8 +237,10 @@ priors=list(smoothing=list(shape=2,rate=0.002),
 # Gaussian: priors=list(residual=list(rate=0.01))
 ```
 
-`tdmm.control()` groups chains, total iterations, burn-in, thinning, adaptation,
-and an optional seed; `cores` applies only to `tdmm.parallel()`. Partial named
+`tdmm_control()` groups chains, total iterations, burn-in, thinning, adaptation,
+and an optional seed. Add `parallel=TRUE` and `cores` to run separate chains
+from the same `tdmm()` interface. The older dotted name `tdmm.control()` remains
+an alias. Partial named
 control lists also work. Earlier `n.chains`, `n.iter`, `n.burn`, `n.thin`,
 `n.adapt`, and parallel `seed`/`n.cores` arguments remain supported. Giving one
 setting in both places is an error. The original defaults remain when `control`
@@ -245,10 +248,19 @@ is omitted. The evaluation grid belongs to plotting, e.g.
 `plot(fit, grid=seq(0,1,length.out=100))`, because it does not affect fitting.
 `plot.tdmm(data, fit)` remains available for older code.
 
-`tdmm.parallel()` remains separate: on macOS/Linux it runs chains on separate
-forked workers and accepts `control=list(cores=2)`. This keeps the existing
-parallel API and makes platform limitations visible. Windows multicore support
-would require a separate implementation.
+The recommended workflow is `tdmm()` followed by `summary(fit)`, `plot(fit)`,
+and `plot.trace.tdmm(fit, ...)`. For parallel execution on macOS/Linux:
+
+```r
+fit <- tdmm(dat, family="poisson", subject.var="id",
+            x.var=c("baseline", "changing"),
+            control=tdmm_control(parallel=TRUE, cores=2, seed=218))
+```
+
+`tdmm.parallel()` remains only as a compatibility wrapper for older scripts.
+It delegates to `tdmm()` and retains its prior arguments and 10,000-iteration
+adaptation default; new scripts should use the unified call above. Windows
+multicore support would require a separate implementation.
 
 Reasonable sensitivity analyses can vary `n_basis`, smoothing Gamma parameters,
 and scientifically important variance or random-effect prior parameters.

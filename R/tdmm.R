@@ -1,5 +1,5 @@
 ## tdmm() fits a Bayesian time-dynamic mixed-effects model
-## using the standard serial JAGS workflow.
+## using serial or parallel JAGS chains through one public interface.
 ##
 ## The function:
 ##   - checks the requested response family
@@ -154,22 +154,33 @@ tdmm <- function(data,
   ## R2jags::jags() runs the MCMC sampler through JAGS.
   ## The model file depends on the selected response family.
   
+  if (isTRUE(control$parallel)) {
+    model.settings$n.cores <- control$cores
+    model.settings$parallel.method <- "mclapply"
+  }
+
   if (!quiet) {
     message("Fitting ", family, " TDMM with ", length(inputs$x.var), " covariate(s).")
     message("Using JAGS model file: ", config$model.file)
+    if (isTRUE(control$parallel))
+      message("Running ", n.chains, " chain(s) on ", control$cores, " core(s).")
   }
   
-  if (!is.null(control$seed)) set.seed(control$seed)
-  fit <- R2jags::jags(
-    data = jags.data,
-    parameters.to.save = config$params,
-    model.file = config$model.file,
-    n.chains = n.chains,
-    n.iter = n.iter,
-    n.burnin = n.burn,
-    n.thin = n.thin,
-    n.adapt = n.adapt
-  )
+  if (isTRUE(control$parallel)) {
+    fit <- .tdmm.parallel.samples(jags.data, config, control, quiet)
+  } else {
+    if (!is.null(control$seed)) set.seed(control$seed)
+    fit <- R2jags::jags(
+      data = jags.data,
+      parameters.to.save = config$params,
+      model.file = config$model.file,
+      n.chains = n.chains,
+      n.iter = n.iter,
+      n.burnin = n.burn,
+      n.thin = n.thin,
+      n.adapt = n.adapt
+    )
+  }
   
   ##########
   ## Build and return the fitted TDMM object

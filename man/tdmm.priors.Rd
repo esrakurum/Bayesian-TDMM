@@ -4,7 +4,7 @@
 \usage{tdmm.priors(family = c("gaussian", "bernoulli", "poisson"))}
 \arguments{\item{family}{Response family.}}
 \description{Return the family-specific structured prior defaults used by
-\code{tdmm()} and \code{tdmm.parallel()}. A partial nested list can be passed
+\code{tdmm()}. A partial nested list can be passed
 as \code{priors=} to change supported prior parameters.}
 \details{All Gamma distributions use shape and rate. The smoothing prior is
 \code{smoothing = list(shape = 1, rate = 0.001)} for every family.

@@ -1,6 +1,7 @@
 export(tdmm)
 export(tdmm.parallel)
 export(tdmm.control)
+export(tdmm_control)
 export(tdmm.priors)
 
 export(check.tdmm.data.structure)

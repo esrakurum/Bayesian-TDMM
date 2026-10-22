@@ -1,4 +1,7 @@
 library(TDMM)
+stopifnot(identical(tdmm_control,tdmm.control),
+  identical(tdmm_control()$parallel,FALSE),
+  identical(tdmm_control(parallel=TRUE,cores=2)$cores,2))
 err <- function(expr, pattern) {
   x <- tryCatch({force(expr);NULL}, error=identity)
   stopifnot(inherits(x,'error'),grepl(pattern,conditionMessage(x),fixed=TRUE))
@@ -39,14 +42,15 @@ for(f in c('gaussian','bernoulli','poisson')) for(method in c('serial','parallel
   if(f!='gaussian') prior$random_intercept <- list(max_sd=4)
   ctrl <- list(chains=2L,iterations=120L,burn_in=60L,thin=2L,
     adapt=100L,seed=246L)
-  if(method=='parallel') ctrl$cores <- 2L
-  fit <- suppressWarnings(do.call(if(method=='serial')tdmm else tdmm.parallel,
+  if(method=='parallel') {ctrl$parallel <- TRUE;ctrl$cores <- 2L}
+  fit <- suppressWarnings(do.call(tdmm,
     list(data=d,family=f,subject.var='id',x.var=c('baseline','changing'),
          control=ctrl,priors=prior,quiet=TRUE)))
   stopifnot(fit$model.settings$n.chains==2,fit$model.settings$n.iter==120,
     fit$model.settings$n.burn==60,fit$model.settings$n.thin==2,
     fit$model.settings$n.adapt==100,fit$model.settings$seed==246,
     fit$model.settings$control$seed==246,
+    identical(fit$model.settings$control$parallel,method=='parallel'),
     fit$model.settings$priors$smoothing$shape==1.5,
     all(is.finite(fit$post.mat)),ncol(fit$beta.hat)==3,
     identical(fit$inputs$n_basis,8L),summary(fit)$n_basis==8)
@@ -62,6 +66,17 @@ for(f in c('gaussian','bernoulli','poisson')) for(method in c('serial','parallel
 }
 err(tdmm(d,family='poisson',n.iter=120,control=list(iterations=120)),
     'either control$iterations')
-err(tdmm(d,family='poisson',control=list(cores=2)),'only to tdmm.parallel')
+err(tdmm(d,family='poisson',control=list(cores=2)),'requires control$parallel')
+err(tdmm(d,family='poisson',control=list(parallel=1)),'control$parallel')
 err(tdmm.parallel(d,family='poisson',seed=1,control=list(seed=1)),
     'either control$seed')
+stopifnot(identical(formals(tdmm.parallel)$n.adapt,10000))
+# The old parallel entry point delegates to tdmm(), including old dotted
+# control objects whose new parallel field defaults to FALSE.
+legacy <- suppressWarnings(tdmm.parallel(d,family='poisson',subject.var='id',
+  x.var=c('baseline','changing'),quiet=TRUE,
+  control=tdmm.control(chains=2,iterations=100,burn_in=50,
+    thin=1,adapt=100,cores=2,seed=246)))
+stopifnot(inherits(legacy,'tdmm'),inherits(legacy$post.samples,'mcmc.list'),
+  isTRUE(legacy$model.settings$control$parallel),
+  identical(legacy$model.settings$parallel.method,'mclapply'))

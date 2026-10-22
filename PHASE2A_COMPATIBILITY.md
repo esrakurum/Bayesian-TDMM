@@ -100,3 +100,12 @@ method now supports plot(fit) using the saved fitted data; direct
 plot.tdmm(data, fit) remains supported. tdmm.parallel() remains a separate
 entry point using the existing fork backend. Only approved prior families may
 be tuned: distribution changes require future statistical review.
+
+## Unified V2 fitting entry point (supersedes Task 6 parallel guidance)
+
+The recommended call for all three families is tdmm(...). Parallel chains are
+selected with control=tdmm_control(parallel=TRUE, cores=...). The dotted
+tdmm.control() constructor remains an alias. tdmm.parallel() is a legacy
+compatibility wrapper that delegates to tdmm(), preserving its argument order,
+10,000-adaptation default and mcmc.list output. Fitted-object class and
+summary/plot methods are unchanged. No model or prior specification changed.

@@ -2,18 +2,26 @@
 # An omitted list preserves the legacy fitting arguments and all model defaults.
 tdmm.control <- function(chains = 3L, iterations = 10000L,
                          burn_in = 3000L, thin = 5L, adapt = 5000L,
-                         seed = NULL, cores = NULL) {
+                         seed = NULL, cores = NULL, parallel = FALSE) {
   .validate.tdmm.control(list(chains = chains, iterations = iterations,
-    burn_in = burn_in, thin = thin, adapt = adapt, seed = seed, cores = cores))
+    burn_in = burn_in, thin = thin, adapt = adapt, seed = seed,
+    cores = cores, parallel = parallel))
 }
 
+# Preferred spelling in the unified V2 interface; dotted spelling is retained.
+tdmm_control <- tdmm.control
+
 .validate.tdmm.control <- function(x) {
-  allowed <- c("chains", "iterations", "burn_in", "thin", "adapt", "seed", "cores")
+  allowed <- c("chains", "iterations", "burn_in", "thin", "adapt",
+               "seed", "cores", "parallel")
   if (!is.list(x) || (length(x) > 0L && is.null(names(x))) || anyNA(names(x)) ||
       any(names(x) == "") || anyDuplicated(names(x)) ||
       any(!names(x) %in% allowed))
-    stop("control must be a named list using chains, iterations, burn_in, thin, adapt, seed or cores.",
+    stop("control must be a named list using chains, iterations, burn_in, thin, adapt, seed, cores or parallel.",
          call. = FALSE)
+  if (!is.null(x$parallel) &&
+      (!is.logical(x$parallel) || length(x$parallel) != 1L || is.na(x$parallel)))
+    stop("control$parallel must be TRUE or FALSE.", call. = FALSE)
   whole <- function(v, minimum = 0) is.numeric(v) && length(v) == 1L &&
     is.finite(v) && v == floor(v) && v >= minimum
   for (nm in c("chains", "iterations", "thin", "adapt"))
@@ -30,7 +38,8 @@ tdmm.control <- function(chains = 3L, iterations = 10000L,
   x
 }
 
-.resolve.tdmm.control <- function(control, legacy, supplied, parallel = FALSE) {
+.resolve.tdmm.control <- function(control, legacy, supplied,
+                                  allow_parallel = TRUE) {
   if (is.null(control)) control <- list()
   control <- .validate.tdmm.control(control)
   mapping <- c(chains = "n.chains", iterations = "n.iter",
@@ -41,17 +50,22 @@ tdmm.control <- function(chains = 3L, iterations = 10000L,
       stop("Specify either control$", nm, " or legacy ", mapping[[nm]],
            ", not both.", call. = FALSE)
   }
-  if (!parallel && !is.null(control$cores))
-    stop("control$cores applies only to tdmm.parallel().", call. = FALSE)
   out <- list(chains = legacy$n.chains, iterations = legacy$n.iter,
     burn_in = legacy$n.burn, thin = legacy$n.thin, adapt = legacy$n.adapt,
-    seed = legacy$seed, cores = legacy$n.cores)
+    seed = legacy$seed, cores = legacy$n.cores, parallel = FALSE)
   for (nm in names(control)) out[nm] <- list(control[[nm]])
   out <- .validate.tdmm.control(out)
   if (out$iterations <= out$burn_in)
     stop("iterations must exceed burn-in.", call. = FALSE)
-  if (parallel && is.null(out$cores))
-    out$cores <- min(out$chains, parallel::detectCores())
+  if (!allow_parallel && isTRUE(out$parallel))
+    stop("This fitter cannot enable parallel execution.", call. = FALSE)
+  if (!isTRUE(out$parallel) && !is.null(out$cores))
+    stop("control$cores requires control$parallel = TRUE.", call. = FALSE)
+  if (isTRUE(out$parallel) && is.null(out$cores)) {
+    available <- parallel::detectCores()
+    if (!is.finite(available) || available < 1L) available <- 1L
+    out$cores <- min(out$chains, available)
+  }
   out
 }
 
