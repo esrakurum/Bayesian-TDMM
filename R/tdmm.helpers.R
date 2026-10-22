@@ -124,7 +124,8 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
     params <- c(params, "tau.e", "sigma2.e", "sigma.e")
   }
 
-  if (family == "poisson") params <- c(params, "b")
+  if (family %in% c("poisson", "bernoulli")) params <- c(params, "b")
+  if (family == "bernoulli") params <- c(params, "theta", "gamma")
 
   list(
     family = family,
@@ -388,22 +389,15 @@ build.tdmm.jags.data <- function(inputs,
                 bases.obs = inputs$bases.obs,
                 Penalty.bases = inputs$Penalty.bases))
   }
-  # Bernoulli retains its V1 formulation pending statistical review.
-  .check.tdmm.integration.scope(inputs$data, family, inputs$subject.var,
-                                inputs$time.var, inputs$x.var)
-  jags.data <- list(
-    y = inputs$y,
-    X = inputs$X,
-    nX = inputs$nX,
-    n.subject = inputs$n.subject,
-    n.time = inputs$n.time,
-    ni = inputs$ni,
-    bases.time = inputs$basis,
-    n_basis = inputs$n_basis,
-    Penalty.bases = inputs$Penalty.bases
-  )
+  # Approved centered null-space prior. Keep the exact targeted-comparison
+  # eigendecomposition: remove the legacy ridge from penalized eigenvalues,
+  # and give the two null directions independent fixed-variance priors.
+  ns <- .bernoulli.null.space(inputs$Penalty.bases)
+  c(list(N = inputs$N, n.subject = inputs$n.subject,
+         nX = inputs$nX, n_basis = inputs$n_basis, y = inputs$y,
+         subject.ID = inputs$subject.ID, X = inputs$X.obs,
+         bases.obs = inputs$bases.obs), ns)
 
-  jags.data
 }
 
 
@@ -654,17 +648,16 @@ build.tdmm.output <- function(family,
   output
 }
 
-# Bernoulli V2 remains on hold; Gaussian and Poisson use observation-level models.
-.check.tdmm.integration.scope <- function(data, family, subject.var, time.var, x.var) {
-  if (family != "bernoulli") return(invisible(NULL))
-  balance <- check.tdmm.subject.balance(data, subject.var, time.var)
-  variation <- check.tdmm.covariate.variation(data, subject.var, x.var)
-  if (!balance$balanced || !balance$common.time.grid || variation$has.time.varying.covariates) {
-    stop("Phase 2A: V2 ", family,
-         " fitting is pending Esra K review of the random-effect prior",
-         if (family == "bernoulli") " and spline parameterization" else "",
-         ". Only the unchanged V1 common-grid, baseline-covariate model is enabled for this family.",
-         call. = FALSE)
-  }
-  invisible(NULL)
+# Internal decomposition; users only supply data and the public spline controls.
+.bernoulli.null.space <- function(penalty) {
+  e <- eigen(penalty, symmetric = TRUE)
+  lambda <- e$values - 1e-6
+  nul <- which(lambda <= 1e-8)
+  pen <- which(lambda > 1e-8)
+  if (length(nul) != 2L || length(pen) != nrow(penalty) - 2L)
+    stop("Invalid second-difference null-space decomposition.", call. = FALSE)
+  list(n.null = length(nul), n.pen = length(pen),
+       U.null = e$vectors[, nul, drop = FALSE],
+       U.pen = e$vectors[, pen, drop = FALSE],
+       lambda.pen = lambda[pen], tau.null = .01)
 }

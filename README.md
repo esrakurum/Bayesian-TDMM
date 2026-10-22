@@ -2,7 +2,7 @@
 
 This repository contains the `TDMM` R package for fitting Bayesian time-dynamic mixed-effects models for longitudinal data.
 
-**Development snapshot (0.1.0.9000; not a 0.2.0 release).** Gaussian and Poisson fitting now accept subject-specific times, unequal visit counts, and observation-level covariates. Bernoulli retains its V1 model for common-grid baseline-covariate data; its V2 fitting path remains blocked pending statistical review. See `PHASE2A_COMPATIBILITY.md` and `PHASE2A_CHANGELOG.md`.
+**Development snapshot (0.1.0.9000; not a 0.2.0 release).** All three families accept subject-specific times, unequal visit counts, and observation-level covariates. Bernoulli V2 uses the approved centered null-space spline prior and a Uniform(0,5) random-intercept SD prior. See `PHASE2A_COMPATIBILITY.md` and `PHASE2A_CHANGELOG.md`.
 
 The released V1 package provides tools for estimating time-varying coefficient functions while accounting for within-subject dependence through subject-specific random effects. The current implementation focuses on longitudinal data with baseline covariates. It can handle irregularly spaced measurement times when subjects share the same observation grid, but it assumes a balanced repeated-measures structure with the same number of observations per subject.
 
@@ -181,8 +181,9 @@ second-difference penalty plus 1e-6 identity; tau.alpha[k] ~ Gamma(1,0.001)
 (shape, rate). There is no residual variance parameter or separate null-space
 prior. This intentionally replaces the development branch's retained V1
 Poisson Gamma(1,0.005) precision prior for new fits, including common-grid fits.
-Historical fitted-object reconstruction remains unchanged. Bernoulli remains
-on its existing V1 path pending a separate decision.
+Historical fitted-object reconstruction remains unchanged. Bernoulli V2 now uses
+the approved centered null-space model; new Bernoulli fits intentionally differ
+from V1 priors. See `simulations/bernoulli-v2-validation.md`.
 
 See `simulations/poisson-v2-design.md` and the standalone
 `examples/poisson-v2-example.R` for the finalized Poisson example. The former

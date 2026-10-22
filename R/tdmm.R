@@ -67,7 +67,6 @@ tdmm <- function(data,
   ## This prepares the response vector, covariate matrices,
   ## subject indexing, spline basis, and penalty matrix.
   
-  .check.tdmm.integration.scope(data, family, subject.var, time.var, data.check$covariates)
 
   inputs <- build.tdmm.subject.inputs(
     data = data,
@@ -88,6 +87,9 @@ tdmm <- function(data,
     family = family
   )
   
+  if (family == "bernoulli") inputs$null.space <- jags.data[c(
+    "U.null", "U.pen", "lambda.pen", "tau.null")]
+
   ##########
   ## Get the family-specific model configuration
   ##########
@@ -123,7 +125,8 @@ tdmm <- function(data,
     N = inputs$N,
     n.subject = inputs$n.subject,
     n.basis = inputs$nbasis,
-    implementation = if (family != "bernoulli") "V2 observation-level" else "V1 retained pending review",
+    implementation = "V2 observation-level",
+    spline.prior = if (family == "bernoulli") "centered null-space" else "ridge",
     coef.names = inputs$coef.names
   )
   

@@ -45,3 +45,15 @@ Each candidate was compared individually. The Gaussian model, structural checks 
 - `Updates/jags/bernoulli.txt`: `6d196fcd6eaaea054b1781cc6fae1c8f1911de0fc94db4d13fe71fdeb7407f04`
 - `Updates/jags/gaussian.txt`: `e8849daf0d48453654a07da238caace7f8f9daa04f5cbee2173d4cd784d7454c`
 - `Updates/jags/poisson.txt`: `a451c8dc057ae51fabd9e393739b7db33014015031bf625e42c6d79e12f6094b`
+
+## Approved centered null-space Bernoulli V2 integration
+
+| File | Issue | Change made | Mechanical or statistical | Needs Esra K review? |
+|---|---|---|---|---|
+| inst/jags/TDMM_Bernoulli_JAGS.txt | Bernoulli V2 held on V1 model | Exact approved centered null-space observation-level model; Uniform(0,5) SD prior | Statistical, explicitly approved | Prior choice approved in this session |
+| R/tdmm.helpers.R | Old balanced-grid Bernoulli input path | Internal eigen decomposition and observation-level JAGS data; monitor alpha, theta, gamma, tau.alpha and b | Implementation of approved specification | No |
+| R/tdmm.R; R/tdmm.parallel.R | Public Bernoulli V2 blocked | Enable both fitters; save decomposition/prior metadata | Mechanical integration | No |
+| tests/bernoulli-v2-*.R; tests/phase2a-smoke.R | Need regression coverage | Serial/parallel, prior reconstruction, alignment and legacy workflow checks | Software tests | No |
+| simulations/bernoulli-v2-generator.R; simulations/bernoulli-v2-validation.* | Final public validation needed | Separate identifiable generator and one-dataset validation, with secondary tau diagnostics | Validation design | Review single-dataset results |
+| README.md; DESCRIPTION; PHASE2A_COMPATIBILITY.md | Stale Bernoulli hold | Update current status and document intentional V1 prior differences | Documentation | No |
+| examples/bernoulli-v2-example.R | Need a standalone user example after validation | Same generator and public fit/summary/plot workflow; reuse matching saved fits | Example | Single-dataset validation completed |

@@ -69,3 +69,19 @@ No man-page documentation or formal release-ready package check exists. The old 
 The fork-based parallel backend remains macOS/Linux-oriented; seed is not a guarantee of JAGS RNG
 reproducibility. These inherited issues are documented, not redesigned here. Installation/short smoke
 execution is not evidence of convergence, statistical correctness, numerical equivalence, or performance.
+
+## Approved Bernoulli V2 completion (supersedes the historical hold above)
+
+Bernoulli now supports observation-level irregular times, unequal visits and
+baseline/time-varying predictors through both public fitters. Its production
+spline prior is centered null-space with gamma ~ N(0,100),
+theta[r] | tau.alpha ~ N(0,1/(tau.alpha*lambda.pen[r])), and
+tau.alpha ~ Gamma(1,.001), shape/rate. Esra explicitly approved
+sigma.b ~ Uniform(0,5), replacing the retained V1 Gamma(1,.005) precision prior.
+New Bernoulli fits are not statistically equivalent to V1. Common-grid legacy
+inputs and arguments still execute; saved historical alpha/basis reconstruction
+is unchanged. Internal inputs$null.space records the actual decomposition;
+model.settings$spline.prior identifies the backend. Users provide no matrices.
+Default cubic degree 3/order 4/n_basis=8 and deprecated nknots behavior remain.
+Gaussian/Poisson formulations and the existing missing-data behavior are unchanged.
+See simulations/bernoulli-v2-validation.md for the final validation workflow.

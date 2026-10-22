@@ -8,7 +8,7 @@ Authors@R: c(
     )
 Description: Fits Bayesian time-dynamic mixed-effects models for longitudinal
     data with baseline covariates, with development support for irregular
-    observation times and time-varying covariates for Gaussian and Poisson outcomes. The package supports Gaussian, Bernoulli,
+    observation times and time-varying covariates. The package supports Gaussian, Bernoulli,
     and Poisson outcomes using spline-based time-varying coefficient functions
     and subject-specific random intercepts. Posterior computation is performed
     using JAGS.

@@ -48,7 +48,7 @@ check.fit.interface <- function(fit, dat, family, method, time.var="time", nX=2L
   }
   if (family != "gaussian") {
     stopifnot(!any(c("sigma.e", "sigma2.e") %in% names(fit)),
-              identical(fit$model.settings$implementation, if (family=="bernoulli") "V1 retained pending review" else "V2 observation-level"))
+              identical(fit$model.settings$implementation, "V2 observation-level"))
   }
 }
 for (family in c("gaussian", "bernoulli", "poisson")) {
@@ -110,13 +110,6 @@ for (method in c("serial", "parallel")) {
   plot.trace.tdmm(fit, c("sigma.b", "sigma2.b", "sigma2.e", "tau.alpha[1]", "alpha[1,1]"))
   grDevices::dev.off()
   cat("PASS gaussian", method, "irregular/time-varying fit, alignment and plots\n")
-}
-for (family in "bernoulli") {
-  d <- irregular; d$y <- rep(c(0,1), length.out=nrow(d))
-  for (f in list(tdmm, tdmm.parallel)) {
-    expect.error(suppressWarnings(f(d, family=family)), "pending Esra K review")
-  }
-  cat("PASS", family, "V2 hold in both fitters\n")
 }
 d <- balanced; d$y[1] <- NA
 expect.error(tdmm(d), "Missing values")
