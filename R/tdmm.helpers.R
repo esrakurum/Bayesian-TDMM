@@ -367,7 +367,8 @@ build.tdmm.subject.inputs <- function(data,
 ############################################################
 
 build.tdmm.jags.data <- function(inputs,
-                                 family = c("gaussian", "bernoulli", "poisson")) {
+                                 family = c("gaussian", "bernoulli", "poisson"),
+                                 priors = NULL) {
 
   ## This helper builds the list passed to JAGS.
   ##
@@ -381,22 +382,25 @@ build.tdmm.jags.data <- function(inputs,
   ##   n_basis is the number of spline basis functions
 
   family <- match.arg(family)
+  priors <- .resolve.tdmm.priors(family, priors)
+  hyperparameters <- .tdmm.prior.jags.data(family, priors)
 
   if (family %in% c("gaussian", "poisson")) {
-    return(list(N = inputs$N, n.subject = inputs$n.subject,
+    return(c(list(N = inputs$N, n.subject = inputs$n.subject,
                 nX = inputs$nX, n_basis = inputs$n_basis, y = inputs$y,
                 subject.ID = inputs$subject.ID, X = inputs$X.obs,
                 bases.obs = inputs$bases.obs,
-                Penalty.bases = inputs$Penalty.bases))
+                Penalty.bases = inputs$Penalty.bases), hyperparameters))
   }
   # Approved centered null-space prior. Keep the exact targeted-comparison
   # eigendecomposition: remove the legacy ridge from penalized eigenvalues,
   # and give the two null directions independent fixed-variance priors.
   ns <- .bernoulli.null.space(inputs$Penalty.bases)
+  ns$tau.null <- NULL
   c(list(N = inputs$N, n.subject = inputs$n.subject,
          nX = inputs$nX, n_basis = inputs$n_basis, y = inputs$y,
          subject.ID = inputs$subject.ID, X = inputs$X.obs,
-         bases.obs = inputs$bases.obs), ns)
+         bases.obs = inputs$bases.obs), ns, hyperparameters)
 
 }
 

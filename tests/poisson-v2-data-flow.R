@@ -42,7 +42,8 @@ for (ids in list(base$person, c(90,10,90,40,10,90),
                               min(base$visit),max(base$visit),12,3)[1,])
   }
   jd <- jags.data(z,"poisson")
-  stopifnot(setequal(names(jd),c("N","n.subject","nX","n_basis","y",
+  stopifnot(setequal(names(jd),c("smoothing.shape","smoothing.rate",
+    "random.sd.max","N","n.subject","nX","n_basis","y",
                                 "subject.ID","X","bases.obs","Penalty.bases")),
             identical(jd$y,z$y), identical(jd$subject.ID,z$subject.ID),
             identical(jd$X,z$X.obs), identical(jd$bases.obs,z$bases.obs),

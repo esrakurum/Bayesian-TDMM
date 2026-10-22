@@ -9,7 +9,7 @@ model {
   y[j] ~ dbern(p[j])
  }
  for(i in 1:n.subject) { b[i] ~ dnorm(0,tau.b) }
- sigma.b ~ dunif(0,5)
+ sigma.b ~ dunif(0,random.sd.max)
  tau.b <- 1/pow(sigma.b,2)
  sigma2.b <- pow(sigma.b,2)
 
@@ -20,6 +20,6 @@ model {
    alpha[k,l] <- inprod(U.null[l,1:n.null],gamma[k,1:n.null])+
                  inprod(U.pen[l,1:n.pen],theta[k,1:n.pen])
   }
-  tau.alpha[k] ~ dgamma(1,0.001)
+  tau.alpha[k] ~ dgamma(smoothing.shape,smoothing.rate)
  }
 }

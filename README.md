@@ -4,7 +4,7 @@ This repository contains the `TDMM` R package for fitting Bayesian time-dynamic 
 
 **Development snapshot (0.1.0.9000; not a 0.2.0 release).** All three families accept subject-specific times, unequal visit counts, and observation-level covariates. Bernoulli V2 uses the approved centered null-space spline prior and a Uniform(0,5) random-intercept SD prior. See `PHASE2A_COMPATIBILITY.md` and `PHASE2A_CHANGELOG.md`.
 
-The released V1 package provides tools for estimating time-varying coefficient functions while accounting for within-subject dependence through subject-specific random effects. The current implementation focuses on longitudinal data with baseline covariates. It can handle irregularly spaced measurement times when subjects share the same observation grid, but it assumes a balanced repeated-measures structure with the same number of observations per subject.
+The released V1 package provides tools for estimating time-varying coefficient functions while accounting for within-subject dependence through subject-specific random effects. V1 focuses on baseline covariates and a balanced observation grid. This development branch supports irregular subject-specific times, unequal visit counts, and time-varying covariates for all three families.
 
 A full package tutorial is included separately and describes the statistical model, Bayesian estimation framework, data requirements, fitting functions, diagnostics, visualization tools, and implementation examples.
 
@@ -190,3 +190,71 @@ See `simulations/poisson-v2-design.md` and the standalone
 `simulations/poisson-v2-validation.R` is retained only as a labeled confounded
 diagnostic/stress-test scenario. Gaussian V2's single-dataset validation has been accepted
 by Esra; formal repeated validation is deferred until all families are finalized.
+
+## Public V2 fitting controls
+
+All three families use the same long-format interface. Use `family="gaussian"`,
+`"bernoulli"`, or `"poisson"`; `n_basis=8` and `degree=3` are the effective
+spline defaults. `n_basis` controls the actual number of basis functions;
+`degree` remains adjustable. The deprecated `nknots` argument still follows
+its historical mapping. Internal JAGS, basis, subject-index, ridge and
+null-space matrices are constructed by the package.
+
+```r
+library(TDMM)
+fit <- tdmm(dat, family="bernoulli", subject.var="id",
+            x.var=c("baseline", "changing"), n_basis=8,
+            control=tdmm.control(chains=3, iterations=10000,
+                                 burn_in=3000, thin=5, adapt=5000,
+                                 seed=218),
+            priors=list(smoothing=list(rate=0.002)))
+summary(fit)
+plot(fit) # uses the data and spline specification stored in the fit
+plot.trace.tdmm(fit, c("sigma.b", "tau.alpha[1]"))
+```
+
+`tdmm.priors("gaussian")`, `tdmm.priors("bernoulli")`, and
+`tdmm.priors("poisson")` show the exact family defaults. A partial `priors`
+list changes only named parameters; unknown fields and nonpositive values
+fail before fitting. All Gamma parameters use **shape and rate**:
+
+| Family | Smoothing precision | Random intercept | Other public prior |
+|---|---|---|---|
+| Gaussian | Gamma(1, 0.001) | precision Gamma(1, 0.005) | residual precision Gamma(1, 0.005) |
+| Bernoulli | Gamma(1, 0.001) | SD Uniform(0, 5) | null-space coordinate SD 10 (variance 100) |
+| Poisson | Gamma(1, 0.001) | SD Uniform(0, 5) | none |
+
+The Bernoulli prior remains the approved centered null-space model; the
+`null_space$sd` setting controls its two ordinary Normal prior scales. The
+spline penalty/eigenvectors and the Gaussian/Poisson ridge stay internal.
+The approved random-effect prior *distribution* is fixed by family; advanced
+users can vary its parameters through `random_intercept`. For example:
+
+```r
+priors=list(smoothing=list(shape=2,rate=0.002),
+            random_intercept=list(max_sd=4)) # Bernoulli or Poisson
+# Gaussian: priors=list(residual=list(rate=0.01))
+```
+
+`tdmm.control()` groups chains, total iterations, burn-in, thinning, adaptation,
+and an optional seed; `cores` applies only to `tdmm.parallel()`. Partial named
+control lists also work. Earlier `n.chains`, `n.iter`, `n.burn`, `n.thin`,
+`n.adapt`, and parallel `seed`/`n.cores` arguments remain supported. Giving one
+setting in both places is an error. The original defaults remain when `control`
+is omitted. The evaluation grid belongs to plotting, e.g.
+`plot(fit, grid=seq(0,1,length.out=100))`, because it does not affect fitting.
+`plot.tdmm(data, fit)` remains available for older code.
+
+`tdmm.parallel()` remains separate: on macOS/Linux it runs chains on separate
+forked workers and accepts `control=list(cores=2)`. This keeps the existing
+parallel API and makes platform limitations visible. Windows multicore support
+would require a separate implementation.
+
+Reasonable sensitivity analyses can vary `n_basis`, smoothing Gamma parameters,
+and scientifically important variance or random-effect prior parameters.
+Changing spline degree is supported but changes the coefficient-function model;
+report it explicitly if used. Keep numerical ridge constants, knot construction,
+null-space eigenvectors, and subject indexing fixed. Prior distribution-family
+changes require an explicit statistical-model decision, rather than a low-level
+interface switch. Existing saved objects retain their recorded spline metadata,
+and summary/plot methods tolerate saved objects without the new prior metadata.

@@ -57,3 +57,14 @@ Each candidate was compared individually. The Gaussian model, structural checks 
 | simulations/bernoulli-v2-generator.R; simulations/bernoulli-v2-validation.* | Final public validation needed | Separate identifiable generator and one-dataset validation, with secondary tau diagnostics | Validation design | Review single-dataset results |
 | README.md; DESCRIPTION; PHASE2A_COMPATIBILITY.md | Stale Bernoulli hold | Update current status and document intentional V1 prior differences | Documentation | No |
 | examples/bernoulli-v2-example.R | Need a standalone user example after validation | Same generator and public fit/summary/plot workflow; reuse matching saved fits | Example | Single-dataset validation completed |
+
+## Task 6 public controls and workflow
+
+| File | Issue | Change made | Mechanical or statistical | Needs Esra K review? |
+|---|---|---|---|---|
+| R/interface.controls.R; NAMESPACE; man/tdmm.*.Rd | Priors and computation scattered or fixed in low-level files | Export structured controls and family-specific prior defaults, validate partial lists, document fields | Interface only; defaults unchanged | No |
+| R/tdmm.R; R/tdmm.parallel.R; R/tdmm.helpers.R | Fitters lacked shared controls/prior data flow | Resolve lists, preserve legacy arguments, pass named hyperparameters, store prior metadata | Interface only | No |
+| inst/jags/TDMM_*_JAGS.txt | Prior constants could not be tuned | Replace literals with validated named hyperparameters; same defaults | Parameterization of approved defaults | No |
+| R/plot.tdmm.R; R/summary.tdmm.R | Generic plot(fit) unavailable and priors not visible | Register S3 plot using stored data; show resolved priors when present | Interface only | No |
+| tests/structured-interface.R; existing family tests | Missing structured-control regression tests | Test defaults, invalid controls, serial/parallel workflows, plots, and saved-object compatibility | Software tests | No |
+| README.md; PHASE2A_COMPATIBILITY.md | Stale V1 scope and undocumented public controls | Document workflow, sensitivity parameters, and compatibility | Documentation | No |

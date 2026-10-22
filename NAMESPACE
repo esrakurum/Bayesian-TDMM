@@ -1,5 +1,7 @@
 export(tdmm)
 export(tdmm.parallel)
+export(tdmm.control)
+export(tdmm.priors)
 
 export(check.tdmm.data.structure)
 export(check.tdmm.subject.balance)
@@ -13,6 +15,7 @@ export(data.gen.tdmm.bern)
 export(data.gen.tdmm.pois)
 
 S3method(summary,tdmm)
+S3method(plot,tdmm)
 export(summary.tdmm)
 
 export(plot.tdmm)

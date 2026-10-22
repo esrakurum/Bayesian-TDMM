@@ -19,14 +19,14 @@ model
     for (k in 1:nX) {
         alpha[k, 1:n_basis] ~ dmnorm(rep(0.00000E+00, n_basis),
                                     tau.alpha[k] * Penalty.bases[, ])
-        tau.alpha[k] ~ dgamma(1, 0.001)
+        tau.alpha[k] ~ dgamma(smoothing.shape, smoothing.rate)
     }
 
-    tau.b ~ dgamma(1, 0.005)
+    tau.b ~ dgamma(random.shape, random.rate)
     sigma2.b <- 1 / tau.b
     sigma.b <- 1 / sqrt(tau.b)
 
-    tau.e ~ dgamma(1, 0.005)
+    tau.e ~ dgamma(residual.shape, residual.rate)
     sigma2.e <- 1 / tau.e
     sigma.e <- 1 / sqrt(tau.e)
 }

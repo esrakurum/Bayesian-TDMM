@@ -85,3 +85,18 @@ model.settings$spline.prior identifies the backend. Users provide no matrices.
 Default cubic degree 3/order 4/n_basis=8 and deprecated nknots behavior remain.
 Gaussian/Poisson formulations and the existing missing-data behavior are unchanged.
 See simulations/bernoulli-v2-validation.md for the final validation workflow.
+
+## Task 6 public interface
+
+Optional structured `control` and `priors` lists were added to both public
+fitters without removing legacy arguments. Conflicting legacy/structured
+computational settings fail explicitly. With neither list supplied, all
+family models and computational defaults retain their previous values.
+The JAGS files now read prior hyperparameters from the resolved family defaults
+rather than literal constants; the default values are identical. New fits store
+resolved prior settings in model.settings and show them in summary(). Older
+saved objects without this field remain readable and plottable. The plot S3
+method now supports plot(fit) using the saved fitted data; direct
+plot.tdmm(data, fit) remains supported. tdmm.parallel() remains a separate
+entry point using the existing fork backend. Only approved prior families may
+be tuned: distribution changes require future statistical review.

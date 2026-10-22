@@ -50,7 +50,7 @@ for (bad in list(-1,.5,Inf,"not a count")) {
 # Lock the supplied V2 likelihood/prior specification against accidental drift.
 model <- paste(readLines(system.file("jags","TDMM_Poisson_JAGS.txt",package="TDMM")),collapse=" ")
 for (term in c("log(lambda[j]) <- eta[j]", "y[j] ~ dpois(lambda[j])",
-               "b[subject.ID[j]]", "sigma.b ~ dunif(0, 5)",
-               "tau.alpha[k] ~ dgamma(1, 0.001)")) {
+               "b[subject.ID[j]]", "sigma.b ~ dunif(0, random.sd.max)",
+               "tau.alpha[k] ~ dgamma(smoothing.shape, smoothing.rate)")) {
   stopifnot(grepl(term,model,fixed=TRUE))
 }

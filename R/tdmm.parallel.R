@@ -33,7 +33,9 @@ tdmm.parallel <- function(data,
                           jags.dir = NULL,
                           quiet = FALSE,
                           seed = NULL,
-                          n_basis = NULL) {
+                          n_basis = NULL,
+                          control = NULL,
+                          priors = NULL) {
   
   #########
   ## Match the requested family
@@ -41,6 +43,22 @@ tdmm.parallel <- function(data,
   
   n_basis <- .resolve.n_basis(n_basis, nknots, degree)
   family <- match.arg(family)
+  control <- .resolve.tdmm.control(control,
+    legacy = list(n.chains = n.chains, n.iter = n.iter, n.burn = n.burn,
+      n.thin = n.thin, n.adapt = n.adapt, seed = seed,
+      n.cores = if (missing(n.cores)) NULL else n.cores),
+    supplied = c(n.chains = !missing(n.chains), n.iter = !missing(n.iter),
+      n.burn = !missing(n.burn), n.thin = !missing(n.thin),
+      n.adapt = !missing(n.adapt), seed = !missing(seed),
+      n.cores = !missing(n.cores)), parallel = TRUE)
+  n.chains <- control$chains
+  n.iter <- control$iterations
+  n.burn <- control$burn_in
+  n.thin <- control$thin
+  n.adapt <- control$adapt
+  n.cores <- control$cores
+  seed <- control$seed
+  priors <- .resolve.tdmm.priors(family, priors)
   
   #########
   ## Check the data before fitting
@@ -81,7 +99,8 @@ tdmm.parallel <- function(data,
   
   jags.data <- build.tdmm.jags.data(
     inputs = inputs,
-    family = family
+    family = family,
+    priors = priors
   )
   
   if (family == "bernoulli") inputs$null.space <- jags.data[c(
@@ -111,6 +130,8 @@ tdmm.parallel <- function(data,
     n.burn = n.burn,
     n.thin = n.thin,
     n.adapt = n.adapt,
+    control = control,
+    priors = priors,
     n.cores = n.cores,
     jags.dir = jags.dir,
     model.file = config$model.file,

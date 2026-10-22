@@ -148,8 +148,8 @@ recover.tdmm.betas.ci <- function(post.mat,
 ## Main TDMM plot function
 #########
 
-plot.tdmm <- function(data,
-                      result,
+plot.tdmm <- function(x = NULL,
+                      result = NULL,
                       sd = FALSE,
                       level = 0.95,
                       grid = NULL,
@@ -177,7 +177,9 @@ plot.tdmm <- function(data,
                       width = 2200,
                       height = 700,
                       res = 150,
-                      n_basis = NULL) {
+                      n_basis = NULL,
+                      data = NULL,
+                      ...) {
   
   ## This is the main plotting function for fitted TDMM objects.
   ##
@@ -193,6 +195,14 @@ plot.tdmm <- function(data,
   ## Optional panel labels can be added using panel.labels.
   ## For example:
   ##   panel.labels = c("(a)", "(b)", "(c)")
+
+  ## plot(fit) and plot(x = fit) use the data stored with the fit.
+  ## Keep plot.tdmm(data, fit) and named data/result calls unchanged.
+  if (is.null(data)) data <- x
+  if (inherits(data, "tdmm") && is.null(result)) {
+    result <- data
+    data <- result$inputs$data
+  }
   
   #########
   ## Check fitted object

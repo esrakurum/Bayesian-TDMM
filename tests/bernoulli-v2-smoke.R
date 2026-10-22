@@ -60,6 +60,6 @@ for (bad in list(-1,.5,2,Inf,"not binary")) {
 # Pin production to the approved centered prior, including exact reconstruction.
 model <- paste(readLines(system.file("jags","TDMM_Bernoulli_JAGS.txt",package="TDMM")),collapse=" ")
 for(term in c("logit(p[j]) <- eta[j]", "y[j] ~ dbern(p[j])",
- "sigma.b ~ dunif(0,5)", "gamma[k,q] ~ dnorm(0,tau.null)",
+ "sigma.b ~ dunif(0,random.sd.max)", "gamma[k,q] ~ dnorm(0,tau.null)",
  "theta[k,r] ~ dnorm(0,tau.alpha[k]*lambda.pen[r])",
- "tau.alpha[k] ~ dgamma(1,0.001)")) stopifnot(grepl(term,model,fixed=TRUE))
+ "tau.alpha[k] ~ dgamma(smoothing.shape,smoothing.rate)")) stopifnot(grepl(term,model,fixed=TRUE))

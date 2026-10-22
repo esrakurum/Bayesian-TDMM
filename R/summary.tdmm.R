@@ -68,6 +68,12 @@ summary.tdmm <- function(object, ...) {
   cat("------------------\n")
   cat("sigma2.b: ", object$sigma2.b, "\n", sep = "")
   cat("sigma.b: ", object$sigma.b, "\n", sep = "")
+
+  if (!is.null(settings$priors)) {
+    cat("\nPrior settings\n")
+    cat("--------------\n")
+    print(settings$priors)
+  }
   
   if (family == "gaussian") {
     cat("sigma2.e: ", object$sigma2.e, "\n", sep = "")
@@ -103,7 +109,8 @@ summary.tdmm <- function(object, ...) {
       beta.names = object$beta.names,
       sigma2.b = object$sigma2.b,
       sigma2.e = if (family == "gaussian") object$sigma2.e else NULL,
-      model.settings = settings
+      model.settings = settings,
+      priors = settings$priors
     )
   )
 }

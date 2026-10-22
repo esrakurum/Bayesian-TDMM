@@ -39,11 +39,25 @@ tdmm <- function(data,
                  n.adapt = 5000,
                  jags.dir = NULL,
                  quiet = FALSE,
-                 n_basis = NULL) {
+                 n_basis = NULL,
+                 control = NULL,
+                 priors = NULL) {
   
   ## Match the requested family
   n_basis <- .resolve.n_basis(n_basis, nknots, degree)
   family <- match.arg(family)
+  control <- .resolve.tdmm.control(control,
+    legacy = list(n.chains = n.chains, n.iter = n.iter, n.burn = n.burn,
+      n.thin = n.thin, n.adapt = n.adapt, seed = NULL, n.cores = NULL),
+    supplied = c(n.chains = !missing(n.chains), n.iter = !missing(n.iter),
+      n.burn = !missing(n.burn), n.thin = !missing(n.thin),
+      n.adapt = !missing(n.adapt)))
+  n.chains <- control$chains
+  n.iter <- control$iterations
+  n.burn <- control$burn_in
+  n.thin <- control$thin
+  n.adapt <- control$adapt
+  priors <- .resolve.tdmm.priors(family, priors)
   
   ##########
   ## Check the data before fitting
@@ -84,7 +98,8 @@ tdmm <- function(data,
   
   jags.data <- build.tdmm.jags.data(
     inputs = inputs,
-    family = family
+    family = family,
+    priors = priors
   )
   
   if (family == "bernoulli") inputs$null.space <- jags.data[c(
@@ -114,6 +129,9 @@ tdmm <- function(data,
     n.burn = n.burn,
     n.thin = n.thin,
     n.adapt = n.adapt,
+    control = control,
+    seed = control$seed,
+    priors = priors,
     jags.dir = jags.dir,
     model.file = config$model.file,
     params = config$params,
@@ -141,6 +159,7 @@ tdmm <- function(data,
     message("Using JAGS model file: ", config$model.file)
   }
   
+  if (!is.null(control$seed)) set.seed(control$seed)
   fit <- R2jags::jags(
     data = jags.data,
     parameters.to.save = config$params,
