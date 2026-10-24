@@ -4,4 +4,4 @@ TDMM v0.2.0 supports Gaussian, Bernoulli, and Poisson longitudinal outcomes with
 
 The recommended workflow is `tdmm()` followed by `summary()`, coefficient plots, and chain diagnostics. Serial and parallel fitting are selected with `tdmm_control()`; `tdmm.parallel()` remains available for compatibility. The package includes a Getting Started vignette, short examples for all three families, and a reproducible PBC2 application. Users should assess convergence and model fit for each analysis.
 
-Version 0.1.0 remains preserved as the historical V1 release. Its Zenodo DOI, 10.5281/zenodo.20617705, should not be cited as an archive of v0.2.0. Add a version-specific DOI to release metadata only after the v0.2.0 archive is created.
+Version 0.1.0 remains preserved as the historical V1 release. The Zenodo DOI 10.5281/zenodo.20617705 corresponds to v0.1.0. TDMM v0.2.0 is archived at DOI 10.5281/zenodo.23608508.
