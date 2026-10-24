@@ -24,8 +24,8 @@ Gaussian model, cubic degree 3 and `n_basis` 8, 6, or 10, with unchanged
 family-default Gaussian priors and 3 chains, 8,000 iterations, 3,000 burn-in,
 thinning 5, adaptation 5,000 and fixed seed 541. The source package, data,
 prior defaults, model file checksum, package version and settings are recorded
-in the output manifest. A saved fit is reused, and mismatched data/code are
-rejected. The script never calls JAGS directly.
+in the output. A saved fit is reused, and mismatched data/code are
+rejected.
 
 In RStudio, set the working directory to the TDMM repository and use a fresh R
 session. Install packages if needed:
