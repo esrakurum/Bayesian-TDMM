@@ -1,5 +1,5 @@
-# Public, optional lists for computational settings and family-specific priors.
-# An omitted list preserves the legacy fitting arguments and all model defaults.
+# Pptional lists for computational settings and family-specific priors.
+# If no control list is provided, model defaults are used.
 tdmm.control <- function(chains = 3L, iterations = 10000L,
                          burn_in = 3000L, thin = 5L, adapt = 5000L,
                          seed = NULL, cores = NULL, parallel = FALSE) {
@@ -8,7 +8,6 @@ tdmm.control <- function(chains = 3L, iterations = 10000L,
     cores = cores, parallel = parallel))
 }
 
-# Preferred spelling in the unified V2 interface; dotted spelling is retained.
 tdmm_control <- tdmm.control
 
 .validate.tdmm.control <- function(x) {
