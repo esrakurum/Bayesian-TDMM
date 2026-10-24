@@ -57,7 +57,7 @@ for (bad in list(-1,.5,2,Inf,"not binary")) {
     x.var=c("baseline","changing")),silent=TRUE),"try-error"))
 }
 
-# Pin production to the approved centered prior, including exact reconstruction.
+# Check the centered null-space prior and exact coefficient reconstruction.
 model <- paste(readLines(system.file("jags","TDMM_Bernoulli_JAGS.txt",package="TDMM")),collapse=" ")
 for(term in c("logit(p[j]) <- eta[j]", "y[j] ~ dbern(p[j])",
  "sigma.b ~ dunif(0,random.sd.max)", "gamma[k,q] ~ dnorm(0,tau.null)",

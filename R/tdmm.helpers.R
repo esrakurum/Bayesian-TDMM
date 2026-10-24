@@ -11,7 +11,7 @@
 ##   - constructing the fitted TDMM output object
 ##
 ## These are mostly internal package helpers. Most users will
-## interact with tdmm(), tdmm.parallel(), summary.tdmm(),
+## interact with tdmm(), summary.tdmm(),
 ## plot.tdmm(), and plot.trace.tdmm() instead.
 ############################################################
 
@@ -26,8 +26,7 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
   ## response family.
   ##
   ## If jags.dir is supplied, the function looks there first.
-  ## This is useful during local development when the model
-  ## files are stored in the top-level jags/ folder.
+  ## This supports an explicit directory containing model files.
   ##
   ## If jags.dir is not supplied, the function tries to find
   ## the model file from the installed package.
@@ -392,9 +391,8 @@ build.tdmm.jags.data <- function(inputs,
                 bases.obs = inputs$bases.obs,
                 Penalty.bases = inputs$Penalty.bases), hyperparameters))
   }
-  # Approved centered null-space prior. Keep the exact targeted-comparison
-  # eigendecomposition: remove the legacy ridge from penalized eigenvalues,
-  # and give the two null directions independent fixed-variance priors.
+  # The centered null-space decomposition uses the penalty's positive
+  # eigenvalues and independent fixed-variance priors for two null directions.
   ns <- .bernoulli.null.space(inputs$Penalty.bases)
   ns$tau.null <- NULL
   c(list(N = inputs$N, n.subject = inputs$n.subject,

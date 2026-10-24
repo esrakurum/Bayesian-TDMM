@@ -1,5 +1,5 @@
 # Reusable Poisson V2 design. No fitting, file writes, or basis construction.
-# Coefficients are log-rate effects. seed is explicit for repeated studies.
+# Coefficients are log-rate effects; the seed makes the example reproducible.
 poisson_v2_truth <- function(time) {
   cbind(beta0=0.25+0.35*sin(2*pi*time),
         beta1=0.35*cos(2*pi*time), beta2=0.25+0.20*time)
@@ -44,7 +44,7 @@ simulate_poisson_v2 <- function(seed, n_subject=200L, visits=8:14,
 
 # Source this standalone file, then call run_poisson_example().
 # Requires installed TDMM V2, R2jags/rjags/coda and system JAGS.
-# Uses one illustrative dataset; this is not a repeated simulation study.
+# Uses one illustrative dataset.
 run_poisson_example <- function(out='poisson-example-output') {
   library(TDMM)
   sim <- simulate_poisson_v2(seed=20261021L)

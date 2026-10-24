@@ -9,7 +9,7 @@ vignette: >
 
 TDMM fits Bayesian time-dynamic mixed-effects models with coefficient functions that vary over time and subject-specific random intercepts. Gaussian, Bernoulli, and Poisson responses are supported. Subjects may have different observation times and visit counts. Numeric covariates can be constant within subject or change at each visit. The default is eight cubic B-spline basis functions (degree 3, order 4) with a second-order coefficient-difference penalty. Install [JAGS](https://mcmc-jags.sourceforge.io/) before fitting.
 
-This page is the HTML companion to the package's [Sweave Getting Started vignette](https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/getting-started.Rnw).
+This page accompanies the package's [Getting Started vignette](https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/getting-started.Rnw).
 
 ## Data and fitting
 
