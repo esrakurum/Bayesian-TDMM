@@ -1,4 +1,4 @@
-# Pptional lists for computational settings and family-specific priors.
+# Optional lists for computational settings and family-specific priors.
 # If no control list is provided, model defaults are used.
 tdmm.control <- function(chains = 3L, iterations = 10000L,
                          burn_in = 3000L, thin = 5L, adapt = 5000L,
