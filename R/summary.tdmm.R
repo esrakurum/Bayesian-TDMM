@@ -68,6 +68,9 @@ summary.tdmm <- function(object, ...) {
   cat("------------------\n")
   cat("sigma2.b: ", object$sigma2.b, "\n", sep = "")
   cat("sigma.b: ", object$sigma.b, "\n", sep = "")
+  if (family == "gaussian") {
+    cat("sigma2.e: ", object$sigma2.e, "\n", sep = "")
+  }
 
   if (!is.null(settings$priors)) {
     cat("\nPrior settings\n")
@@ -75,17 +78,18 @@ summary.tdmm <- function(object, ...) {
     print(settings$priors)
   }
   
-  if (family == "gaussian") {
-    cat("sigma2.e: ", object$sigma2.e, "\n", sep = "")
-  }
-  
   cat("\nCoefficient functions\n")
   cat("---------------------\n")
   
   if (!is.null(object$beta.hat)) {
-    cat("  beta.hat\n")
+    labels <- object$beta.names
+    if (is.null(labels) || length(labels) != ncol(object$beta.hat)) {
+      labels <- paste0("beta", seq_len(ncol(object$beta.hat)) - 1L)
+    }
+    labels <- sub("\\.hat$", "", labels)
+    cat("Posterior mean curves: ", paste(labels, collapse = ", "), "\n", sep = "")
   } else {
-    cat("  beta.hat not found\n")
+    cat("Posterior mean curves unavailable\n")
   }
   
   ########

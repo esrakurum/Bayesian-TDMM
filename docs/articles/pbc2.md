@@ -1,0 +1,45 @@
+# PBC2 real-data application
+
+This application analyzes the `pbc2` dataset from JMbayes2 using log
+serum bilirubin as the Gaussian response, years since baseline as time,
+baseline treatment assignment, and longitudinal albumin. The dataset
+contains 1,945 observations from 312 subjects, with 1–16 visits per
+subject. The [standalone
+script](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-v2-analysis.R)
+loads the source data programmatically and reproduces the preprocessing,
+primary fit, sensitivity analysis, and plots.
+
+Albumin is centered at the overall observation-level mean of
+**3.3898868894601542 g/dL**. Treatment is coded 0 for placebo and 1 for
+D-penicillamine. The intercept therefore represents the modeled placebo
+trajectory at the centering value and random intercept zero.
+
+``` r
+library(TDMM)
+e <- new.env(parent=emptyenv())
+utils::data("pbc2", package="JMbayes2", envir=e)
+raw <- e$pbc2
+albumin_center <- mean(raw$albumin)
+pbc <- data.frame(id=as.numeric(raw$id), time=raw$year,
+                  y=log(raw$serBilir),
+                  drug=as.integer(raw$drug=="D-penicil"),
+                  albumin=raw$albumin-albumin_center)
+fit <- tdmm(pbc, family="gaussian", subject.var="id", time.var="time",
+            y.var="y", x.var=c("drug","albumin"), degree=3, n_basis=8,
+            control=tdmm_control(chains=3, iterations=8000,
+              burn_in=3000, thin=5, adapt=5000, seed=541),
+            priors=tdmm.priors("gaussian"))
+summary(fit)
+plot(fit)
+```
+
+The treatment 95% credible band includes zero across the evaluation
+grid. The albumin coefficient is negative, with its band below zero
+throughout that grid. The modeled intercept generally rises over the
+better-supported follow-up period. Treatment estimates are conditional
+associations rather than causal effects. Late follow-up is sparse, so
+local tail fluctuations warrant caution. A comparison of 6, 8, and 10
+basis functions gave broadly stable curves and conclusions; see the
+[application
+report](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-v2-analysis.md)
+for details.

@@ -1,0 +1,23 @@
+---
+title: "Bernoulli example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bernoulli example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Use `family = "bernoulli"` for a binary response. Coefficient functions are on the log-odds scale, and `x.var` order controls their labels. TDMM supplies the spline and prior decomposition internally.
+
+The [standalone runnable example](https://github.com/esrakurum/Bayesian-TDMM/blob/main/examples/bernoulli-v2-getting-started.R) generates irregular visits with a baseline and time-varying covariate, fits one dataset, and saves summaries and plots. From the repository root:
+
+```r
+library(TDMM)
+source("examples/bernoulli-v2-getting-started.R")
+fit <- run_small_bernoulli_v2()
+summary(fit)
+plot(fit)
+plot.trace.tdmm(fit, c("sigma.b", "tau.alpha[1]"))
+```
+
+Review chain diagnostics for reconstructed coefficient curves, the random-effect scale, and smoothing parameters. The same `tdmm()` workflow is described in [Getting Started](getting-started.html).

@@ -7,6 +7,11 @@
 ^figures$
 ^simulations$
 ^examples$
+^applications$
+^documentation$
+^TDMM_tutorial\.pdf$
+^.*\.Rcheck$
+^TDMM_.*\.tar\.gz$
 ^\.DS_Store$
 
 ^PHASE2A_.*\.md$
@@ -14,3 +19,7 @@
 ^tools$
 
 ^\.github$
+^docs$
+^archive$
+^vignettes/.*\.Rmd$
+^_pkgdown\.yml$

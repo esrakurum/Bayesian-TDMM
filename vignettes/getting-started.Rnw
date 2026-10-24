@@ -1,0 +1,209 @@
+\documentclass[11pt]{article}
+\usepackage{Sweave}
+\usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
+\title{Getting Started with TDMM}
+\author{Makena Grigsby and Esra K\"{u}r\"{u}m}
+\date{TDMM v0.2.0}
+%\VignetteIndexEntry{Getting Started with TDMM}
+%\VignetteEngine{utils::Sweave}
+%\VignetteEncoding{UTF-8}
+\begin{document}
+\maketitle
+
+\section{TDMM}
+TDMM fits Bayesian time-dynamic mixed-effects models with coefficient functions
+that vary over observation time and subject-specific random intercepts. Gaussian,
+Bernoulli, and Poisson responses are supported. Subjects may have different
+observation times and different numbers of visits. Numeric covariates may be
+constant within subject (baseline) or change at each visit. The default is
+eight cubic B-spline basis functions (polynomial degree 3, order 4) with a
+second-order coefficient-difference penalty. JAGS is required for fitting;
+TDMM constructs the model matrices and selects the JAGS model internally.
+
+\section{Data and the fitting workflow}
+For analysis, provide one row per observed subject and visit. The subject ID,
+numeric observation time, response, and numeric covariates must be separate
+columns. In the example below, \verb|baseline| is repeated within subject
+and \verb|changing| varies by visit. The response is Gaussian, and the
+coefficient functions are known because the data are simulated.
+
+<<gaussian-data,echo=TRUE>>=
+set.seed(27181)
+truth <- function(t) cbind(beta0 = sin(2*pi*t),
+                           beta1 = cos(2*pi*t),
+                           beta2 = 1.5*(t-0.5))
+dat <- do.call(rbind, lapply(seq_len(40), function(i) {
+  n <- sample(5:8, 1)
+  time <- sort(runif(n))
+  baseline <- rnorm(1)
+  changing <- sin(2*pi*time) + rnorm(n, sd=0.25)
+  random_intercept <- rnorm(1, sd=sqrt(0.5))
+  beta <- truth(time)
+  y <- rnorm(n, beta[,1] + baseline*beta[,2] +
+            changing*beta[,3] + random_intercept, sd=sqrt(0.1))
+  data.frame(id=paste0('person-',i), time=time, y=y,
+             baseline=baseline, changing=changing)
+}))
+head(dat, 3)
+c(subjects=length(unique(dat$id)), observations=nrow(dat),
+  min_visits=min(table(dat$id)), max_visits=max(table(dat$id)))
+@
+
+The recommended workflow is \verb|data -> tdmm() -> summary() -> plot()|,
+followed by convergence diagnostics. After installing JAGS, fit the simulated
+data with the following call. Adjust the MCMC settings and review diagnostics
+before drawing conclusions from your own data.
+
+\begin{verbatim}
+library(TDMM)
+fit <- tdmm(dat, family='gaussian', subject.var='id',
+            time.var='time', y.var='y',
+            x.var=c('baseline','changing'), n_basis=8,
+            control=tdmm_control(chains=3, iterations=4000,
+              burn_in=1500, thin=2, adapt=2000, seed=77181),
+            priors=tdmm.priors('gaussian'))
+summary(fit)
+plot(fit)
+plot.trace.tdmm(fit, c('sigma.b','sigma2.e','tau.alpha[1]'))
+\end{verbatim}
+
+The coefficient curves are on the Gaussian response scale; Bernoulli curves
+are on the log-odds scale and Poisson curves on the log-mean scale. In the
+Gaussian example, \verb|beta0| is the intercept, \verb|beta1| multiplies
+\verb|baseline|, and \verb|beta2| multiplies \verb|changing|, in the order
+passed to \verb|x.var|. \verb|summary(fit)| returns a list invisibly as well
+as printing a concise summary. \verb|plot(fit)| reconstructs curves on a
+grid consistent with the fitted spline specification.
+
+\subsection{Coefficient-function recovery}
+The figure illustrates coefficient-function recovery from a larger Gaussian
+simulation with the same known coefficient functions. The posterior mean
+curves follow the true functions across time. Dashed lines show the truth;
+shaded regions show pointwise 95\% credible bands.
+
+<<gaussian-curves,echo=TRUE,fig=TRUE,width=9,height=3.4>>=
+example_data_path <- function(filename) {
+  path <- system.file('extdata', filename, package='TDMM')
+  if (!nzchar(path)) path <- file.path('..','inst','extdata',filename)
+  stopifnot(file.exists(path))
+  path
+}
+g <- read.csv(example_data_path('gaussian-v2-pointwise.csv'))
+oldpar <- par(mfrow=c(1,3), mar=c(4,4,2,1))
+for (nm in c('beta0','beta1','beta2')) {
+  z <- g[g$coefficient==nm,]
+  plot(z$time,z$estimate,type='n',ylim=range(z$truth,z$lower,z$upper),
+       xlab='Time',ylab=nm,main=nm)
+  polygon(c(z$time,rev(z$time)),c(z$lower,rev(z$upper)),
+          col='gray90',border=NA)
+  lines(z$time,z$estimate,lwd=2,col='navy')
+  lines(z$time,z$truth,lty=2,lwd=1.5)
+}
+par(oldpar)
+@
+
+Before interpreting a fit, inspect chain trace plots, R-hat, and effective
+sample size (ESS) for the reconstructed coefficient functions and relevant
+model parameters. Review the uncertainty bands and any sampler warnings in
+the context of the observed data.
+
+\section{PBC2: a real-data application}
+This application uses \verb|JMbayes2::pbc2|: 1,945 observations from
+312 subjects, with 1--16 visits each. The response is log serum bilirubin,
+time is years since baseline, and the covariates are a baseline treatment
+indicator and longitudinal albumin. Treatment is coded 0 for placebo and 1
+for D-penicillamine. Albumin is centered at the overall
+\emph{observation-level} mean (3.3898868894601542 g/dL), not the mean of
+subject means. Thus the intercept represents the modeled placebo trajectory
+at that albumin level and random intercept zero.
+
+The following code shows the preprocessing and the \verb|tdmm()| fit.
+Install \verb|JMbayes2| to obtain the dataset.
+
+\begin{verbatim}
+install.packages('JMbayes2') # if needed
+raw <- new.env(parent=emptyenv())
+utils::data('pbc2', package='JMbayes2', envir=raw)
+pbc2 <- raw$pbc2
+albumin_center <- mean(pbc2$albumin) # 3.3898868894601542
+pbc <- data.frame(
+  id=as.numeric(pbc2$id), time=pbc2$year,
+  y=log(pbc2$serBilir),
+  drug=as.integer(pbc2$drug=='D-penicil'),
+  albumin=pbc2$albumin-albumin_center)
+fit_pbc <- tdmm(pbc, family='gaussian', subject.var='id',
+  time.var='time', y.var='y', x.var=c('drug','albumin'),
+  degree=3, n_basis=8,
+  control=tdmm_control(chains=3, iterations=8000,
+    burn_in=3000, thin=5, adapt=5000, seed=541),
+  priors=tdmm.priors('gaussian'))
+summary(fit_pbc)
+plot(fit_pbc)
+plot.trace.tdmm(fit_pbc, c('sigma.b','sigma2.e','tau.alpha[1]'))
+\end{verbatim}
+
+The treatment 95\% credible interval includes zero throughout the
+common evaluation grid. The albumin coefficient is negative, with its 95\%
+band below zero throughout that grid. The time-varying intercept generally
+rises through the better-supported follow-up period. These are conditional
+associations; the treatment curve does not establish a causal effect. Late
+follow-up is sparse, so small fluctuations in the tail should not be read as
+precise clinical changes.
+
+<<pbc-curves,echo=TRUE,fig=TRUE,width=9,height=3.4>>=
+p <- read.csv(example_data_path('pbc2-v2-curves.csv'))
+p <- p[p$n_basis==8,]
+oldpar <- par(mfrow=c(1,3), mar=c(4,4,2,1))
+for (nm in c('intercept','treatment','albumin')) {
+  z <- p[p$coefficient==nm,]
+  plot(z$time,z$estimate,type='n',ylim=range(z$lower,z$upper,0),
+       xlab='Years since baseline',ylab='Coefficient',main=nm)
+  polygon(c(z$time,rev(z$time)),c(z$lower,rev(z$upper)),
+          col='gray90',border=NA)
+  abline(h=0,col='gray60',lty=3)
+  lines(z$time,z$estimate,lwd=2,col='navy')
+}
+par(oldpar)
+@
+
+The eight-basis fit had maximum curve R-hat 1.0008 and minimum curve ESS
+2,834. A basis sensitivity check held the data, priors, and controls fixed
+while comparing 6, 8, and 10 basis functions; the broad curves, intervals,
+and substantive conclusions were stable. This is robustness assessment, not
+selection of the most favorable result.
+
+\section{Using your own data and sensitivity analysis}
+Replace the column names and family in the template below. Provide covariates
+in the intended coefficient order; a covariate can be baseline or measured at
+each visit. The data checks reject missing analysis values; decide how
+to handle missing data before fitting rather than relying on implicit imputation.
+
+\begin{verbatim}
+fit <- tdmm(my_long_data, family='poisson',
+  subject.var='participant_id', time.var='visit_time',
+  y.var='count', x.var=c('baseline_x','changing_x'),
+  n_basis=8,
+  control=tdmm_control(chains=3, iterations=8000,
+    burn_in=3000, thin=5, adapt=5000, seed=123),
+  priors=tdmm.priors('poisson'))
+summary(fit)
+plot(fit)
+\end{verbatim}
+
+It is reasonable to vary \verb|n_basis| (eight is the default) and, for
+advanced sensitivity analyses, smoothing-prior parameters. Consider
+random-effect or residual-prior sensitivity when scientifically important.
+TDMM handles basis construction and model setup internally. For Bernoulli or
+Poisson outcomes, use the same workflow with the corresponding \verb|family|
+value. Short examples for both families are in the repository's
+\verb|examples| folder.
+
+To use independent chains on macOS or Linux, use the same fitter with:
+\begin{verbatim}
+control=tdmm_control(parallel=TRUE, cores=2, ...)
+\end{verbatim}
+The current parallel backend uses forked workers and is not implemented for
+Windows.
+
+\end{document}

@@ -7,7 +7,7 @@ authors:
     given-names: Makena
   - family-names: Kürüm
     given-names: Esra
-version: 0.1.0.9000
+version: 0.2.0
 license: MIT
 repository-code: "https://github.com/esrakurum/Bayesian-TDMM"
 abstract: "TDMM provides an R implementation of Bayesian time-dynamic mixed-effects models for longitudinal Gaussian, Bernoulli, and Poisson outcomes, including data checks, model fitting, posterior summarization, MCMC diagnostics, and visualization of time-varying coefficient functions."

@@ -1,272 +1,37 @@
-# TDMM: Bayesian Time-Dynamic Mixed-Effects Models
+# TDMM
 
-This repository contains the `TDMM` R package for fitting Bayesian time-dynamic mixed-effects models for longitudinal data.
+TDMM fits Bayesian time-dynamic mixed-effects models for longitudinal **Gaussian, Bernoulli, and Poisson** outcomes. It estimates time-varying coefficient functions with subject-specific random intercepts. Data may have irregular subject-specific observation times, unequal visit counts, baseline covariates, and covariates that vary by visit.
 
-**Development snapshot (0.1.0.9000; not a 0.2.0 release).** All three families accept subject-specific times, unequal visit counts, and observation-level covariates. Bernoulli V2 uses the approved centered null-space spline prior and a Uniform(0,5) random-intercept SD prior. See `PHASE2A_COMPATIBILITY.md` and `PHASE2A_CHANGELOG.md`.
+The default spline uses **eight cubic B-spline basis functions** (polynomial degree 3, spline order 4) with a second-order coefficient-difference penalty. JAGS performs posterior sampling.
 
-The released V1 package provides tools for estimating time-varying coefficient functions while accounting for within-subject dependence through subject-specific random effects. V1 focuses on baseline covariates and a balanced observation grid. This development branch supports irregular subject-specific times, unequal visit counts, and time-varying covariates for all three families.
+## Install
 
-A full package tutorial is included separately and describes the statistical model, Bayesian estimation framework, data requirements, fitting functions, diagnostics, visualization tools, and implementation examples.
-
-## Package overview
-
-The main model is a Bayesian time-dynamic mixed-effects model of the form
-
-$$
-g\{\mu_i(t)\} = x_i^\top \beta(t) + b_i,
-$$
-
-where:
-
-- $y_i(t)$ is the observed response for subject $i$ at time $t$
-- $\mu_i(t) = E\{y_i(t) \mid x_i, b_i\}$
-- $x_i$ is a vector of baseline subject-level covariates
-- $\beta(t)$ is a vector of time-varying coefficient functions
-- $b_i$ is a subject-specific random intercept
-- $g(\cdot)$ is the link function for the outcome family
-
-For the special case with one baseline covariate, the model can be written as
-
-$$
-g\{\mu_i(t)\} = \beta_0(t) + \beta_1(t)x_i + b_i.
-$$
-
-The package currently supports:
-
-- Gaussian outcomes
-- Bernoulli outcomes
-- Poisson outcomes
-
-Model fitting is performed using JAGS through R.
-
-## Installation
-
-The package depends on JAGS. Users should install JAGS before fitting models.
-
-In R, install the package from GitHub using:
+Install [JAGS](https://mcmc-jags.sourceforge.io/) first, then install TDMM in R:
 
 ```r
-devtools::install_github("esrakurum/Bayesian-TDMM", ref = "v0.2-development")
+install.packages("remotes")
+remotes::install_github("esrakurum/Bayesian-TDMM")
 library(TDMM)
 ```
-## Repository structure
-```text
-Bayesian-TDMM/
-│
-├── README.md
-├── DESCRIPTION
-├── NAMESPACE
-├── .gitignore
-├── .Rbuildignore
-│
-├── R/
-│   ├── tdmm.R
-│   ├── tdmm.parallel.R
-│   ├── simulation.helpers.R
-│   ├── data.checks.R
-│   ├── tdmm.helpers.R
-│   ├── plot.tdmm.R
-│   ├── plot.trace.tdmm.R
-│   └── summary.tdmm.R
-│
-├── inst/jags/
-│   ├── TDMM_Gaussian_JAGS.txt
-│   ├── TDMM_Bernoulli_JAGS.txt
-│   └── TDMM_Poisson_JAGS.txt
-│
-├── examples/
-    ├── tdmm()/
-    │   ├── gaussian_simulation.R
-    │   ├── bernoulli_simulation.R
-    │   ├── poisson_simulation.R
-    │   └── WageData_TDMM.R
-    │
-    └── tdmm.parallel()/
-        ├── gaussian_parallel.R
-        ├── bernoulli_parallel.R
-        └── poisson_parallel.R
+
+## Fit a model
+
+Supply one row per observed visit. Here `baseline` is constant within subject and `changing` varies by visit:
+
+```r
+fit <- tdmm(long_data, family = "gaussian",
+            subject.var = "id", time.var = "time", y.var = "y",
+            x.var = c("baseline", "changing"), n_basis = 8,
+            control = tdmm_control(chains = 3, seed = 123))
+summary(fit)
+plot(fit)
+plot.trace.tdmm(fit, c("sigma.b", "sigma2.e", "tau.alpha[1]"))
 ```
+
+Use `family = "bernoulli"` for binary outcomes or `family = "poisson"` for counts. See [Getting Started](https://esrakurum.github.io/Bayesian-TDMM/articles/getting-started.html) for data layout, interpretation, and diagnostics. The [Gaussian](https://esrakurum.github.io/Bayesian-TDMM/articles/gaussian.html), [Bernoulli](https://esrakurum.github.io/Bayesian-TDMM/articles/bernoulli.html), [Poisson](https://esrakurum.github.io/Bayesian-TDMM/articles/poisson.html), and [PBC2](https://esrakurum.github.io/Bayesian-TDMM/articles/pbc2.html) examples give fuller workflows. The [vignette source](https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/getting-started.Rnw) and [example scripts](https://github.com/esrakurum/Bayesian-TDMM/tree/main/examples) are also available in the repository.
+
 ## Citation
 
-If you use this package, please cite the software using the citation information provided in the `CITATION.cff` file and the archived V1 release Zenodo DOI (not an archive of this development snapshot): https://doi.org/10.5281/zenodo.20617705
+For v0.2.0, use `citation("TDMM")` or the repository's [citation metadata](https://github.com/esrakurum/Bayesian-TDMM/blob/main/CITATION.cff). The [Zenodo DOI 10.5281/zenodo.20617705](https://doi.org/10.5281/zenodo.20617705) identifies the historical **v0.1.0** release; it is not a DOI for v0.2.0.
 
-## License
-
-This package is licensed under the MIT License.
-
-Copyright (c) 2026 Makena Grigsby and Esra Kürüm.
-
-## V2 spline defaults and Gaussian workflow
-
-New fits use cubic B-splines (`degree = 3`, order 4), evaluated with
-`splines::splineDesign()`. Supply `n_basis` for the actual number of columns.
-The default is **8 basis functions**. Esra selected eight after a matched
-10-dataset Gaussian cubic pilot comparing 6, 8 and 10: eight balanced curve
-recovery and shape with runtime (77.2 seconds per fit versus 129.8 for ten).
-This small pilot informed the default; it is not a formal simulation study.
-The formal argument remains `n_basis = NULL` so that omitted values resolve
-to eight while deprecated `nknots` calls retain their historical mapping.
-
-For degree `d` and `q = n_basis`, there are `q - d` equally spaced intervals
-across the fitted time range. The knot vector extends `d` intervals beyond
-both ends. The second-order coefficient-difference penalty and existing
-family priors are unchanged. The JAGS dimension is named `n_basis`.
-
-`nknots` remains in its original argument position but is deprecated. Its
-historical rule is `intervals = nknots - 2`, so the actual dimension is
-`nknots + degree - 2`. For example, `nknots = 6` now gives seven cubic bases;
-`n_basis = 6` gives six. Supplying both arguments is an error. The cubic
-default is an intentional behavior change; selecting `degree = 2` for a new
-fit still uses the conventional positive basis, not the old signed raw-alpha
-convention.
-
-New fitted objects retain the exact knots, degree, dimension, and convention
-in `inputs$spline`. Plotting uses this fitted specification, not the range
-of replacement plotting data. Older objects retain their recorded degree;
-for objects without convention metadata, reconstruction checks their saved
-basis against the standard and historical signed constructors. Ambiguous or
-incomplete objects fail explicitly rather than being reinterpreted as cubic.
-The old signed evaluator is used only to reconstruct legacy objects.
-There is no separate prediction method; the shared plot-grid/reconstruction
-helpers evaluate new times from the same stored specification.
-
-The quadratic Gaussian studies, basis sensitivity, Bernoulli diagnostics,
-Poisson study, and PBC2 fits do not validate the new cubic specification.
-Their fits/results and all package example outputs require rerunning before
-being presented as V2 cubic results. No formal studies were rerun for this
-API change.
-
-A long-format Gaussian workflow requires only the installed package:
-
-```r
-library(TDMM)
-fit <- tdmm(dat, family = "gaussian", subject.var = "id",
-            time.var = "time", y.var = "y",
-            x.var = c("baseline", "time_varying"))
-summary(fit)
-plot.tdmm(dat, fit)
-plot.trace.tdmm(fit, c("sigma2.b", "sigma2.e", "tau.alpha[1]"))
-# On macOS/Linux: use the same fitter with independent chains on two cores.
-# fit <- tdmm(dat, family="gaussian", subject.var="id",
-#             x.var=c("baseline", "time_varying"),
-#             control=tdmm_control(parallel=TRUE, cores=2, seed=218))
-```
-
-Rows may be unsorted, subject IDs need not be consecutive, visit counts may
-differ, and covariates may vary within subject. Required columns must be
-complete; response, times and covariates must be finite numeric values.
-Encode categorical covariates as numeric indicators. Unused subject-factor
-levels are ignored. The package locates its own JAGS model, maps subject IDs,
-constructs observation-level matrices, and recovers curves on sorted unique
-observed times. Plots use the saved spline specification on a regular grid
-by default; `grid=fit$time.points` uses the exact recovery grid.
-
-See `simulations/gaussian-v2-validation.md` for a single-dataset validation
-using the installed package. Parallel execution currently uses forked chains
-on macOS/Linux; multi-core Windows execution is not implemented.
-
-## Poisson V2 workflow
-
-Poisson now supports the same irregular-time, unequal-visit, baseline and
-time-varying covariate workflow: use family="poisson" with tdmm(), then
-summary(fit), plot(fit) and
-plot.trace.tdmm(fit,c("sigma.b","sigma2.b","tau.alpha[1]")).
-Responses must be finite nonnegative integer counts. Coefficient curves are
-on the log-rate scale. The package monitors alpha, tau.alpha, sigma.b,
-sigma2.b, tau.b and subject intercepts b in chain-resolved posterior draws.
-
-The supplied Makena Poisson V2 prior is preserved: sigma.b ~ Uniform(0,5),
-tau.b=1/sigma.b^2; b_i ~ Normal(0,1/tau.b). Spline vectors have zero-mean
-multivariate Normal priors with precision tau.alpha[k] times the existing
-second-difference penalty plus 1e-6 identity; tau.alpha[k] ~ Gamma(1,0.001)
-(shape, rate). There is no residual variance parameter or separate null-space
-prior. This intentionally replaces the development branch's retained V1
-Poisson Gamma(1,0.005) precision prior for new fits, including common-grid fits.
-Historical fitted-object reconstruction remains unchanged. Bernoulli V2 now uses
-the approved centered null-space model; new Bernoulli fits intentionally differ
-from V1 priors. See `simulations/bernoulli-v2-validation.md`.
-
-See `simulations/poisson-v2-design.md` and the standalone
-`examples/poisson-v2-example.R` for the finalized Poisson example. The former
-`simulations/poisson-v2-validation.R` is retained only as a labeled confounded
-diagnostic/stress-test scenario. Gaussian V2's single-dataset validation has been accepted
-by Esra; formal repeated validation is deferred until all families are finalized.
-
-## Public V2 fitting controls
-
-All three families use the same long-format interface. Use `family="gaussian"`,
-`"bernoulli"`, or `"poisson"`; `n_basis=8` and `degree=3` are the effective
-spline defaults. `n_basis` controls the actual number of basis functions;
-`degree` remains adjustable. The deprecated `nknots` argument still follows
-its historical mapping. Internal JAGS, basis, subject-index, ridge and
-null-space matrices are constructed by the package.
-
-```r
-library(TDMM)
-fit <- tdmm(dat, family="bernoulli", subject.var="id",
-            x.var=c("baseline", "changing"), n_basis=8,
-            control=tdmm_control(chains=3, iterations=10000,
-                                 burn_in=3000, thin=5, adapt=5000,
-                                 seed=218),
-            priors=list(smoothing=list(rate=0.002)))
-summary(fit)
-plot(fit) # uses the data and spline specification stored in the fit
-plot.trace.tdmm(fit, c("sigma.b", "tau.alpha[1]"))
-```
-
-`tdmm.priors("gaussian")`, `tdmm.priors("bernoulli")`, and
-`tdmm.priors("poisson")` show the exact family defaults. A partial `priors`
-list changes only named parameters; unknown fields and nonpositive values
-fail before fitting. All Gamma parameters use **shape and rate**:
-
-| Family | Smoothing precision | Random intercept | Other public prior |
-|---|---|---|---|
-| Gaussian | Gamma(1, 0.001) | precision Gamma(1, 0.005) | residual precision Gamma(1, 0.005) |
-| Bernoulli | Gamma(1, 0.001) | SD Uniform(0, 5) | null-space coordinate SD 10 (variance 100) |
-| Poisson | Gamma(1, 0.001) | SD Uniform(0, 5) | none |
-
-The Bernoulli prior remains the approved centered null-space model; the
-`null_space$sd` setting controls its two ordinary Normal prior scales. The
-spline penalty/eigenvectors and the Gaussian/Poisson ridge stay internal.
-The approved random-effect prior *distribution* is fixed by family; advanced
-users can vary its parameters through `random_intercept`. For example:
-
-```r
-priors=list(smoothing=list(shape=2,rate=0.002),
-            random_intercept=list(max_sd=4)) # Bernoulli or Poisson
-# Gaussian: priors=list(residual=list(rate=0.01))
-```
-
-`tdmm_control()` groups chains, total iterations, burn-in, thinning, adaptation,
-and an optional seed. Add `parallel=TRUE` and `cores` to run separate chains
-from the same `tdmm()` interface. The older dotted name `tdmm.control()` remains
-an alias. Partial named
-control lists also work. Earlier `n.chains`, `n.iter`, `n.burn`, `n.thin`,
-`n.adapt`, and parallel `seed`/`n.cores` arguments remain supported. Giving one
-setting in both places is an error. The original defaults remain when `control`
-is omitted. The evaluation grid belongs to plotting, e.g.
-`plot(fit, grid=seq(0,1,length.out=100))`, because it does not affect fitting.
-`plot.tdmm(data, fit)` remains available for older code.
-
-The recommended workflow is `tdmm()` followed by `summary(fit)`, `plot(fit)`,
-and `plot.trace.tdmm(fit, ...)`. For parallel execution on macOS/Linux:
-
-```r
-fit <- tdmm(dat, family="poisson", subject.var="id",
-            x.var=c("baseline", "changing"),
-            control=tdmm_control(parallel=TRUE, cores=2, seed=218))
-```
-
-`tdmm.parallel()` remains only as a compatibility wrapper for older scripts.
-It delegates to `tdmm()` and retains its prior arguments and 10,000-iteration
-adaptation default; new scripts should use the unified call above. Windows
-multicore support would require a separate implementation.
-
-Reasonable sensitivity analyses can vary `n_basis`, smoothing Gamma parameters,
-and scientifically important variance or random-effect prior parameters.
-Changing spline degree is supported but changes the coefficient-function model;
-report it explicitly if used. Keep numerical ridge constants, knot construction,
-null-space eigenvectors, and subject indexing fixed. Prior distribution-family
-changes require an explicit statistical-model decision, rather than a low-level
-interface switch. Existing saved objects retain their recorded spline metadata,
-and summary/plot methods tolerate saved objects without the new prior metadata.
+TDMM is released under the [MIT license](LICENSE.md).
