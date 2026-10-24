@@ -148,6 +148,18 @@ recover.tdmm.betas.ci <- function(post.mat,
 ## Main TDMM plot function
 #########
 
+  ## This is the main plotting function for fitted TDMM objects.
+  ##
+  ## It plots posterior mean coefficient functions with either:
+  ##   - pointwise credible intervals, if sd = FALSE
+  ##   - posterior standard deviation bands, if sd = TRUE
+  ##
+  ## The fitted curves are shown on the model's linear predictor scale.
+  ## For Gaussian models this is the response scale.
+  ## For Bernoulli models this is the log-odds scale.
+  ## For Poisson models this is the log-mean scale.
+
+  ## plot(fit) and plot(x = fit) use the data stored with the fit.
 plot.tdmm <- function(x = NULL,
                       result = NULL,
                       sd = FALSE,
@@ -180,24 +192,7 @@ plot.tdmm <- function(x = NULL,
                       n_basis = NULL,
                       data = NULL,
                       ...) {
-  
-  ## This is the main plotting function for fitted TDMM objects.
-  ##
-  ## It plots posterior mean coefficient functions with either:
-  ##   - pointwise credible intervals, if sd = FALSE
-  ##   - posterior standard deviation bands, if sd = TRUE
-  ##
-  ## The fitted curves are shown on the model's linear predictor scale.
-  ## For Gaussian models this is the response scale.
-  ## For Bernoulli models this is the log-odds scale.
-  ## For Poisson models this is the log-mean scale.
-  ##
-  ## Optional panel labels can be added using panel.labels.
-  ## For example:
-  ##   panel.labels = c("(a)", "(b)", "(c)")
 
-  ## plot(fit) and plot(x = fit) use the data stored with the fit.
-  ## Keep plot.tdmm(data, fit) and named data/result calls unchanged.
   if (is.null(data)) data <- x
   if (inherits(data, "tdmm") && is.null(result)) {
     result <- data
