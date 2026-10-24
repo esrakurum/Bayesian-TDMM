@@ -11,7 +11,7 @@ data.gen.tdmm.pois(n.subject = 200, n.time = 20, sigma2.b = 0.5, seed = NULL)
 \item{sigma2.b}{Random-intercept variance.}
 \item{seed}{Optional random seed.}
 }
-\value{A simulated long-format data frame or list as returned by the legacy generator.}
+\value{A simulated long-format data frame or list as returned by the generator.}
 \examples{
 set.seed(1)
 d <- data.gen.tdmm.pois(n.subject = 5, n.time = 4)
