@@ -4,16 +4,16 @@
 
   - **Makena Grigsby**. Author.
 
-  - **Esra Kurum**. Author, maintainer.
+  - **Esra Kürüm**. Author, maintainer.
 
 ## Citation
 
 Source:
 [`inst/CITATION`](https://github.com/esrakurum/Bayesian-TDMM/blob/main/inst/CITATION)
 
-Grigsby M, K\<U+00FC\>r\<U+00FC\>m E (2026). *TDMM: Bayesian
-Time-Dynamic Mixed-Effects Models for Longitudinal Data*. R package
-version 0.2.0, <https://github.com/esrakurum/Bayesian-TDMM>.
+Grigsby M, Kürüm E (2026). *TDMM: Bayesian Time-Dynamic Mixed-Effects
+Models for Longitudinal Data*. R package version 0.2.0,
+<https://github.com/esrakurum/Bayesian-TDMM>.
 
     @Manual{,
       title = {TDMM: Bayesian Time-Dynamic Mixed-Effects Models for Longitudinal Data},
