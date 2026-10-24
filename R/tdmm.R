@@ -1,5 +1,5 @@
 ## tdmm() fits a Bayesian time-dynamic mixed-effects model
-## using serial or parallel JAGS chains through one public interface.
+## using serial or parallel JAGS chains through one fitting interface.
 ##
 ## The function:
 ##   - checks the requested response family

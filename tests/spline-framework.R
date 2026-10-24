@@ -21,7 +21,7 @@ for(d in c(1,2,3,4)) for(q in c(6L,8L,15L,25L)) {
     near(evaluate(edge,s),splines::splineDesign(s$knots,edge,ord=d+1,outer.ok=TRUE))
   }
 }
-# Independent check against historical cubic formula (not the production evaluator).
+# Independent check against the cubic basis formula.
 s <- specification(0,1,6,3);x <- seq(0,1,length.out=301)
 near(evaluate(x,s),legacy(x,0,1,3,3))
 # Affine transformations retain the basis shape on a well-resolved scale.

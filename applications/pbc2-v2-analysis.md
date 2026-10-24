@@ -1,12 +1,11 @@
-# Clean PBC2 application on TDMM V2
+# PBC2 application with TDMM
 
 Run from the TDMM repository root. Source data are the `pbc2`
 dataset distributed with **JMbayes2** (tested with version 0.6-5), loaded by
 `data('pbc2', package='JMbayes2')`. The preparation uses all 1,945 source
 observations from 312 subjects, with 1–16 visits per subject; there are no
-missing analysis values and no exclusions. It reproduces the original PBC2
-analysis data exactly. The original historical fit files remain separate under
-`TDMM_V2/03_pbc2_analysis/` and are never reused as V2 fits.
+missing analysis values and no exclusions. The script prepares the analysis
+data from the source dataset on each run.
 
 Preprocessing, in source order: `id = as.numeric(id)`, `time = year` (years
 since baseline), `y = log(serBilir)`, `drug = 0` for placebo and `1` for
@@ -20,7 +19,7 @@ constant centering changes the intercept interpretation but not that slope.
 The treatment coefficient is the modeled D-penicillamine-versus-placebo
 association, not a causal effect established by this analysis.
 
-The primary and sensitivity fits use the installed public `TDMM::tdmm()`
+The primary and sensitivity fits use `TDMM::tdmm()` with the
 Gaussian model, cubic degree 3 and `n_basis` 8, 6, or 10, with unchanged
 family-default Gaussian priors and 3 chains, 8,000 iterations, 3,000 burn-in,
 thinning 5, adaptation 5,000 and fixed seed 541. The source package, data,
@@ -38,7 +37,7 @@ install.packages('.', repos=NULL, type='source')                 # current TDMM
 library(TDMM)
 source('applications/pbc2-v2-analysis.R')
 check_pbc2_v2()                  # optional: data checks, no fitting
-run_pbc2_v2_primary()            # fit n_basis=8; save checkpoint
+run_pbc2_v2_primary()            # fit n_basis=8; save fit
 summarize_pbc2_v2()              # inspect/regenerate tables and plots; no MCMC
 run_pbc2_v2_sensitivity()        # fit 6 and 10; reuse saved 8
 summarize_pbc2_v2()              # regenerate all comparison outputs; no MCMC

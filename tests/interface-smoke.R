@@ -1,5 +1,5 @@
 library(TDMM)
-# Deterministic execution fixtures, not simulation studies or convergence tests.
+# Deterministic fixtures for fitting interfaces and data alignment.
 balanced <- expand.grid(time = c(0, .2, .5, .8, 1), subject.ID = c("s9", "s2", "s5", "s1", "s4", "s7"))
 balanced <- balanced[order(balanced$subject.ID, balanced$time), ]
 balanced$x <- rep(c(-1, -.6, -.2, .2, .6, 1), each = 5)
@@ -12,7 +12,7 @@ expect.error <- function(expr, pattern) {
   error <- tryCatch({force(expr); NULL}, error = identity)
   stopifnot(inherits(error, "error"), grepl(pattern, conditionMessage(error), fixed = TRUE))
 }
-# Pin the legacy interface, not a development-version string.
+# Check that legacy fitting arguments remain available.
 legacy.args <- c("data", "family", "nknots", "subject.var", "time.var", "y.var",
                  "x.var", "degree", "n.chains", "n.iter", "n.burn", "n.thin",
                  "n.adapt", "jags.dir", "quiet")

@@ -9,7 +9,7 @@ eight cubic B-spline basis functions (degree 3, order 4) with a
 second-order coefficient-difference penalty. Install
 [JAGS](https://mcmc-jags.sourceforge.io/) before fitting.
 
-This page is the HTML companion to the package’s [Sweave Getting Started
+This page accompanies the package’s [Getting Started
 vignette](https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/getting-started.Rnw).
 
 ## Data and fitting

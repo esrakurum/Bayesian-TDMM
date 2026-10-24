@@ -39,7 +39,6 @@ plot.trace.tdmm(fit,c("sigma.b","sigma2.e","tau.alpha[1]"))
 
 Compare the reconstructed curves with `truth()` and examine the
 pointwise credible bands. The [Getting Started
-article](https://esrakurum.github.io/Bayesian-TDMM/articles/getting-started.md)
-explains the scales and diagnostics. The package’s [Sweave
-vignette](https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/getting-started.Rnw)
-includes an illustration from a larger Gaussian dataset.
+guide](https://esrakurum.github.io/Bayesian-TDMM/articles/getting-started.md)
+explains the scales and diagnostics and illustrates recovery from a
+larger Gaussian dataset.

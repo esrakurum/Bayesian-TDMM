@@ -1,5 +1,5 @@
 # Reusable Bernoulli V2 design. No fitting, file writes, or basis construction.
-# Coefficients are log-odds effects. seed is explicit for repeated studies.
+# Coefficients are log-odds effects; the seed makes the example reproducible.
 bernoulli_v2_truth <- function(time) {
   cbind(beta0=-0.5+0.75*sin(2*pi*time),
         beta1=0.75*cos(2*pi*time), beta2=0.5+0.25*time)

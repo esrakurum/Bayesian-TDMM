@@ -15,7 +15,7 @@ for(nb in c(4,6,8,10)) {
   identical(j$y,i$data$y), identical(j$X[,3],i$data$changing),
   all(i$subject.levels[j$subject.ID]==i$data$subject.ID),
   identical(j$bases.obs,splines::splineDesign(i$spline$knots,i$time.obs,ord=4)))
- # Match the approved diagnostic coordinates and conditional covariance exactly.
+ # Check the eigenspace coordinates and conditional covariance exactly.
  e<-eigen(i$Penalty.bases,symmetric=TRUE);pen<-which(e$values-1e-6>1e-8)
  stopifnot(identical(j$U.pen,e$vectors[,pen,drop=FALSE]),
   identical(j$lambda.pen,e$values[pen]-1e-6))
