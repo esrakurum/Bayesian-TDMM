@@ -1,7 +1,7 @@
 \name{data.gen.tdmm.bern}
 \alias{data.gen.tdmm.bern}
 \title{Generate a balanced-grid Bernoulli simulation dataset}
-\description{Generate a balanced-grid Bernoulli simulation dataset for compatibility examples. This legacy helper is separate from the irregular-time V2 simulation examples.}
+\description{Generate a balanced-grid Bernoulli simulation dataset for TDMM examples.}
 \usage{
 data.gen.tdmm.bern(n.subject = 200, n.time = 20, sigma2.b = 0.5, seed = NULL) 
 }
