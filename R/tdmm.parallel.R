@@ -1,4 +1,4 @@
-# Compatibility entry point. New V2 code uses tdmm(...,
+# This parallel function is from an older release, the new V2 code uses tdmm(...,
 # control = tdmm_control(parallel = TRUE, cores = ...)).
 tdmm.parallel <- function(data,
                           family = c("gaussian", "bernoulli", "poisson"),
