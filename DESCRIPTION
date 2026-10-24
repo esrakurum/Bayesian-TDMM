@@ -4,7 +4,7 @@ Title: Bayesian Time-Dynamic Mixed-Effects Models
 Version: 0.2.0
 Authors@R: c(
     person("Makena", "Grigsby", email = "makenavgrigsby@gmail.com", role = "aut"),
-    person("Esra", "Kurum", email = "esra.kurum@ucr.edu", role = c("aut", "cre"))
+    person("Esra", "Kürüm", email = "esra.kurum@ucr.edu", role = c("aut", "cre"))
     )
 Description: Fits Bayesian time-dynamic mixed-effects models for longitudinal
     data with irregular subject-specific observation times, baseline covariates,
