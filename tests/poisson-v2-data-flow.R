@@ -1,6 +1,5 @@
 library(TDMM)
-# Deterministic row identities let this test detect permutations independently of
-# the fitter. No outcome generation, posterior performance or convergence checks.
+# No outcome generation, posterior performance or convergence checks.
 build <- getFromNamespace("build.tdmm.subject.inputs", "TDMM")
 jags.data <- getFromNamespace("build.tdmm.jags.data", "TDMM")
 bbase <- getFromNamespace("bbase", "TDMM")
