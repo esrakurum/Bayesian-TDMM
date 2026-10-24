@@ -1,9 +1,9 @@
 ## tdmm() fits a Bayesian time-dynamic mixed-effects model
-## using the standard serial JAGS workflow.
+## using serial or parallel JAGS chains through one public interface.
 ##
 ## The function:
 ##   - checks the requested response family
-##   - prepares the subject-level TDMM inputs
+##   - prepares the observation-level TDMM inputs
 ##   - builds the JAGS data list
 ##   - locates the correct JAGS model file
 ##   - runs the model using R2jags
@@ -14,34 +14,50 @@
 ##   - Bernoulli outcomes
 ##   - Poisson outcomes
 ##
-## Baseline covariates are supplied through x.var.
+## Covariates are supplied through x.var.
 ## The user can pass one covariate or several covariates:
 ##
 ##   x.var = "x1"
 ##   x.var = c("x1", "x2", ...)
 ##
 ## If x.var is NULL, all columns except the subject ID, time,
-## and response variables are treated as baseline covariates.
+## and response variables are treated as covariates.
 ############################################################
 
 tdmm <- function(data,
                  family = c("gaussian", "bernoulli", "poisson"),
-                 nknots = 15,
+                 nknots = NULL,
                  subject.var = "subject.ID",
                  time.var = "time",
                  y.var = "y",
                  x.var = NULL,
-                 degree = 2,
+                 degree = 3,
                  n.chains = 3,
                  n.iter = 10000,
                  n.burn = 3000,
                  n.thin = 5,
                  n.adapt = 5000,
                  jags.dir = NULL,
-                 quiet = FALSE) {
+                 quiet = FALSE,
+                 n_basis = NULL,
+                 control = NULL,
+                 priors = NULL) {
   
   ## Match the requested family
+  n_basis <- .resolve.n_basis(n_basis, nknots, degree)
   family <- match.arg(family)
+  control <- .resolve.tdmm.control(control,
+    legacy = list(n.chains = n.chains, n.iter = n.iter, n.burn = n.burn,
+      n.thin = n.thin, n.adapt = n.adapt, seed = NULL, n.cores = NULL),
+    supplied = c(n.chains = !missing(n.chains), n.iter = !missing(n.iter),
+      n.burn = !missing(n.burn), n.thin = !missing(n.thin),
+      n.adapt = !missing(n.adapt)))
+  n.chains <- control$chains
+  n.iter <- control$iterations
+  n.burn <- control$burn_in
+  n.thin <- control$thin
+  n.adapt <- control$adapt
+  priors <- .resolve.tdmm.priors(family, priors)
   
   ##########
   ## Check the data before fitting
@@ -60,14 +76,15 @@ tdmm <- function(data,
   )
   
   ##########
-  ## Build subject-level inputs
+  ## Build observation-level inputs
   ##########
   ## This prepares the response vector, covariate matrices,
   ## subject indexing, spline basis, and penalty matrix.
   
+
   inputs <- build.tdmm.subject.inputs(
     data = data,
-    nknots = nknots,
+    n_basis = n_basis,
     subject.var = subject.var,
     time.var = time.var,
     y.var = y.var,
@@ -81,9 +98,13 @@ tdmm <- function(data,
   
   jags.data <- build.tdmm.jags.data(
     inputs = inputs,
-    family = family
+    family = family,
+    priors = priors
   )
   
+  if (family == "bernoulli") inputs$null.space <- jags.data[c(
+    "U.null", "U.pen", "lambda.pen", "tau.null")]
+
   ##########
   ## Get the family-specific model configuration
   ##########
@@ -101,13 +122,16 @@ tdmm <- function(data,
   
   model.settings <- list(
     family = family,
-    nknots = nknots,
+    n_basis = n_basis,
     degree = degree,
     n.chains = n.chains,
     n.iter = n.iter,
     n.burn = n.burn,
     n.thin = n.thin,
     n.adapt = n.adapt,
+    control = control,
+    seed = control$seed,
+    priors = priors,
     jags.dir = jags.dir,
     model.file = config$model.file,
     params = config$params,
@@ -116,6 +140,11 @@ tdmm <- function(data,
     y.var = y.var,
     x.var = inputs$x.var,
     nX = inputs$nX,
+    N = inputs$N,
+    n.subject = inputs$n.subject,
+    n.basis = inputs$nbasis,
+    implementation = "V2 observation-level",
+    spline.prior = if (family == "bernoulli") "centered null-space" else "ridge",
     coef.names = inputs$coef.names
   )
   
@@ -125,21 +154,33 @@ tdmm <- function(data,
   ## R2jags::jags() runs the MCMC sampler through JAGS.
   ## The model file depends on the selected response family.
   
+  if (isTRUE(control$parallel)) {
+    model.settings$n.cores <- control$cores
+    model.settings$parallel.method <- "mclapply"
+  }
+
   if (!quiet) {
-    message("Fitting ", family, " TDMM with ", length(inputs$x.var), " baseline covariate(s).")
+    message("Fitting ", family, " TDMM with ", length(inputs$x.var), " covariate(s).")
     message("Using JAGS model file: ", config$model.file)
+    if (isTRUE(control$parallel))
+      message("Running ", n.chains, " chain(s) on ", control$cores, " core(s).")
   }
   
-  fit <- R2jags::jags(
-    data = jags.data,
-    parameters.to.save = config$params,
-    model.file = config$model.file,
-    n.chains = n.chains,
-    n.iter = n.iter,
-    n.burnin = n.burn,
-    n.thin = n.thin,
-    n.adapt = n.adapt
-  )
+  if (isTRUE(control$parallel)) {
+    fit <- .tdmm.parallel.samples(jags.data, config, control, quiet)
+  } else {
+    if (!is.null(control$seed)) set.seed(control$seed)
+    fit <- R2jags::jags(
+      data = jags.data,
+      parameters.to.save = config$params,
+      model.file = config$model.file,
+      n.chains = n.chains,
+      n.iter = n.iter,
+      n.burnin = n.burn,
+      n.thin = n.thin,
+      n.adapt = n.adapt
+    )
+  }
   
   ##########
   ## Build and return the fitted TDMM object

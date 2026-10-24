@@ -1,0 +1,86 @@
+---
+title: "Getting Started with TDMM"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with TDMM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+TDMM fits Bayesian time-dynamic mixed-effects models with coefficient functions that vary over time and subject-specific random intercepts. Gaussian, Bernoulli, and Poisson responses are supported. Subjects may have different observation times and visit counts. Numeric covariates can be constant within subject or change at each visit. The default is eight cubic B-spline basis functions (degree 3, order 4) with a second-order coefficient-difference penalty. Install [JAGS](https://mcmc-jags.sourceforge.io/) before fitting.
+
+This page is the HTML companion to the package's [Sweave Getting Started vignette](https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/getting-started.Rnw).
+
+## Data and fitting
+
+Provide one row per observed subject and visit, with columns for subject ID, numeric time, response, and covariates. The order of `x.var` determines the coefficient labels: `beta1` multiplies the first covariate, `beta2` the second, and so on.
+
+```r
+library(TDMM)
+fit <- tdmm(long_data, family = "gaussian",
+            subject.var = "id", time.var = "time", y.var = "y",
+            x.var = c("baseline", "changing"), n_basis = 8,
+            control = tdmm_control(chains = 3, iterations = 4000,
+                                   burn_in = 1500, thin = 2,
+                                   adapt = 2000, seed = 77181),
+            priors = tdmm.priors("gaussian"))
+summary(fit)
+plot(fit)
+plot.trace.tdmm(fit, c("sigma.b", "sigma2.e", "tau.alpha[1]"))
+```
+
+Here `baseline` should be repeated within subject and `changing` may vary by visit. TDMM handles the subject indexing and spline construction. The Gaussian coefficient curves are on the response scale; Bernoulli coefficients are on the log-odds scale and Poisson coefficients on the log-mean scale. Inspect trace plots, R-hat, effective sample size, and credible bands before interpretation.
+
+## Coefficient-function recovery
+
+The figure illustrates recovery from simulated data with known coefficient functions. Solid lines show posterior means, dashed lines the truth, and shaded regions pointwise 95% credible bands. The [Gaussian example](gaussian.html) gives the fitting code. The Bernoulli and Poisson examples show the same workflow for binary and count outcomes.
+
+```{r gaussian-curves, echo=FALSE, fig.width=9, fig.height=3.4}
+example_data_path <- function(filename) {
+  path <- system.file("extdata", filename, package="TDMM")
+  if (!nzchar(path)) path <- file.path("..", "inst", "extdata", filename)
+  if (!file.exists(path)) path <- file.path("inst", "extdata", filename)
+  stopifnot(file.exists(path))
+  path
+}
+g <- read.csv(example_data_path("gaussian-v2-pointwise.csv"))
+oldpar <- par(mfrow=c(1,3), mar=c(4,4,2,1))
+for (nm in c("beta0","beta1","beta2")) {
+  z <- g[g$coefficient==nm,]
+  plot(z$time,z$estimate,type="n",ylim=range(z$truth,z$lower,z$upper),
+       xlab="Time",ylab=nm,main=nm)
+  polygon(c(z$time,rev(z$time)),c(z$lower,rev(z$upper)),
+          col="gray90",border=NA)
+  lines(z$time,z$estimate,lwd=2,col="navy")
+  lines(z$time,z$truth,lty=2,lwd=1.5)
+}
+par(oldpar)
+```
+
+
+## PBC2 real-data application
+
+The [PBC2 application](pbc2.html) uses the `pbc2` dataset from JMbayes2: 1,945 observations from 312 subjects, with 1–16 visits. The response is log serum bilirubin; predictors are a baseline treatment indicator and longitudinal albumin. Albumin is centered at its overall *observation-level* mean, 3.3898868894601542 g/dL. Thus the intercept represents the modeled placebo trajectory at that albumin level and random intercept zero.
+
+The treatment 95% credible interval includes zero throughout the common evaluation grid. The albumin coefficient is negative, with its band below zero on that grid. These are conditional associations, and the treatment curve does not establish a causal effect. Late follow-up is sparse, so small tail fluctuations should not be read as precise clinical changes.
+
+```{r pbc-curves, echo=FALSE, fig.width=9, fig.height=3.4}
+p <- read.csv(example_data_path("pbc2-v2-curves.csv"))
+p <- p[p$n_basis==8,]
+oldpar <- par(mfrow=c(1,3), mar=c(4,4,2,1))
+for (nm in c("intercept","treatment","albumin")) {
+  z <- p[p$coefficient==nm,]
+  plot(z$time,z$estimate,type="n",ylim=range(z$lower,z$upper,0),
+       xlab="Years since baseline",ylab="Coefficient",main=nm)
+  polygon(c(z$time,rev(z$time)),c(z$lower,rev(z$upper)),
+          col="gray90",border=NA)
+  abline(h=0,col="gray60",lty=3)
+  lines(z$time,z$estimate,lwd=2,col="navy")
+}
+par(oldpar)
+```
+
+
+## Using your own data
+
+Choose `family = "gaussian"`, `"bernoulli"`, or `"poisson"` and supply the intended covariates in `x.var` order. The data checks reject missing analysis values; decide how to handle missingness before fitting. Varying `n_basis` is a useful sensitivity check; scientifically important smoothing or variance priors can also be examined using `tdmm.priors()`. For independent chains on macOS or Linux, select parallel execution through `tdmm_control(parallel = TRUE, cores = 2, ...)`.

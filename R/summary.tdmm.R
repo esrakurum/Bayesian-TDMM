@@ -32,6 +32,8 @@ summary.tdmm <- function(object, ...) {
   inputs <- object$inputs
   settings <- object$model.settings
   family <- settings$family
+  n_basis <- if (!is.null(inputs$n_basis)) inputs$n_basis else ncol(inputs$basis)
+  degree <- if (!is.null(inputs$degree)) inputs$degree else settings$degree
   
   ########
   ## Print model summary
@@ -42,10 +44,12 @@ summary.tdmm <- function(object, ...) {
   
   cat("Family: ", family, "\n", sep = "")
   cat("Number of subjects: ", inputs$n.subject, "\n", sep = "")
-  cat("Number of time points: ", inputs$n.time, "\n", sep = "")
+  cat("Number of unique observed time points: ", inputs$n.time, "\n", sep = "")
   cat("Total observations: ", inputs$n.total, "\n", sep = "")
   cat("Number of covariates: ", length(inputs$x.var), "\n", sep = "")
   cat("Number of coefficient functions: ", inputs$nX, "\n", sep = "")
+  cat("Spline basis functions: ", n_basis, "\n", sep = "")
+  cat("Polynomial degree: ", degree, "; spline order: ", degree + 1, "\n", sep = "")
   cat("Covariates: ", paste(inputs$x.var, collapse = ", "), "\n", sep = "")
   
   cat("\nMCMC settings\n")
@@ -63,18 +67,29 @@ summary.tdmm <- function(object, ...) {
   cat("\nVariance summaries\n")
   cat("------------------\n")
   cat("sigma2.b: ", object$sigma2.b, "\n", sep = "")
-  
+  cat("sigma.b: ", object$sigma.b, "\n", sep = "")
   if (family == "gaussian") {
     cat("sigma2.e: ", object$sigma2.e, "\n", sep = "")
+  }
+
+  if (!is.null(settings$priors)) {
+    cat("\nPrior settings\n")
+    cat("--------------\n")
+    print(settings$priors)
   }
   
   cat("\nCoefficient functions\n")
   cat("---------------------\n")
   
   if (!is.null(object$beta.hat)) {
-    cat("  beta.hat\n")
+    labels <- object$beta.names
+    if (is.null(labels) || length(labels) != ncol(object$beta.hat)) {
+      labels <- paste0("beta", seq_len(ncol(object$beta.hat)) - 1L)
+    }
+    labels <- sub("\\.hat$", "", labels)
+    cat("Posterior mean curves: ", paste(labels, collapse = ", "), "\n", sep = "")
   } else {
-    cat("  beta.hat not found\n")
+    cat("Posterior mean curves unavailable\n")
   }
   
   ########
@@ -87,13 +102,19 @@ summary.tdmm <- function(object, ...) {
       n.subject = inputs$n.subject,
       n.time = inputs$n.time,
       n.total = inputs$n.total,
+      N = inputs$n.total,
+      sigma.b = object$sigma.b,
+      sigma.e = if (family == "gaussian") object$sigma.e else NULL,
       nX = inputs$nX,
+      n_basis = n_basis,
+      degree = degree,
       covariates = inputs$x.var,
       beta.hat = object$beta.hat,
       beta.names = object$beta.names,
       sigma2.b = object$sigma2.b,
       sigma2.e = if (family == "gaussian") object$sigma2.e else NULL,
-      model.settings = settings
+      model.settings = settings,
+      priors = settings$priors
     )
   )
 }

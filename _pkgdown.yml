@@ -1,0 +1,72 @@
+url: https://esrakurum.github.io/Bayesian-TDMM/
+destination: docs
+repo:
+  branch: main
+template:
+  bootstrap: 5
+navbar:
+  structure:
+    left: [intro, examples, reference, technical, news]
+    right: [search, github]
+  components:
+    intro:
+      text: Getting Started
+      href: articles/getting-started.html
+    examples:
+      text: Examples
+      menu:
+      - text: Gaussian
+        href: articles/gaussian.html
+      - text: Bernoulli
+        href: articles/bernoulli.html
+      - text: Poisson
+        href: articles/poisson.html
+      - text: PBC2 real-data application
+        href: articles/pbc2.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    technical:
+      text: Technical documentation
+      href: articles/technical.html
+    news:
+      text: NEWS
+      href: news/index.html
+    github:
+      icon: fa-github
+      aria-label: GitHub repository
+      href: https://github.com/esrakurum/Bayesian-TDMM
+reference:
+- title: Fit and control
+  contents:
+  - tdmm
+  - tdmm_control
+  - tdmm.control
+  - tdmm.priors
+  - tdmm.parallel
+- title: Summaries, plots, and diagnostics
+  contents:
+  - summary.tdmm
+  - plot.tdmm
+  - plot.trace.tdmm
+  - recover.tdmm.betas.ci
+  - make.tdmm.plot.grid
+- title: Data checks
+  contents:
+  - starts_with("check.")
+- title: Simulation helpers
+  contents:
+  - starts_with("data.gen.")
+articles:
+- title: Getting Started
+  contents:
+  - matches("getting-started")
+- title: Examples
+  contents:
+  - gaussian
+  - bernoulli
+  - poisson
+  - pbc2
+- title: Technical documentation
+  contents:
+  - technical

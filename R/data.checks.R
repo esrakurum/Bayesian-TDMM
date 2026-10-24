@@ -1,25 +1,38 @@
-## This file contains data checking functions for TDMM inputs.
+############################################################
+## data.checks.R
 ##
-## The checks are used before fitting a model to make sure:
+## Data checking functions for TDMM inputs.
+##
+## The checks make sure:
 ##   - required columns are present
 ##   - data are in long format
-##   - subjects share a common time grid
-##   - baseline covariates are constant within subject
+##   - the time variable is numeric
+##   - covariates are numeric
 ##   - the response matches the selected family
+##
+## The updated checks allow:
+##   - balanced measurement times
+##   - irregular measurement times
+##   - baseline covariates
+##   - time-varying covariates
+############################################################
 
 
-##########
+############################################################
 ## Check repeated-measure structure
-##########
+############################################################
 
 check.tdmm.subject.balance <- function(data,
                                        subject.var = "subject.ID",
                                        time.var = "time") {
-  
-  ## Check that the subject ID and time columns are present.
+
+  ##########
+  ## Check required columns
+  ##########
+
   required.cols <- c(subject.var, time.var)
   missing.cols <- setdiff(required.cols, names(data))
-  
+
   if (length(missing.cols) > 0) {
     stop(
       "data is missing required column(s): ",
@@ -27,25 +40,36 @@ check.tdmm.subject.balance <- function(data,
       call. = FALSE
     )
   }
-  
-  ## Count repeated observations per subject.
-  obs.per.subject <- table(data[[subject.var]])
-  
-  ## Split and sort the observed time grid for each subject.
-  time.by.subject <- split(data[[time.var]], data[[subject.var]])
+
+  ##########
+  ## Count observations per subject
+  ##########
+
+  obs.per.subject <- table(factor(data[[subject.var]]))
+
+  ##########
+  ## Store observed times by subject
+  ##########
+
+  time.by.subject <- split(data[[time.var]], data[[subject.var]], drop = TRUE)
   time.by.subject <- lapply(time.by.subject, sort)
-  
-  ## Use the first subject's time grid as the reference.
+
+  ##########
+  ## Check balanced structure
+  ##########
+
   reference.grid <- time.by.subject[[1]]
-  
-  ## Check if all subjects have the same time grid.
+
   common.time.grid <- all(
     sapply(time.by.subject, function(z) identical(z, reference.grid))
   )
-  
-  ## Check if all subjects have the same number of observations.
+
   balanced <- length(unique(as.numeric(obs.per.subject))) == 1
-  
+
+  ##########
+  ## Return structure summary
+  ##########
+
   list(
     n.subject = length(obs.per.subject),
     min.obs.per.subject = min(obs.per.subject),
@@ -54,14 +78,63 @@ check.tdmm.subject.balance <- function(data,
     obs.per.subject = obs.per.subject,
     balanced = balanced,
     common.time.grid = common.time.grid,
-    time.grid = reference.grid
+    time.grid = reference.grid,
+    time.by.subject = time.by.subject
   )
 }
 
 
-##########
+############################################################
+## Check covariate variation within subject
+############################################################
+
+check.tdmm.covariate.variation <- function(data,
+                                           subject.var = "subject.ID",
+                                           x.var) {
+
+  ##########
+  ## Count unique values within subject
+  ##########
+
+  x.unique.by.subject <- lapply(x.var, function(x.name) {
+    tapply(
+      data[[x.name]],
+      factor(data[[subject.var]]),
+      function(z) length(unique(z))
+    )
+  })
+
+  names(x.unique.by.subject) <- x.var
+
+  ##########
+  ## Identify baseline and time-varying covariates
+  ##########
+
+  x.constant.by.variable <- sapply(
+    x.unique.by.subject,
+    function(z) all(z == 1)
+  )
+
+  baseline.covariates <- names(x.constant.by.variable)[x.constant.by.variable]
+  time.varying.covariates <- names(x.constant.by.variable)[!x.constant.by.variable]
+
+  ##########
+  ## Return covariate summary
+  ##########
+
+  list(
+    x.constant.by.variable = x.constant.by.variable,
+    x.unique.by.subject = x.unique.by.subject,
+    baseline.covariates = baseline.covariates,
+    time.varying.covariates = time.varying.covariates,
+    has.time.varying.covariates = length(time.varying.covariates) > 0
+  )
+}
+
+
+############################################################
 ## Check general TDMM data structure
-##########
+############################################################
 
 check.tdmm.data.structure <- function(data,
                                       subject.var = "subject.ID",
@@ -69,117 +142,142 @@ check.tdmm.data.structure <- function(data,
                                       y.var = "y",
                                       x.var = NULL,
                                       stop.on.fail = TRUE) {
-  
-  ## If covariates are not supplied, use all columns except
-  ## subject, time, and response.
+
+  ##########
+  ## Basic data check
+  ##########
+
+  if (!is.data.frame(data)) {
+    stop("data must be a data frame.", call. = FALSE)
+  }
+
+  ##########
+  ## Select covariates
+  ##########
+
   if (is.null(x.var)) {
     x.var <- setdiff(names(data), c(subject.var, time.var, y.var))
   }
-  
+
   if (length(x.var) == 0) {
-    stop("No baseline covariates were provided or detected.", call. = FALSE)
+    stop("No covariates were provided or detected.", call. = FALSE)
   }
-  
-  ## Check that all required columns are present.
+
+  ##########
+  ## Check required columns
+  ##########
+
   required.cols <- c(subject.var, time.var, y.var, x.var)
   missing.cols <- setdiff(required.cols, names(data))
-  
+
   if (length(missing.cols) > 0) {
+
     msg <- paste0(
       "data is missing required column(s): ",
       paste(missing.cols, collapse = ", ")
     )
-    
+
     if (stop.on.fail) {
       stop(msg, call. = FALSE)
     } else {
       warning(msg, call. = FALSE)
     }
   }
-  
-  ## Check missing values in required columns.
+
+  ##########
+  ## Check missing values
+  ##########
+
   missing.counts <- colSums(is.na(data[, required.cols, drop = FALSE]))
   has.missing <- any(missing.counts > 0)
-  
+
   if (has.missing) {
+
     msg <- "Missing values were found in the required TDMM columns."
-    
+
     if (stop.on.fail) {
       stop(msg, call. = FALSE)
     } else {
       warning(msg, call. = FALSE)
     }
   }
-  
-  ## Check repeated-measure balance and common time grid.
+
+  ##########
+  ## Check time variable
+  ##########
+
+  if (!is.numeric(data[[time.var]])) {
+
+    msg <- "time.var must be numeric."
+
+    if (stop.on.fail) {
+      stop(msg, call. = FALSE)
+    } else {
+      warning(msg, call. = FALSE)
+    }
+  }
+
+  ##########
+  ## Check covariates
+  ##########
+
+  covariate.numeric <- sapply(data[, x.var, drop = FALSE], is.numeric)
+
+  if (!all(covariate.numeric)) {
+
+    bad.x <- names(covariate.numeric)[!covariate.numeric]
+
+    msg <- paste0(
+      "The following covariate(s) are not numeric: ",
+      paste(bad.x, collapse = ", "),
+      ". Convert factor or character covariates to numeric indicators before fitting."
+    )
+
+    if (stop.on.fail) {
+      stop(msg, call. = FALSE)
+    } else {
+      warning(msg, call. = FALSE)
+    }
+  }
+
+  numeric.cols <- c(time.var, x.var)
+  if (all(vapply(data[, numeric.cols, drop = FALSE], is.numeric, logical(1))) &&
+      any(vapply(data[, numeric.cols, drop = FALSE],
+                 function(z) any(is.infinite(z)), logical(1)))) {
+    stop("Times and covariates must contain finite values.", call. = FALSE)
+  }
+
+  ##########
+  ## Summarize repeated-measure structure
+  ##########
+
   subject.balance <- check.tdmm.subject.balance(
     data = data,
     subject.var = subject.var,
     time.var = time.var
   )
-  
-  if (!subject.balance$balanced) {
-    msg <- "Subjects do not all have the same number of repeated observations."
-    
-    if (stop.on.fail) {
-      stop(msg, call. = FALSE)
-    } else {
-      warning(msg, call. = FALSE)
-    }
-  }
-  
-  if (!subject.balance$common.time.grid) {
-    msg <- "Subjects do not all share the same time grid."
-    
-    if (stop.on.fail) {
-      stop(msg, call. = FALSE)
-    } else {
-      warning(msg, call. = FALSE)
-    }
-  }
-  
-  ## Check that each baseline covariate is constant within subject.
-  x.unique.by.subject <- lapply(x.var, function(x.name) {
-    tapply(
-      data[[x.name]],
-      data[[subject.var]],
-      function(z) length(unique(z))
-    )
-  })
-  
-  names(x.unique.by.subject) <- x.var
-  
-  x.constant.by.variable <- sapply(
-    x.unique.by.subject,
-    function(z) all(z == 1)
+
+  ##########
+  ## Summarize covariate variation
+  ##########
+
+  covariate.variation <- check.tdmm.covariate.variation(
+    data = data,
+    subject.var = subject.var,
+    x.var = x.var
   )
-  
-  x.constant.within.subject <- all(x.constant.by.variable)
-  
-  if (!x.constant.within.subject) {
-    bad.x <- names(x.constant.by.variable)[!x.constant.by.variable]
-    
-    msg <- paste0(
-      "The following baseline covariate(s) are not constant within subject: ",
-      paste(bad.x, collapse = ", "),
-      ". Baseline covariates must be constant within subject for the current TDMM implementation."
-    )
-    
-    if (stop.on.fail) {
-      stop(msg, call. = FALSE)
-    } else {
-      warning(msg, call. = FALSE)
-    }
-  }
-  
-  ## Check whether rows are already ordered by subject and time.
+
+  ##########
+  ## Check row ordering
+  ##########
+
   data.ordered <- data[order(data[[subject.var]], data[[time.var]]), ]
-  
+
   ordered.by.subject.time <- identical(
     row.names(data),
     row.names(data.ordered)
   )
-  
+
   if (!ordered.by.subject.time) {
     warning(
       "Rows are not ordered by subject and time. ",
@@ -187,7 +285,11 @@ check.tdmm.data.structure <- function(data,
       call. = FALSE
     )
   }
-  
+
+  ##########
+  ## Return structure check
+  ##########
+
   list(
     required.columns = required.cols,
     missing.counts = missing.counts,
@@ -195,26 +297,34 @@ check.tdmm.data.structure <- function(data,
     subject.balance = subject.balance,
     x.var = x.var,
     p = length(x.var),
-    x.constant.within.subject = x.constant.within.subject,
-    x.constant.by.variable = x.constant.by.variable,
-    x.unique.by.subject = x.unique.by.subject,
+    x.constant.within.subject = all(covariate.variation$x.constant.by.variable),
+    covariate.numeric = covariate.numeric,
+    covariate.variation = covariate.variation,
+    x.constant.by.variable = covariate.variation$x.constant.by.variable,
+    x.unique.by.subject = covariate.variation$x.unique.by.subject,
+    baseline.covariates = covariate.variation$baseline.covariates,
+    time.varying.covariates = covariate.variation$time.varying.covariates,
+    has.time.varying.covariates = covariate.variation$has.time.varying.covariates,
     ordered.by.subject.time = ordered.by.subject.time
   )
 }
 
 
-##########
+############################################################
 ## Check Gaussian response
-##########
+############################################################
 
 check.gaussian.response <- function(data,
                                     y.var = "y",
                                     time.var = "time") {
-  
-  ## Check that the response and time variables are present.
+
+  ##########
+  ## Check required columns
+  ##########
+
   required.cols <- c(y.var, time.var)
   missing.cols <- setdiff(required.cols, names(data))
-  
+
   if (length(missing.cols) > 0) {
     stop(
       "data is missing required column(s): ",
@@ -222,15 +332,25 @@ check.gaussian.response <- function(data,
       call. = FALSE
     )
   }
-  
+
+  ##########
+  ## Check response
+  ##########
+
   y <- data[[y.var]]
-  
-  ## Gaussian responses should be numeric.
+
   if (!is.numeric(y)) {
-    warning("The Gaussian response variable is not numeric.", call. = FALSE)
+    stop("The Gaussian response variable must be numeric.", call. = FALSE)
   }
-  
-  ## Overall response summaries.
+
+  if (any(is.infinite(y))) {
+    stop("The Gaussian response must contain finite values.", call. = FALSE)
+  }
+
+  ##########
+  ## Overall response summaries
+  ##########
+
   overall <- list(
     n = length(y),
     mean = mean(y, na.rm = TRUE),
@@ -238,8 +358,11 @@ check.gaussian.response <- function(data,
     min = min(y, na.rm = TRUE),
     max = max(y, na.rm = TRUE)
   )
-  
-  ## Response summaries by time point.
+
+  ##########
+  ## Response summaries by observed time
+  ##########
+
   by.time <- aggregate(
     y,
     by = list(time = data[[time.var]]),
@@ -253,10 +376,14 @@ check.gaussian.response <- function(data,
       )
     }
   )
-  
+
   by.time <- do.call(data.frame, by.time)
   names(by.time) <- c("time", "n", "mean", "sd", "min", "max")
-  
+
+  ##########
+  ## Return response check
+  ##########
+
   list(
     family = "gaussian",
     overall = overall,
@@ -265,18 +392,21 @@ check.gaussian.response <- function(data,
 }
 
 
-##########
+############################################################
 ## Check Bernoulli response
-##########
+############################################################
 
 check.bernoulli.balance <- function(data,
                                     y.var = "y",
                                     time.var = "time") {
-  
-  ## Check that the response and time variables are present.
+
+  ##########
+  ## Check required columns
+  ##########
+
   required.cols <- c(y.var, time.var)
   missing.cols <- setdiff(required.cols, names(data))
-  
+
   if (length(missing.cols) > 0) {
     stop(
       "data is missing required column(s): ",
@@ -284,20 +414,30 @@ check.bernoulli.balance <- function(data,
       call. = FALSE
     )
   }
-  
+
+  ##########
+  ## Check response
+  ##########
+
   y <- data[[y.var]]
-  
-  ## Bernoulli responses must contain only 0 and 1.
   y.values <- sort(unique(y))
-  
+
   if (!all(y.values %in% c(0, 1))) {
-    stop("For Bernoulli data, y must contain only 0 and 1 values.", call. = FALSE)
+    stop("For Bernoulli data, y must contain only 0 and 1 values.",
+         call. = FALSE)
   }
-  
+
+  ##########
+  ## Overall response summaries
+  ##########
+
   overall.counts <- table(y)
   overall.proportions <- prop.table(overall.counts)
-  
-  ## Response balance by time point.
+
+  ##########
+  ## Response summaries by observed time
+  ##########
+
   by.time <- aggregate(
     y,
     by = list(time = data[[time.var]]),
@@ -311,10 +451,14 @@ check.bernoulli.balance <- function(data,
       )
     }
   )
-  
+
   by.time <- do.call(data.frame, by.time)
   names(by.time) <- c("time", "n", "n0", "n1", "prop1", "prop0")
-  
+
+  ##########
+  ## Return response check
+  ##########
+
   list(
     family = "bernoulli",
     overall.counts = overall.counts,
@@ -324,18 +468,21 @@ check.bernoulli.balance <- function(data,
 }
 
 
-##########
+############################################################
 ## Check Poisson response
-##########
+############################################################
 
 check.poisson.counts <- function(data,
                                  y.var = "y",
                                  time.var = "time") {
-  
-  ## Check that the response and time variables are present.
+
+  ##########
+  ## Check required columns
+  ##########
+
   required.cols <- c(y.var, time.var)
   missing.cols <- setdiff(required.cols, names(data))
-  
+
   if (length(missing.cols) > 0) {
     stop(
       "data is missing required column(s): ",
@@ -343,18 +490,31 @@ check.poisson.counts <- function(data,
       call. = FALSE
     )
   }
-  
+
+  ##########
+  ## Check response
+  ##########
+
   y <- data[[y.var]]
-  
-  ## Poisson responses must be nonnegative integer counts.
+
+  if (!is.numeric(y) || any(is.infinite(y))) {
+    stop("For Poisson data, y must contain finite numeric counts.", call. = FALSE)
+  }
+
   if (any(y < 0, na.rm = TRUE)) {
-    stop("For Poisson data, y must be nonnegative.", call. = FALSE)
+    stop("For Poisson data, y must be nonnegative.",
+         call. = FALSE)
   }
-  
+
   if (any(abs(y - round(y)) > .Machine$double.eps^0.5, na.rm = TRUE)) {
-    stop("For Poisson data, y must contain integer counts.", call. = FALSE)
+    stop("For Poisson data, y must contain integer counts.",
+         call. = FALSE)
   }
-  
+
+  ##########
+  ## Overall response summaries
+  ##########
+
   overall <- list(
     n = length(y),
     mean = mean(y, na.rm = TRUE),
@@ -364,8 +524,11 @@ check.poisson.counts <- function(data,
     zeros = sum(y == 0, na.rm = TRUE),
     zero.proportion = mean(y == 0, na.rm = TRUE)
   )
-  
-  ## Count summaries by time point.
+
+  ##########
+  ## Response summaries by observed time
+  ##########
+
   by.time <- aggregate(
     y,
     by = list(time = data[[time.var]]),
@@ -381,7 +544,7 @@ check.poisson.counts <- function(data,
       )
     }
   )
-  
+
   by.time <- do.call(data.frame, by.time)
   names(by.time) <- c(
     "time",
@@ -393,7 +556,11 @@ check.poisson.counts <- function(data,
     "zeros",
     "zero.proportion"
   )
-  
+
+  ##########
+  ## Return response check
+  ##########
+
   list(
     family = "poisson",
     overall = overall,
@@ -402,9 +569,9 @@ check.poisson.counts <- function(data,
 }
 
 
-##########
+############################################################
 ## Combined family-specific TDMM check
-##########
+############################################################
 
 check.tdmm.family.data <- function(data,
                                    family = c("gaussian", "bernoulli", "poisson"),
@@ -413,25 +580,27 @@ check.tdmm.family.data <- function(data,
                                    y.var = "y",
                                    x.var = NULL,
                                    stop.on.fail = TRUE) {
-  
-  ## This is the main checking function users can run before
-  ## fitting a TDMM.
-  ##
-  ## It first checks the shared longitudinal data structure
-  ## and then runs the response check for the selected family.
-  
+
+  ##########
+  ## Match family
+  ##########
+
   family <- match.arg(family)
-  
-  ## If the user does not give covariate names, use all columns
-  ## except the subject ID, time, and response columns.
+
+  ##########
+  ## Select covariates
+  ##########
+
   if (is.null(x.var)) {
     x.var <- setdiff(names(data), c(subject.var, time.var, y.var))
   }
-  
-  ## Count the number of baseline covariates.
+
   p <- length(x.var)
-  
-  ## Run the shared TDMM data structure check.
+
+  ##########
+  ## Check data structure
+  ##########
+
   structure.check <- check.tdmm.data.structure(
     data = data,
     subject.var = subject.var,
@@ -440,8 +609,11 @@ check.tdmm.family.data <- function(data,
     x.var = x.var,
     stop.on.fail = stop.on.fail
   )
-  
-  ## Run the response check that matches the selected family.
+
+  ##########
+  ## Check response by family
+  ##########
+
   response.check <- switch(
     family,
     gaussian = check.gaussian.response(
@@ -460,7 +632,11 @@ check.tdmm.family.data <- function(data,
       time.var = time.var
     )
   )
-  
+
+  ##########
+  ## Return full check
+  ##########
+
   list(
     family = family,
     covariates = x.var,

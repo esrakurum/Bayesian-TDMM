@@ -1,0 +1,14 @@
+pandoc: '2.10'
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  bernoulli: bernoulli.html
+  gaussian: gaussian.html
+  getting-started: getting-started.html
+  pbc2: pbc2.html
+  poisson: poisson.html
+  technical: technical.html
+last_built: 2026-10-24T00:32Z
+urls:
+  reference: https://esrakurum.github.io/Bayesian-TDMM/reference
+  article: https://esrakurum.github.io/Bayesian-TDMM/articles
