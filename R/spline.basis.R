@@ -45,13 +45,10 @@
   splines::splineDesign(spec$knots, x, ord = spec$order, outer.ok = TRUE)
 }
 
-# Internal compatibility for code using the interval-based constructor.
 bbase <- function(x, xl, xr, ndx, deg) {
   .evaluate.spline(x, .make.spline.spec(xl, xr, ndx + deg, deg))
 }
 
-# Never infer a legacy object's degree from the new default. Unversioned objects
-# must contain enough stored basis information to identify their convention.
 .fitted.spline.spec <- function(result) {
   i <- result$inputs
   if (!is.null(i$spline)) return(i$spline)
