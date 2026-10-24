@@ -28,4 +28,4 @@ The shorter chains are intended to illustrate package use. For substantive
 analyses, inspect convergence diagnostics and choose MCMC settings appropriate
 for the application. Inspect
 `summary.txt`, `coefficients.pdf`, and `traces.pdf` in each output directory.
-Bernoulli's centered null-space decomposition is managed internally by TDMM.
+
