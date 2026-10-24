@@ -32,8 +32,6 @@ Use `family = "bernoulli"` for binary outcomes or `family = "poisson"` for count
 
 ## Citation
 
-## Citation
-
 For v0.2.0, use `citation("TDMM")` or the repository's [citation metadata](https://github.com/esrakurum/Bayesian-TDMM/blob/main/CITATION.cff).
 
 TDMM v0.2.0 is archived on Zenodo at [https://doi.org/10.5281/zenodo.23608508](https://doi.org/10.5281/zenodo.23608508). The historical v0.1.0 release is archived at [https://doi.org/10.5281/zenodo.20617705](https://doi.org/10.5281/zenodo.20617705).
