@@ -7,8 +7,8 @@
     baseline covariates, and time-varying covariates.
   - Use cubic B-splines (degree 3, order 4) with a second-order
     coefficient-difference penalty and eight basis functions by default.
-    `n_basis` specifies the actual basis dimension; legacy `nknots`
-    calls remain supported with a deprecation warning.
+    `n_basis` specifies the basis dimension directly; the older `nknots`
+    argument remains supported with a deprecation warning.
   - Fit serial or parallel chains through `tdmm()` and structured
     `tdmm_control()` and `tdmm.priors()` settings. `tdmm.parallel()`
     remains a compatibility wrapper.

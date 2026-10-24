@@ -44,7 +44,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="tdmm-020">TDMM 0.2.0<a class="anchor" aria-label="anchor" href="#tdmm-020"></a></h2>
 <ul><li>Fit Gaussian, Bernoulli, and Poisson longitudinal outcomes with subject-specific irregular observation times, unequal visit counts, baseline covariates, and time-varying covariates.</li>
-<li>Use cubic B-splines (degree 3, order 4) with a second-order coefficient-difference penalty and eight basis functions by default. <code>n_basis</code> specifies the actual basis dimension; legacy <code>nknots</code> calls remain supported with a deprecation warning.</li>
+<li>Use cubic B-splines (degree 3, order 4) with a second-order coefficient-difference penalty and eight basis functions by default. <code>n_basis</code> specifies the basis dimension directly; the older <code>nknots</code> argument remains supported with a deprecation warning.</li>
 <li>Fit serial or parallel chains through <code><a href="../reference/tdmm.html">tdmm()</a></code> and structured <code><a href="../reference/tdmm.control.html">tdmm_control()</a></code> and <code><a href="../reference/tdmm.priors.html">tdmm.priors()</a></code> settings. <code><a href="../reference/tdmm.parallel.html">tdmm.parallel()</a></code> remains a compatibility wrapper.</li>
 <li>Existing Gaussian and Poisson model specifications are retained.</li>
 </ul></div>
