@@ -99,7 +99,7 @@ tdmm.priors <- function(family = c("gaussian", "bernoulli", "poisson")) {
   }
   expected <- tdmm.priors(family)$random_intercept$distribution
   if (!identical(out$random_intercept$distribution, expected))
-    stop("The random-intercept prior family is fixed by the approved model; change its parameters only.",
+    stop("The random-intercept prior family is fixed for this response family; only its parameters can be changed.",
          call. = FALSE)
   positive <- function(v) is.numeric(v) && length(v) == 1L && is.finite(v) && v > 0
   check <- function(x, nm) for (field in nm)
