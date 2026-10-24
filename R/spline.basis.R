@@ -1,5 +1,4 @@
-# Shared spline specification. Eight cubic bases selected by Esra after the
-# 10-dataset matched Gaussian pilot; this is not formal simulation validation.
+# Shared spline specification, uses eight cubic bases.
 .resolve.n_basis <- function(n_basis = NULL, nknots = NULL, degree = 3) {
   integer.scalar <- function(x) is.numeric(x) && length(x) == 1L &&
     is.finite(x) && x == floor(x)
