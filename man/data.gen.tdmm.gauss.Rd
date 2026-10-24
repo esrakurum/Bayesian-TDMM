@@ -1,6 +1,6 @@
 \name{data.gen.tdmm.gauss}
 \alias{data.gen.tdmm.gauss}
-\title{Generate a balanced-grid Gaussian simulation dataset.}
+\title{Generate a balanced-grid Gaussian simulation dataset}
 \description{Generate a balanced-grid Gaussian simulation dataset for compatibility examples. This legacy helper is separate from the irregular-time V2 simulation examples.}
 \usage{
 data.gen.tdmm.gauss(n.subject = 200, n.time = 20, sigma2.b = 0.5, sigma2.e = 0.1, seed = NULL) 
