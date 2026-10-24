@@ -1,8 +1,6 @@
-# Generate legacy Gaussian TDMM simulation data
+# Generate a balanced-grid Gaussian simulation dataset
 
-Generate a balanced-grid Gaussian simulation dataset for compatibility
-examples. This legacy helper is separate from the V2 irregular-time
-validation generators.
+Generate a balanced-grid Gaussian simulation dataset for TDMM examples.
 
 ## Usage
 
@@ -34,8 +32,7 @@ data.gen.tdmm.gauss(n.subject = 200, n.time = 20, sigma2.b = 0.5, sigma2.e = 0.1
 
 ## Value
 
-A simulated long-format data frame or list as returned by the legacy
-generator.
+A simulated long-format data frame or list as returned by the generator.
 
 ## Examples
 

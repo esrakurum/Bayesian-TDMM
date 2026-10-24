@@ -38,9 +38,9 @@
 
 <!-- end list -->
 
-  - `data.gen.tdmm.bern()` : Generate legacy Bernoulli TDMM simulation
-    data
-  - `data.gen.tdmm.gauss()` : Generate legacy Gaussian TDMM simulation
-    data
-  - `data.gen.tdmm.pois()` : Generate legacy Poisson TDMM simulation
-    data
+  - `data.gen.tdmm.bern()` : Generate a balanced-grid Bernoulli
+    simulation dataset
+  - `data.gen.tdmm.gauss()` : Generate a balanced-grid Gaussian
+    simulation dataset
+  - `data.gen.tdmm.pois()` : Generate a balanced-grid Poisson simulation
+    dataset

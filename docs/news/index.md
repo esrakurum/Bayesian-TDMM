@@ -12,11 +12,7 @@
   - Fit serial or parallel chains through `tdmm()` and structured
     `tdmm_control()` and `tdmm.priors()` settings. `tdmm.parallel()`
     remains a compatibility wrapper.
-  - Use the centered null-space spline formulation for Bernoulli
-    outcomes. Existing Gaussian and Poisson model specifications are
-    retained.
-  - Add package examples, a Getting Started vignette, a reproducible
-    PBC2 application, and a pkgdown documentation site.
+  - Existing Gaussian and Poisson model specifications are retained.
 
 ## TDMM 0.1.0
 

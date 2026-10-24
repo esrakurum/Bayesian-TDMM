@@ -1,7 +1,7 @@
 # Family-specific default TDMM priors
 
-Return the family-specific structured prior defaults used by `tdmm()`. A
-partial nested list can be passed as `priors=` to change supported prior
+Return the family-specific prior defaults used by `tdmm()`. A partial
+named list can be supplied through `priors=` to modify supported prior
 parameters.
 
 ## Usage
@@ -18,26 +18,33 @@ tdmm.priors(family = c("gaussian", "bernoulli", "poisson"))
 
 ## Details
 
-All Gamma distributions use shape and rate. The smoothing prior is
-`smoothing = list(shape = 1, rate = 0.001)` for every family. Gaussian
-uses Gamma(1, 0.005) priors on random-intercept and residual precisions.
-Bernoulli and Poisson use a Uniform(0, 5) prior on the random-intercept
-standard deviation. Bernoulli uses a Normal(0, 100) prior for each of
-its two null-space coordinates, corresponding to `null_space = list(sd
-= 10)`. The approved distribution family is fixed for each response
-family; users may change positive shape, rate, maximum standard
-deviation, or null-space standard deviation parameters. Basis
-eigenvectors and numerical ridge constants are not prior controls.
+All Gamma distributions use shape and rate parameterization.
+
+For all response families, the smoothing precision has a Gamma(1, 0.001)
+prior.
+
+For Gaussian outcomes, the random-intercept precision and residual
+precision each have Gamma(1, 0.005) priors.
+
+For Bernoulli and Poisson outcomes, the random-intercept standard
+deviation has a Uniform(0, 5) prior.
+
+For Bernoulli outcomes, `null_space = list(sd = 10)` specifies the
+standard deviation used for the two unpenalized spline components.
+
+Users may modify the numerical parameters of these priors, but the prior
+distribution associated with each response family is fixed.
 
 ## Value
 
-A named list with `smoothing`, `random_intercept`, and family-specific
-`residual` or `null_space` groups.
+A named list containing the prior settings for the selected response
+family. The list includes `smoothing` and `random_intercept`, with
+additional family-specific components where applicable.
 
 ## Examples
 
 ``` r
- tdmm.priors("bernoulli")
+tdmm.priors("bernoulli")
 #> $smoothing
 #> $smoothing$shape
 #> [1] 1
@@ -59,5 +66,7 @@ A named list with `smoothing`, `random_intercept`, and family-specific
 #> [1] 10
 #> 
 #> 
- # Example partial override: priors = list(smoothing = list(rate = 0.002))
+
+# Example partial override:
+priors <- list(smoothing = list(rate = 0.002))
 ```
