@@ -1,6 +1,6 @@
 # TDMM
 
-TDMM fits Bayesian time-dynamic mixed-effects models for longitudinal **Gaussian, Bernoulli, and Poisson** outcomes. It estimates time-varying coefficient functions with subject-specific random intercepts. Data may have irregular subject-specific observation times, unequal visit counts, baseline covariates, and covariates that vary by visit.
+TDMM provides Bayesian time-dynamic regression models for **Gaussian, Bernoulli, and Poisson** outcomes. Regression coefficients vary smoothly over time. With `random_intercept = TRUE` (the default), subjects may have repeated observations, irregular observation times, unequal visit counts, baseline covariates, and covariates that vary by visit. With `random_intercept = FALSE`, the model omits the subject-specific random intercept for independent observations; time may represent age, time since an event, or time relative to an event.
 
 The default spline uses **eight cubic B-spline basis functions** (polynomial degree 3, spline order 4) with a second-order coefficient-difference penalty. JAGS performs posterior sampling.
 
@@ -32,8 +32,8 @@ Use `family = "bernoulli"` for binary outcomes or `family = "poisson"` for count
 
 ## Citation
 
-For v0.2.0, use `citation("TDMM")` or the repository's [citation metadata](https://github.com/esrakurum/Bayesian-TDMM/blob/main/CITATION.cff).
+Use `citation("TDMM")` or the repository's [citation metadata](https://github.com/esrakurum/Bayesian-TDMM/blob/main/CITATION.cff).
 
-TDMM v0.2.0 is archived on Zenodo at [https://doi.org/10.5281/zenodo.23608508](https://doi.org/10.5281/zenodo.23608508). The historical v0.1.0 release is archived at [https://doi.org/10.5281/zenodo.20617705](https://doi.org/10.5281/zenodo.20617705).
+The v0.2.0 release is archived at [Zenodo DOI 10.5281/zenodo.23608508](https://doi.org/10.5281/zenodo.23608508); the v0.1.0 release has [Zenodo DOI 10.5281/zenodo.20617705](https://doi.org/10.5281/zenodo.20617705).
 
 TDMM is released under the [MIT license](LICENSE.md).

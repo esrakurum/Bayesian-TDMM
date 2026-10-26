@@ -1,5 +1,16 @@
 # Changelog
 
+## TDMM 0.3.0
+
+  - `tdmm()` and `tdmm.parallel()` support models with or without a
+    subject-specific random intercept through `random_intercept`; `TRUE`
+    remains the default.
+  - Gaussian, Bernoulli, and Poisson simulation helpers generate
+    independent-observation data directly when `random_intercept =
+    FALSE`.
+  - Repeated-observation models with a subject-specific random intercept
+    remain supported.
+
 ## TDMM 0.2.0
 
   - Fit Gaussian, Bernoulli, and Poisson longitudinal outcomes with

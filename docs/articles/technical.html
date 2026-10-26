@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">TDMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,8 +70,17 @@
 
     
     
-<p>TDMM models longitudinal outcomes using time-varying coefficient functions and a subject-specific random intercept. The <a href="../reference/index.html">reference index</a> documents fitting, priors, computational controls, plotting, diagnostics, and data checks. The <a href="getting-started.html">Getting Started guide</a> gives the full introductory workflow.</p>
-<p>New fits use cubic B-splines (degree 3, order 4), <code>n_basis = 8</code> by default, and a second-order coefficient-difference penalty. <code>n_basis</code> directly specifies the number of basis functions. The <code>nknots</code> argument is retained for compatibility with older calls; use <code>n_basis</code> for new work. Family-specific priors can be inspected with <code><a href="../reference/tdmm.priors.html">tdmm.priors()</a></code>.</p>
+<p>TDMM models Gaussian, Bernoulli, and Poisson outcomes using coefficient functions that vary smoothly over time. The <a href="../reference/index.html">reference index</a> documents fitting, priors, computational controls, plotting, diagnostics, and data checks. The <a href="getting-started.html">Getting Started guide</a> gives the introductory workflow.</p>
+<p>For repeated observations, the model includes a subject-specific random intercept:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false" form="prefix">{</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><msub><mi>Y</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>∣</mo><msub><mi>b</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">}</mo><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>X</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>β</mi><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msub><mi>b</mi><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+g\{E[Y_i(t) \mid b_i]\} = \beta_0(t) + \sum_k X_{ik}(t)\beta_k(t) + b_i.
+</annotation></semantics></math></p>
+<p>For independent observations, <code>random_intercept = FALSE</code> omits that term:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false" form="prefix">{</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><msub><mi>Y</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">}</mo><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>X</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>β</mi><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+g\{E[Y_i(t)]\} = \beta_0(t) + \sum_k X_{ik}(t)\beta_k(t).
+</annotation></semantics></math></p>
+<p>Here <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>g</mi><annotation encoding="application/x-tex">g</annotation></semantics></math> is the identity, logit, or log link for Gaussian, Bernoulli, or Poisson outcomes, respectively. In independent-observation settings, time may be age, time since an event, time relative to an event, or another meaningful time scale. The curves describe how associations vary across that time scale in the population; they do not by themselves describe within-subject longitudinal change.</p>
+<p>Cubic B-splines (degree 3, order 4), <code>n_basis = 8</code> by default, and a second-order coefficient-difference penalty are used for both specifications. <code>n_basis</code> directly specifies the number of basis functions. The <code>nknots</code> argument remains available for existing calls; use <code>n_basis</code> when specifying the basis dimension. Family-specific priors can be inspected with <code><a href="../reference/tdmm.priors.html">tdmm.priors()</a></code>.</p>
 <p>The historical v0.1.0 source and documentation remain available through the <a href="https://github.com/esrakurum/Bayesian-TDMM/tree/v0.1.0" class="external-link">v0.1.0 Git tag</a>.</p>
   </main>
 </div>

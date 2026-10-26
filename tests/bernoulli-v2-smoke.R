@@ -23,7 +23,7 @@ for (method in c("serial","parallel")) {
     all(c("tau.alpha[1]","tau.alpha[2]","tau.alpha[3]","sigma.b","sigma2.b","tau.b","b[1]") %in% colnames(fit$post.mat)),
     max(abs(fit$post.mat[,"sigma.b"]^2-fit$post.mat[,"sigma2.b"]))<1e-8,
     max(abs(1/fit$post.mat[,"sigma2.b"]-fit$post.mat[,"tau.b"]))<1e-6,
-    identical(fit$model.settings$implementation,"V2 observation-level"))
+    identical(fit$model.settings$implementation,"observation-level"))
   ns <- z$null.space
   stopifnot(identical(fit$model.settings$spline.prior,"centered null-space"),
     ncol(ns$U.null)==2,ncol(ns$U.pen)==6,ns$tau.null==.01,

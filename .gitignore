@@ -19,9 +19,37 @@ figures/*
 *.RData
 
 # Temporary files
+/Rplots.pdf
+/TDMM_tutorial.pdf
 *.log
 *.tmp
 *.bak
+
+# Private development records
+/archive/
+/documentation/latex/
+/documentation/phase2a/
+/documentation/release-checklist-v0.2.0.md
+/documentation/release-file-manifest-v0.2.0.txt
+/simulations/bernoulli-v2-25-validation.R
+/simulations/bernoulli-v2-25-validation.md
+/simulations/bernoulli-v2-nullspace-centering-comparison.R
+/simulations/bernoulli-v2-nullspace-centering-comparison.md
+/simulations/bernoulli-v2-targeted-comparison.R
+/simulations/bernoulli-v2-targeted-comparison.md
+/simulations/bernoulli-v2-validation.R
+/simulations/bernoulli-v2-validation.md
+/simulations/gaussian-cubic-pilot.R
+/simulations/gaussian-cubic-pilot.md
+/simulations/gaussian-v2-25-validation.R
+/simulations/gaussian-v2-25-validation.md
+/simulations/gaussian-v2-validation.R
+/simulations/gaussian-v2-validation.md
+/simulations/poisson-v2-25-validation.R
+/simulations/poisson-v2-25-validation.md
+/simulations/poisson-v2-design.md
+/simulations/poisson-v2-validation.R
+/simulations/poisson-v2-validation.md
 
 # LaTeX build files
 *.aux

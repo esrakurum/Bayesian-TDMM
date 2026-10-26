@@ -4,7 +4,7 @@
 \usepackage[margin=1in]{geometry}
 \title{Getting Started with TDMM}
 \author{Makena Grigsby and Esra K\"{u}r\"{u}m}
-\date{TDMM v0.2.0}
+\date{TDMM v0.3.0}
 %\VignetteIndexEntry{Getting Started with TDMM}
 %\VignetteEngine{utils::Sweave}
 %\VignetteEncoding{UTF-8}
@@ -12,17 +12,17 @@
 \maketitle
 
 \section{TDMM}
-TDMM fits Bayesian time-dynamic mixed-effects models with coefficient functions
-that vary over observation time and subject-specific random intercepts. Gaussian,
-Bernoulli, and Poisson responses are supported. Subjects may have different
-observation times and different numbers of visits. Numeric covariates may be
+TDMM fits Bayesian time-dynamic regression models for Gaussian, Bernoulli,
+and Poisson responses. Regression coefficients vary smoothly over time.
+With a subject-specific random intercept, subjects may have different
+observation times and numbers of visits. Numeric covariates may be
 constant within subject (baseline) or change at each visit. The default is
 eight cubic B-spline basis functions (polynomial degree 3, order 4) with a
 second-order coefficient-difference penalty. JAGS is required for fitting;
 TDMM constructs the model matrices and selects the JAGS model internally.
 
 \section{Data and the fitting workflow}
-For analysis, provide one row per observed subject and visit. The subject ID,
+For analysis, provide one row per observation. The subject ID,
 numeric observation time, response, and numeric covariates must be separate
 columns. In the example below, \verb|baseline| is repeated within subject
 and \verb|changing| varies by visit. The response is Gaussian, and the
@@ -54,6 +54,11 @@ The recommended workflow is \verb|data -> tdmm() -> summary() -> plot()|,
 followed by convergence diagnostics. After installing JAGS, fit the simulated
 data with the following call. Adjust the MCMC settings and review diagnostics
 before drawing conclusions from your own data.
+
+\verb|random_intercept = TRUE| is the default and includes a subject-specific
+random intercept, as in this example. For independent observations, use
+\verb|random_intercept = FALSE| to omit it. In that setting, time may
+represent age, time since an event, or time relative to an event.
 
 \begin{verbatim}
 library(TDMM)
@@ -89,7 +94,7 @@ example_data_path <- function(filename) {
   stopifnot(file.exists(path))
   path
 }
-g <- read.csv(example_data_path('gaussian-v2-pointwise.csv'))
+g <- read.csv(example_data_path('gaussian-pointwise.csv'))
 oldpar <- par(mfrow=c(1,3), mar=c(4,4,2,1))
 for (nm in c('beta0','beta1','beta2')) {
   z <- g[g$coefficient==nm,]
@@ -152,7 +157,7 @@ follow-up is sparse, so small fluctuations in the tail should not be read as
 precise clinical changes.
 
 <<pbc-curves,echo=TRUE,fig=TRUE,width=9,height=3.4>>=
-p <- read.csv(example_data_path('pbc2-v2-curves.csv'))
+p <- read.csv(example_data_path('pbc2-curves.csv'))
 p <- p[p$n_basis==8,]
 oldpar <- par(mfrow=c(1,3), mar=c(4,4,2,1))
 for (nm in c('intercept','treatment','albumin')) {
@@ -175,8 +180,8 @@ selection of the most favorable result.
 
 \section{Using your own data and sensitivity analysis}
 Replace the column names and family in the template below. Provide covariates
-in the intended coefficient order; a covariate can be baseline or measured at
-each visit. The data checks reject missing analysis values; decide how
+in the intended coefficient order; with repeated observations, a covariate can
+be baseline or measured at each visit. The data checks reject missing analysis values; decide how
 to handle missing data before fitting rather than relying on implicit imputation.
 
 \begin{verbatim}

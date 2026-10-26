@@ -4,11 +4,11 @@
 
 <!-- end list -->
 
-  - `tdmm()` : Fit a time-dynamic mixed-effects model
+  - `tdmm()` : Fit a Bayesian time-dynamic regression model
   - `tdmm.control()` `tdmm_control()` : Computational controls for TDMM
     fits
   - `tdmm.priors()` : Family-specific default TDMM priors
-  - `tdmm.parallel()` : Legacy parallel TDMM fitting wrapper
+  - `tdmm.parallel()` : Parallel TDMM fitting wrapper
 
 ## Summaries, plots, and diagnostics
 
@@ -38,9 +38,7 @@
 
 <!-- end list -->
 
-  - `data.gen.tdmm.bern()` : Generate a balanced-grid Bernoulli
-    simulation dataset
-  - `data.gen.tdmm.gauss()` : Generate a balanced-grid Gaussian
-    simulation dataset
-  - `data.gen.tdmm.pois()` : Generate a balanced-grid Poisson simulation
+  - `data.gen.tdmm.bern()` : Generate Bernoulli TDMM simulation data
+  - `data.gen.tdmm.gauss()` : Generate a Gaussian TDMM simulation
     dataset
+  - `data.gen.tdmm.pois()` : Generate Poisson TDMM simulation data

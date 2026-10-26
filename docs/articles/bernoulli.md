@@ -1,19 +1,20 @@
 # Bernoulli example
 
 Use `family = "bernoulli"` for a binary response. Coefficient functions
-are on the log-odds scale, and `x.var` order controls their labels. TDMM
-supplies the spline and prior decomposition internally.
+are on the log-odds scale, and `x.var` order controls their labels.
+
+## Repeated observations
 
 The [standalone runnable
-example](https://github.com/esrakurum/Bayesian-TDMM/blob/main/examples/bernoulli-v2-getting-started.R)
+example](https://github.com/esrakurum/Bayesian-TDMM/blob/main/examples/bernoulli-getting-started.R)
 generates irregular visits with a baseline and time-varying covariate,
 fits one dataset, and saves summaries and plots. From the repository
 root:
 
 ``` r
 library(TDMM)
-source("examples/bernoulli-v2-getting-started.R")
-fit <- run_small_bernoulli_v2()
+source("examples/bernoulli-getting-started.R")
+fit <- run_small_bernoulli()
 summary(fit)
 plot(fit)
 plot.trace.tdmm(fit, c("sigma.b", "tau.alpha[1]"))
@@ -23,3 +24,19 @@ Review chain diagnostics for reconstructed coefficient curves, the
 random-effect scale, and smoothing parameters. The same `tdmm()`
 workflow is described in [Getting
 Started](https://esrakurum.github.io/Bayesian-TDMM/articles/getting-started.md).
+
+## Independent observations
+
+The Bernoulli simulation helper generates one observation per subject
+when `random_intercept = FALSE`. For independent observations, time may
+represent age, time since an event, or time relative to an event. The
+helper defaults to 2,500 subjects in this setting.
+
+``` r
+independent_data <- data.gen.tdmm.bern(random_intercept = FALSE, seed = 27181)
+fit_independent <- tdmm(independent_data, family = "bernoulli",
+                        x.var = "x1", random_intercept = FALSE,
+                        control = tdmm_control(seed = 77181))
+summary(fit_independent)
+plot(fit_independent)
+```

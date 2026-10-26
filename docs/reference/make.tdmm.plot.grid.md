@@ -30,7 +30,7 @@ make.tdmm.plot.grid(data, grid = NULL, n.grid = 100, time.var = "time", nknots =
 
   - nknots:
     
-    Deprecated legacy basis argument.
+    Deprecated `nknots` argument.
 
   - degree:
     
@@ -48,7 +48,7 @@ make.tdmm.plot.grid(data, grid = NULL, n.grid = 100, time.var = "time", nknots =
 
 When result is supplied, its recorded spline convention, degree, basis
 dimension, and time domain are used. This preserves reconstruction of
-saved legacy objects.
+older fitted objects.
 
 ## Value
 

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">TDMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,17 +70,35 @@
 
     
     
-<p>Use <code>family = "poisson"</code> for counts. Coefficient functions are on the log-mean scale. The <a href="https://github.com/esrakurum/Bayesian-TDMM/blob/main/examples/poisson-v2-getting-started.R" class="external-link">standalone runnable example</a> generates subject-specific irregular visits, a baseline covariate, and a genuinely time-varying covariate with within-time variation.</p>
+<p>Use <code>family = "poisson"</code> for counts. Coefficient functions are on the log-mean scale. The <a href="https://github.com/esrakurum/Bayesian-TDMM/blob/main/examples/poisson-getting-started.R" class="external-link">standalone runnable example</a> generates subject-specific irregular visits, a baseline covariate, and a genuinely time-varying covariate with within-time variation.</p>
+<div class="section level2">
+<h2 id="repeated-observations">Repeated observations<a class="anchor" aria-label="anchor" href="#repeated-observations"></a>
+</h2>
 <p>From the repository root:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://esrakurum.github.io/Bayesian-TDMM/">TDMM</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"examples/poisson-v2-getting-started.R"</span><span class="op">)</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">run_small_poisson_v2</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"examples/poisson-getting-started.R"</span><span class="op">)</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">run_small_poisson</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot.trace.tdmm.html">plot.trace.tdmm</a></span><span class="op">(</span><span class="va">fit</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sigma.b"</span>, <span class="st">"tau.alpha[1]"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Check reconstructed coefficient curves and chain diagnostics, and compare posterior count behavior with the observed counts. <a href="getting-started.html">Getting Started</a> covers the common data format and fit controls.</p>
-  </main>
+</div>
+<div class="section level2">
+<h2 id="independent-observations">Independent observations<a class="anchor" aria-label="anchor" href="#independent-observations"></a>
+</h2>
+<p>The Poisson simulation helper generates one count per subject when <code>random_intercept = FALSE</code>. For independent observations, time may represent age, time since an event, or time relative to an event. The helper defaults to 2,200 subjects in this setting.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">independent_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/data.gen.tdmm.pois.html">data.gen.tdmm.pois</a></span><span class="op">(</span>random_intercept <span class="op">=</span> <span class="cn">FALSE</span>, seed <span class="op">=</span> <span class="fl">27181</span><span class="op">)</span></span>
+<span><span class="va">fit_independent</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tdmm.html">tdmm</a></span><span class="op">(</span><span class="va">independent_data</span>, family <span class="op">=</span> <span class="st">"poisson"</span>,</span>
+<span>                        x.var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span><span class="op">)</span>,</span>
+<span>                        random_intercept <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                        control <span class="op">=</span> <span class="fu"><a href="../reference/tdmm.control.html">tdmm_control</a></span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">77181</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_independent</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_independent</span><span class="op">)</span></span></code></pre></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

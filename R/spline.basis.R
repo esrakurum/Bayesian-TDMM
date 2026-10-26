@@ -8,7 +8,7 @@
     stop("Supply only one of n_basis and nknots.", call. = FALSE)
   if (!is.null(nknots)) {
     if (!integer.scalar(nknots) || nknots < 3)
-      stop("Legacy nknots must be an integer >= 3.", call. = FALSE)
+      stop("Deprecated nknots must be an integer >= 3.", call. = FALSE)
     warning("nknots is deprecated: intervals = nknots - 2; use n_basis = nknots + degree - 2. The default degree is now 3.", call. = FALSE)
     n_basis <- nknots + degree - 2
   }
@@ -55,7 +55,7 @@ bbase <- function(x, xl, xr, ndx, deg) {
   d <- i$degree
   if (is.null(d)) d <- result$model.settings$degree
   if (is.null(d) || is.null(i$basis) || is.null(result$time.points))
-    stop("Legacy fit lacks degree/basis metadata; reconstruction is ambiguous.", call. = FALSE)
+    stop("Older fitted object lacks degree/basis metadata; reconstruction is ambiguous.", call. = FALSE)
   spec <- .make.spline.spec(i$tlo, i$thi, ncol(i$basis), d)
   convention <- i$basis.convention
   if (is.null(convention)) convention <- result$model.settings$basis.convention
@@ -67,7 +67,7 @@ bbase <- function(x, xl, xr, ndx, deg) {
     if (same(.evaluate.spline(result$time.points, spec))) return(spec)
     spec$convention <- "legacy-signed"
     if (!same(.evaluate.spline(result$time.points, spec)))
-      stop("Cannot identify legacy fitted basis convention.", call. = FALSE)
+      stop("Cannot identify older fitted object basis convention.", call. = FALSE)
   }
   spec
 }

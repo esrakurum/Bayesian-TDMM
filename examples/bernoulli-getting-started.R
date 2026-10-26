@@ -1,10 +1,10 @@
 # Run from the TDMM repository root after installing TDMM and JAGS.
 # Sourcing defines this function only; MCMC starts on an explicit call.
 # Inspect the simulated data before fitting, or run the small example fit.
-run_small_bernoulli_v2 <- function(out='results/bernoulli-v2-user-example',
+run_small_bernoulli <- function(out='results/bernoulli-user-example',
                                    fit_model=TRUE) {
-  source('examples/bernoulli-v2-example.R', local=TRUE)
-  sim <- simulate_bernoulli_v2(seed=20261021L, n_subject=50L, visits=5:8)
+  source('examples/bernoulli-example.R', local=TRUE)
+  sim <- simulate_bernoulli(seed=20261021L, n_subject=50L, visits=5:8)
   dat <- sim$data
   stopifnot(length(unique(dat$id))==50L,
             length(unique(as.numeric(table(dat$id))))>1L)

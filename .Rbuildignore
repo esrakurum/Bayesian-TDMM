@@ -10,6 +10,8 @@
 ^applications$
 ^documentation$
 ^TDMM_tutorial\.pdf$
+^Rplots\.pdf$
+^texput\.log$
 ^.*\.Rcheck$
 ^TDMM_.*\.tar\.gz$
 ^\.DS_Store$

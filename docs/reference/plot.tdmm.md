@@ -18,11 +18,13 @@ plot(x = NULL, result = NULL, sd = FALSE, level = 0.95, grid = NULL, n.grid = 10
 
   - x:
     
-    A fitted tdmm object for plot(fit), or legacy data argument.
+    A fitted tdmm object for plot(fit), or data argument in an earlier
+    calling form.
 
   - result:
     
-    A fitted tdmm object for the legacy plot.tdmm(data, result) call.
+    A fitted tdmm object for the earlier plot.tdmm(data, result) calling
+    form.
 
   - sd:
     
@@ -43,11 +45,11 @@ plot(x = NULL, result = NULL, sd = FALSE, level = 0.95, grid = NULL, n.grid = 10
 
   - time.var:
     
-    Observation-time column name for legacy calls.
+    Observation-time column name for earlier calling forms.
 
   - nknots:
     
-    Deprecated legacy basis argument; fitted metadata takes precedence.
+    Deprecated basis argument; fitted metadata takes precedence.
 
   - degree:
     

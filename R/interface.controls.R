@@ -46,7 +46,7 @@ tdmm_control <- tdmm.control
     seed = "seed", cores = "n.cores")
   for (nm in intersect(names(control), names(mapping))) {
     if (!is.null(control[[nm]]) && isTRUE(supplied[mapping[[nm]]]))
-      stop("Specify either control$", nm, " or legacy ", mapping[[nm]],
+      stop("Specify either control$", nm, " or ", mapping[[nm]],
            ", not both.", call. = FALSE)
   }
   out <- list(chains = legacy$n.chains, iterations = legacy$n.iter,

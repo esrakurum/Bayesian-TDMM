@@ -1,12 +1,12 @@
 # Getting Started with TDMM
 
-TDMM fits Bayesian time-dynamic mixed-effects models with coefficient
-functions that vary over time and subject-specific random intercepts.
-Gaussian, Bernoulli, and Poisson responses are supported. Subjects may
-have different observation times and visit counts. Numeric covariates
-can be constant within subject or change at each visit. The default is
-eight cubic B-spline basis functions (degree 3, order 4) with a
-second-order coefficient-difference penalty. Install
+TDMM fits Bayesian time-dynamic regression models for Gaussian,
+Bernoulli, and Poisson responses. Regression coefficients vary smoothly
+over time. With a subject-specific random intercept, subjects may have
+different observation times and visit counts. Numeric covariates can be
+constant within subject or change at each visit. The default is eight
+cubic B-spline basis functions (degree 3, order 4) with a second-order
+coefficient-difference penalty. Install
 [JAGS](https://mcmc-jags.sourceforge.io/) before fitting.
 
 This page accompanies the package’s [Getting Started
@@ -14,10 +14,10 @@ vignette](https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/getting
 
 ## Data and fitting
 
-Provide one row per observed subject and visit, with columns for subject
-ID, numeric time, response, and covariates. The order of `x.var`
-determines the coefficient labels: `beta1` multiplies the first
-covariate, `beta2` the second, and so on.
+Provide one row per observation, with columns for subject ID, numeric
+time, response, and covariates. The order of `x.var` determines the
+coefficient labels: `beta1` multiplies the first covariate, `beta2` the
+second, and so on.
 
 ``` r
 library(TDMM)
@@ -39,6 +39,11 @@ construction. The Gaussian coefficient curves are on the response scale;
 Bernoulli coefficients are on the log-odds scale and Poisson
 coefficients on the log-mean scale. Inspect trace plots, R-hat,
 effective sample size, and credible bands before interpretation.
+
+`random_intercept = TRUE` is the default and includes a subject-specific
+random intercept, as in the call above. For independent observations,
+use `random_intercept = FALSE` to omit it. In that setting, time may
+represent age, time since an event, or time relative to an event.
 
 ## Coefficient-function recovery
 

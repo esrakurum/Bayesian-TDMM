@@ -7,7 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-This application analyzes the `pbc2` dataset from JMbayes2 using log serum bilirubin as the Gaussian response, years since baseline as time, baseline treatment assignment, and longitudinal albumin. The dataset contains 1,945 observations from 312 subjects, with 1–16 visits per subject. The [standalone script](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-v2-analysis.R) loads the source data programmatically and reproduces the preprocessing, primary fit, sensitivity analysis, and plots.
+This application analyzes the `pbc2` dataset from JMbayes2 using log serum bilirubin as the Gaussian response, years since baseline as time, baseline treatment assignment, and longitudinal albumin. The dataset contains 1,945 observations from 312 subjects, with 1–16 visits per subject. The [standalone script](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-analysis.R) loads the source data programmatically and reproduces the preprocessing, primary fit, sensitivity analysis, and plots.
 
 Albumin is centered at the overall observation-level mean of **3.3898868894601542 g/dL**. Treatment is coded 0 for placebo and 1 for D-penicillamine. The intercept therefore represents the modeled placebo trajectory at the centering value and random intercept zero.
 
@@ -30,4 +30,4 @@ summary(fit)
 plot(fit)
 ```
 
-The treatment 95% credible band includes zero across the evaluation grid. The albumin coefficient is negative, with its band below zero throughout that grid. The modeled intercept generally rises over the better-supported follow-up period. Treatment estimates are conditional associations rather than causal effects. Late follow-up is sparse, so local tail fluctuations warrant caution. A comparison of 6, 8, and 10 basis functions gave broadly stable curves and conclusions; see the [application report](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-v2-analysis.md) for details.
+The treatment 95% credible band includes zero across the evaluation grid. The albumin coefficient is negative, with its band below zero throughout that grid. The modeled intercept generally rises over the better-supported follow-up period. Treatment estimates are conditional associations rather than causal effects. Late follow-up is sparse, so local tail fluctuations warrant caution. A comparison of 6, 8, and 10 basis functions gave broadly stable curves and conclusions; see the [application report](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-analysis.md) for details.

@@ -66,8 +66,10 @@ summary.tdmm <- function(object, ...) {
   
   cat("\nVariance summaries\n")
   cat("------------------\n")
-  cat("sigma2.b: ", object$sigma2.b, "\n", sep = "")
-  cat("sigma.b: ", object$sigma.b, "\n", sep = "")
+  if (!isFALSE(settings$random_intercept)) {
+    cat("sigma2.b: ", object$sigma2.b, "\n", sep = "")
+    cat("sigma.b: ", object$sigma.b, "\n", sep = "")
+  }
   if (family == "gaussian") {
     cat("sigma2.e: ", object$sigma2.e, "\n", sep = "")
   }

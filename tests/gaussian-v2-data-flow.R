@@ -52,7 +52,7 @@ for (ids in list(base$person, c(90,10,90,40,10,90),
   revz <- build(dat[6:1,],15,"person","visit","response",c("baseline","changing"))
   stopifnot(identical(jd,jags.data(revz,"gaussian")))
 }
-# A common-grid fixture verifies basis reuse/alignment in the legacy Gaussian case.
+# A common-grid fixture verifies basis reuse and row alignment.
 common <- expand.grid(visit=c(.1,.45,.9),person=c("x","y"))
 common$response <- 1:6; common$baseline <- rep(c(2,4),each=3)
 z <- build(common,15,"person","visit","response","baseline")
