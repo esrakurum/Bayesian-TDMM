@@ -41,9 +41,14 @@ tdmm <- function(data,
                  quiet = FALSE,
                  n_basis = NULL,
                  control = NULL,
-                 priors = NULL) {
+                 priors = NULL,
+                 random_intercept = TRUE) {
   
   ## Match the requested family
+  if (!is.logical(random_intercept) || length(random_intercept) != 1L ||
+      is.na(random_intercept)) {
+    stop("random_intercept must be a single non-missing logical value.", call. = FALSE)
+  }
   n_basis <- .resolve.n_basis(n_basis, nknots, degree)
   family <- match.arg(family)
   control <- .resolve.tdmm.control(control,
@@ -99,7 +104,8 @@ tdmm <- function(data,
   jags.data <- build.tdmm.jags.data(
     inputs = inputs,
     family = family,
-    priors = priors
+    priors = priors,
+    random_intercept = random_intercept
   )
   
   if (family == "bernoulli") inputs$null.space <- jags.data[c(
@@ -113,7 +119,8 @@ tdmm <- function(data,
   
   config <- get.tdmm.family.config(
     family = family,
-    jags.dir = jags.dir
+    jags.dir = jags.dir,
+    random_intercept = random_intercept
   )
   
   ##########
@@ -122,6 +129,7 @@ tdmm <- function(data,
   
   model.settings <- list(
     family = family,
+    random_intercept = random_intercept,
     n_basis = n_basis,
     degree = degree,
     n.chains = n.chains,
@@ -143,7 +151,7 @@ tdmm <- function(data,
     N = inputs$N,
     n.subject = inputs$n.subject,
     n.basis = inputs$nbasis,
-    implementation = "V2 observation-level",
+    implementation = "observation-level",
     spline.prior = if (family == "bernoulli") "centered null-space" else "ridge",
     coef.names = inputs$coef.names
   )

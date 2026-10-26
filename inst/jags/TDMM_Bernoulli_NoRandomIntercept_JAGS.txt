@@ -1,0 +1,20 @@
+model {
+ for(j in 1:N) {
+  for(k in 1:nX) {
+   betaX[j,k] <- inprod(bases.obs[j,1:n_basis],alpha[k,1:n_basis])
+  }
+  eta[j] <- inprod(betaX[j,1:nX],X[j,1:nX])
+  logit(p[j]) <- eta[j]
+  y[j] ~ dbern(p[j])
+ }
+
+ for(k in 1:nX) {
+  for(q in 1:n.null) { gamma[k,q] ~ dnorm(0,tau.null) }
+  for(r in 1:n.pen) { theta[k,r] ~ dnorm(0,tau.alpha[k]*lambda.pen[r]) }
+  for(l in 1:n_basis) {
+   alpha[k,l] <- inprod(U.null[l,1:n.null],gamma[k,1:n.null])+
+                 inprod(U.pen[l,1:n.pen],theta[k,1:n.pen])
+  }
+  tau.alpha[k] ~ dgamma(smoothing.shape,smoothing.rate)
+ }
+}

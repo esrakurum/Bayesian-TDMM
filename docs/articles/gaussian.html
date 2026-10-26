@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">TDMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,6 +71,9 @@
     
     
 <p>This example shows how to fit a Gaussian TDMM when subjects have irregular observation times, unequal visit counts, one baseline covariate, and one covariate measured at each visit. The coefficient functions are known because the data are simulated.</p>
+<div class="section level2">
+<h2 id="repeated-observations">Repeated observations<a class="anchor" aria-label="anchor" href="#repeated-observations"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">27181</span><span class="op">)</span></span>
 <span><span class="va">truth</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>beta0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">pi</span><span class="op">*</span><span class="va">t</span><span class="op">)</span>,</span>
@@ -100,13 +103,28 @@
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot.trace.tdmm.html">plot.trace.tdmm</a></span><span class="op">(</span><span class="va">fit</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sigma.b"</span>,<span class="st">"sigma2.e"</span>,<span class="st">"tau.alpha[1]"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Compare the reconstructed curves with <code>truth()</code> and examine the pointwise credible bands. The <a href="getting-started.html">Getting Started guide</a> explains the scales and diagnostics and illustrates recovery from a larger Gaussian dataset.</p>
-  </main>
+</div>
+<div class="section level2">
+<h2 id="independent-observations">Independent observations<a class="anchor" aria-label="anchor" href="#independent-observations"></a>
+</h2>
+<p>The Gaussian simulation helper can also generate one observation per subject. In an independent-observation study, time may represent age, time since an event, or time relative to an event.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">independent_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/data.gen.tdmm.gauss.html">data.gen.tdmm.gauss</a></span><span class="op">(</span>random_intercept <span class="op">=</span> <span class="cn">FALSE</span>, seed <span class="op">=</span> <span class="fl">27181</span><span class="op">)</span></span>
+<span><span class="va">fit_independent</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tdmm.html">tdmm</a></span><span class="op">(</span><span class="va">independent_data</span>, family <span class="op">=</span> <span class="st">"gaussian"</span>,</span>
+<span>                        x.var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span><span class="op">)</span>,</span>
+<span>                        random_intercept <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                        control <span class="op">=</span> <span class="fu"><a href="../reference/tdmm.control.html">tdmm_control</a></span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">77181</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_independent</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_independent</span><span class="op">)</span></span></code></pre></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Makena Grigsby, Esra Kurum.</p>
+  <p>Developed by Makena Grigsby, Esra Kürüm.</p>
 </div>
 
 <div class="pkgdown-footer-right">

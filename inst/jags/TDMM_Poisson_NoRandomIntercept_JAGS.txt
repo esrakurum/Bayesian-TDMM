@@ -1,0 +1,21 @@
+model
+{
+    for (j in 1:N) {
+        for (k in 1:nX) {
+            betaX[j, k] <- inprod(bases.obs[j, 1:n_basis],
+                                  alpha[k, 1:n_basis])
+        }
+
+        eta[j] <- inprod(betaX[j, 1:nX], X[j, 1:nX])
+
+        log(lambda[j]) <- eta[j]
+
+        y[j] ~ dpois(lambda[j])
+    }
+
+    for (k in 1:nX) {
+        alpha[k, 1:n_basis] ~ dmnorm(rep(0.00000E+00, n_basis),
+                                    tau.alpha[k] * Penalty.bases[, ])
+        tau.alpha[k] ~ dgamma(smoothing.shape, smoothing.rate)
+    }
+}

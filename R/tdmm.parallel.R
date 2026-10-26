@@ -1,5 +1,4 @@
-# This parallel function is from an older release, the new V2 code uses tdmm(...,
-# control = tdmm_control(parallel = TRUE, cores = ...)).
+# Parallel fitting wrapper; tdmm() also supports parallel chains through control.
 tdmm.parallel <- function(data,
                           family = c("gaussian", "bernoulli", "poisson"),
                           nknots = NULL,
@@ -19,13 +18,13 @@ tdmm.parallel <- function(data,
                           seed = NULL,
                           n_basis = NULL,
                           control = NULL,
-                          priors = NULL) {
+                          priors = NULL,
+                          random_intercept = TRUE) {
   family <- match.arg(family)
   if (is.null(control)) control <- list()
   if (!is.list(control))
     stop("control must be a named list.", call. = FALSE)
-  # Calling this legacy function itself selects parallel execution, including
-  # when an older tdmm.control() list contains its default parallel = FALSE.
+  # This wrapper selects parallel execution even if control$parallel is FALSE.
   control$parallel <- TRUE
   resolved <- .resolve.tdmm.control(control,
     legacy = list(n.chains = n.chains, n.iter = n.iter, n.burn = n.burn,
@@ -35,16 +34,15 @@ tdmm.parallel <- function(data,
       n.burn = !missing(n.burn), n.thin = !missing(n.thin),
       n.adapt = !missing(n.adapt), seed = !missing(seed),
       n.cores = !missing(n.cores)))
-  # Delegate all input checks, basis construction, prior resolution, fitting,
-  # output construction and metadata to the single public fitter.
+  # Use the same input checks and fitting path as tdmm().
   tdmm(data = data, family = family, nknots = nknots,
        subject.var = subject.var, time.var = time.var, y.var = y.var,
        x.var = x.var, degree = degree, jags.dir = jags.dir,
        quiet = quiet, n_basis = n_basis, control = resolved,
-       priors = priors)
+       priors = priors, random_intercept = random_intercept)
 }
 
-# Internal chain-level engine shared by tdmm() and the legacy wrapper.
+# Chain-level engine shared by tdmm() and tdmm.parallel().
 .tdmm.parallel.samples <- function(jags.data, config, control, quiet) {
   fit.one.chain <- function(chain.id) {
     if (!is.null(control$seed)) set.seed(control$seed + chain.id)

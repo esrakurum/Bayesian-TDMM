@@ -1,33 +1,8 @@
-## This file contains helper functions for generating simulated
-## longitudinal data sets from the three TDMM response families:
-##
-##   - Gaussian
-##   - Bernoulli
-##   - Poisson
-##
-## These functions are useful for examples, testing, and simulation
-## studies. They are not required for fitting a TDMM to a user's
-## own data.
-##
-## Each simulated data set is returned in long format with columns:
-##
-##   subject.ID
-##   time
-##   y
-##   x1
-##
-## Current simulation setup:
-##   - all subjects share the same time grid
-##   - x1 is a baseline subject-level covariate
-##   - x1 is constant within subject
-##   - each subject has one random intercept
-##   - beta_0(t) = sin(2*pi*t)
-##   - beta_1(t) = cos(2*pi*t)
-##
-## Note:
-## These simulation helpers intentionally use one covariate, x1,
-## to keep the examples simple. The main tdmm() fitting functions
-## can still fit data sets with multiple covariates using x.var.
+## Simulation data for Gaussian, Bernoulli, and Poisson TDMM examples.
+## Each data frame contains subject.ID, time, y, and x1. Gaussian and
+## Poisson independent-observation examples also contain x2. With a
+## random intercept, subjects have repeated visits on a common time grid;
+## without one, each subject has one observation.
 ############################################################
 
 
@@ -39,7 +14,32 @@ data.gen.tdmm.gauss <- function(n.subject = 200,
                                 n.time = 20,
                                 sigma2.b = 0.5,
                                 sigma2.e = 0.1,
-                                seed = NULL) {
+                                seed = NULL,
+                                random_intercept = TRUE) {
+
+  if (!is.logical(random_intercept) || length(random_intercept) != 1L ||
+      is.na(random_intercept)) {
+    stop("random_intercept must be a single non-missing logical value.",
+         call. = FALSE)
+  }
+
+  if (!random_intercept) {
+    ## One observation per subject, with covariates drawn independently of time.
+    if (missing(n.subject)) n.subject <- 300L
+    if (!is.null(seed)) set.seed(seed)
+    subject.ID <- seq_len(n.subject)
+    time <- stats::runif(n.subject)
+    x1 <- rnorm(n.subject)
+    x2.time <- stats::runif(n.subject)
+    x2 <- sin(2 * pi * x2.time) + rnorm(n.subject, sd = 0.25)
+    beta0.t <- sin(2 * pi * time)
+    beta1.t <- cos(2 * pi * time)
+    beta2.t <- 1.5 * (time - 0.5)
+    y <- beta0.t + beta1.t * x1 + beta2.t * x2 +
+      rnorm(n.subject, sd = sqrt(sigma2.e))
+    return(data.frame(subject.ID = subject.ID, time = time,
+                      y = y, x1 = x1, x2 = x2))
+  }
   
   ## Optional seed for reproducibility.
   if (!is.null(seed)) {
@@ -96,7 +96,28 @@ data.gen.tdmm.gauss <- function(n.subject = 200,
 data.gen.tdmm.bern <- function(n.subject = 200,
                                n.time = 20,
                                sigma2.b = 0.5,
-                               seed = NULL) {
+                               seed = NULL,
+                               random_intercept = TRUE) {
+
+  if (!is.logical(random_intercept) || length(random_intercept) != 1L ||
+      is.na(random_intercept)) {
+    stop("random_intercept must be a single non-missing logical value.",
+         call. = FALSE)
+  }
+
+  if (!random_intercept) {
+    if (missing(n.subject)) n.subject <- 2500L
+    if (!is.null(seed)) set.seed(seed)
+    subject.ID <- seq_len(n.subject)
+    time <- stats::runif(n.subject)
+    x1 <- rnorm(n.subject)
+    beta0.t <- sin(2 * pi * time)
+    beta1.t <- cos(2 * pi * time)
+    p <- plogis(beta0.t + x1 * beta1.t)
+    y <- rbinom(n.subject, size = 1L, prob = p)
+    return(data.frame(subject.ID = subject.ID, time = time,
+                      y = y, x1 = x1))
+  }
   
   ## Optional seed for reproducibility.
   if (!is.null(seed)) {
@@ -156,7 +177,31 @@ data.gen.tdmm.bern <- function(n.subject = 200,
 data.gen.tdmm.pois <- function(n.subject = 200,
                                n.time = 20,
                                sigma2.b = 0.5,
-                               seed = NULL) {
+                               seed = NULL,
+                               random_intercept = TRUE) {
+
+  if (!is.logical(random_intercept) || length(random_intercept) != 1L ||
+      is.na(random_intercept)) {
+    stop("random_intercept must be a single non-missing logical value.",
+         call. = FALSE)
+  }
+
+  if (!random_intercept) {
+    if (missing(n.subject)) n.subject <- 2200L
+    if (!is.null(seed)) set.seed(seed)
+    subject.ID <- seq_len(n.subject)
+    time <- stats::runif(n.subject)
+    x1 <- rnorm(n.subject)
+    subject.component <- rnorm(n.subject)
+    x2 <- subject.component + 0.5 * time + rnorm(n.subject, sd = 0.5)
+    beta0.t <- 0.25 + 0.35 * sin(2 * pi * time)
+    beta1.t <- 0.35 * cos(2 * pi * time)
+    beta2.t <- 0.25 + 0.20 * time
+    lambda <- exp(beta0.t + x1 * beta1.t + x2 * beta2.t)
+    y <- rpois(n.subject, lambda = lambda)
+    return(data.frame(subject.ID = subject.ID, time = time,
+                      y = y, x1 = x1, x2 = x2))
+  }
   
   ## Optional seed for reproducibility.
   if (!is.null(seed)) {

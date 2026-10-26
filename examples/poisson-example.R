@@ -1,10 +1,10 @@
-# Reusable Poisson V2 design. No fitting, file writes, or basis construction.
+# Reusable Poisson simulation design. No fitting, file writes, or basis construction.
 # Coefficients are log-rate effects; the seed makes the example reproducible.
-poisson_v2_truth <- function(time) {
+poisson_truth <- function(time) {
   cbind(beta0=0.25+0.35*sin(2*pi*time),
         beta1=0.35*cos(2*pi*time), beta2=0.25+0.20*time)
 }
-simulate_poisson_v2 <- function(seed, n_subject=200L, visits=8:14,
+simulate_poisson <- function(seed, n_subject=200L, visits=8:14,
                                 sigma_b=0.5) {
   stopifnot(length(seed)==1L, is.finite(seed),
     length(n_subject)==1L, is.finite(n_subject), n_subject>=2,
@@ -25,7 +25,7 @@ simulate_poisson_v2 <- function(seed, n_subject=200L, visits=8:14,
     n <- visits[sample.int(length(visits),1)]
     time <- sort(runif(n))
     changing <- subject_component[i]+0.5*time+rnorm(n,sd=0.5)
-    beta <- poisson_v2_truth(time)
+    beta <- poisson_truth(time)
     eta <- beta[,1]+baseline[i]*beta[,2]+changing*beta[,3]+b[i]
     data.frame(id=i,time=time,y=rpois(n,exp(eta)),
       baseline=baseline[i],changing=changing,
@@ -33,21 +33,21 @@ simulate_poisson_v2 <- function(seed, n_subject=200L, visits=8:14,
   })
   all <- do.call(rbind,rows)
   list(data=all[,c('id','time','y','baseline','changing')],
-    truth=poisson_v2_truth(all$time),true_b=all$true_b,
+    truth=poisson_truth(all$time),true_b=all$true_b,
     eta=all$eta,lambda=all$lambda,
     subjects=data.frame(id=seq_len(n_subject),baseline=baseline,
       subject_component=subject_component,b=b),
     settings=list(seed=seed,n_subject=n_subject,visits=visits,sigma_b=sigma_b,
       subject_component_sd=1,time_trend=0.5,observation_noise_sd=0.5,
-      fit_n_basis=8L,fit_degree=3L,scenario='poisson-v2-final'))
+      fit_n_basis=8L,fit_degree=3L,scenario='poisson-example'))
 }
 
 # Source this standalone file, then call run_poisson_example().
-# Requires installed TDMM V2, R2jags/rjags/coda and system JAGS.
+# Requires installed TDMM, R2jags/rjags/coda and system JAGS.
 # Uses one illustrative dataset.
 run_poisson_example <- function(out='poisson-example-output') {
   library(TDMM)
-  sim <- simulate_poisson_v2(seed=20261021L)
+  sim <- simulate_poisson(seed=20261021L)
   dat <- sim$data
   saved <- file.path(out,'fit.rds')
   if(file.exists(saved)) {
@@ -71,6 +71,6 @@ run_poisson_example <- function(out='poisson-example-output') {
   # No JAGS paths, basis matrices or subject mappings are needed from the user.
   plot.tdmm(dat,fit)
   plot.trace.tdmm(fit,c('sigma.b','tau.alpha[1]','tau.alpha[2]','tau.alpha[3]'))
-  invisible(list(data=dat,fit=fit,truth=poisson_v2_truth,
+  invisible(list(data=dat,fit=fit,truth=poisson_truth,
                  true_sigma_b=sim$settings$sigma_b))
 }

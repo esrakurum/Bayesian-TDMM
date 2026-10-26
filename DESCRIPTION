@@ -1,17 +1,17 @@
 Package: TDMM
 Type: Package
 Title: Bayesian Time-Dynamic Mixed-Effects Models
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: c(
     person("Makena", "Grigsby", email = "makenavgrigsby@gmail.com", role = "aut"),
-    person("Esra", "Kurum", email = "esra.kurum@ucr.edu", role = c("aut", "cre"))
+    person("Esra", "Kürüm", email = "esra.kurum@ucr.edu", role = c("aut", "cre"))
     )
-Description: Fits Bayesian time-dynamic mixed-effects models for longitudinal
-    data with irregular subject-specific observation times, baseline covariates,
-    and time-varying covariates. The package supports Gaussian, Bernoulli,
-    and Poisson outcomes using spline-based time-varying coefficient functions
-    and subject-specific random intercepts. Posterior computation is performed
-    using JAGS.
+Description: Fits Bayesian time-dynamic regression models for Gaussian,
+    Bernoulli, and Poisson outcomes. Regression coefficients are modeled as
+    smooth functions of time. Models may include a subject-specific random
+    intercept for repeated observations or omit it for independent observations.
+    For independent observations, time may represent age, time since an event,
+    or time relative to an event. Posterior computation uses JAGS.
 License: MIT + file LICENSE
 URL: https://esrakurum.github.io/Bayesian-TDMM/, https://github.com/esrakurum/Bayesian-TDMM
 BugReports: https://github.com/esrakurum/Bayesian-TDMM/issues

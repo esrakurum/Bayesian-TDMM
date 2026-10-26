@@ -2,7 +2,7 @@
 # PBC2 application. 
 
 
-pbc2_v2_data <- function() {
+pbc2_data <- function() {
   if(!nzchar(system.file(package='JMbayes2')))
     stop("Install JMbayes2 first: install.packages('JMbayes2').")
   e <- new.env(parent=emptyenv())
@@ -76,8 +76,8 @@ pbc2_v2_data <- function() {
   invisible(manifest)
 }
 
-check_pbc2_v2 <- function() {
-  prep <- pbc2_v2_data()
+check_pbc2 <- function() {
+  prep <- pbc2_data()
   s <- .pbc2_settings()
   .pbc2_manifest(prep,s)
   checked <- TDMM::check.tdmm.family.data(prep$data,family='gaussian',
@@ -92,7 +92,7 @@ check_pbc2_v2 <- function() {
 
 .pbc2_fit <- function(n_basis,out) {
   if(!n_basis %in% c(6L,8L,10L)) stop('Use n_basis 6, 8 or 10.')
-  prep <- check_pbc2_v2(); s <- .pbc2_settings(); out <- .pbc2_dir(out)
+  prep <- check_pbc2(); s <- .pbc2_settings(); out <- .pbc2_dir(out)
   .pbc2_check_or_create(out,prep,s,create=TRUE)
   path <- .pbc2_fit_path(out,n_basis)
   if(file.exists(path)) {message('Reusing saved n_basis=',n_basis,' fit.');return(invisible(readRDS(path)))}
@@ -120,13 +120,13 @@ check_pbc2_v2 <- function() {
   invisible(item)
 }
 
-run_pbc2_v2_primary <- function(out='results/pbc2-v2-application') {
+run_pbc2_primary <- function(out='results/pbc2-application') {
   .pbc2_fit(8L,out)
-  summarize_pbc2_v2(out)
+  summarize_pbc2(out)
 }
-run_pbc2_v2_sensitivity <- function(out='results/pbc2-v2-application') {
+run_pbc2_sensitivity <- function(out='results/pbc2-application') {
   for(n_basis in c(6L,8L,10L)) .pbc2_fit(n_basis,out)
-  summarize_pbc2_v2(out)
+  summarize_pbc2(out)
 }
 .pbc2_chain_stats <- function(chains) {
   m <- coda::mcmc.list(lapply(chains,coda::mcmc))
@@ -167,8 +167,8 @@ run_pbc2_v2_sensitivity <- function(out='results/pbc2-v2-application') {
   abline(h=0,lty=3)
 }
 
-summarize_pbc2_v2 <- function(out='results/pbc2-v2-application') {
-  prep <- pbc2_v2_data();s <- .pbc2_settings();out <- .pbc2_dir(out)
+summarize_pbc2 <- function(out='results/pbc2-application') {
+  prep <- pbc2_data();s <- .pbc2_settings();out <- .pbc2_dir(out)
   .pbc2_check_or_create(out,prep,s)
   writeLines(c(paste0('Exact albumin center (g/dL): ',
     sprintf('%.16f',prep$metadata$albumin_center)),
@@ -254,8 +254,8 @@ if(sys.nframe()==0L) {
   args <- commandArgs(trailingOnly=TRUE)
   if(length(args)!=1L || !args %in% c('check','primary','sensitivity','summarize'))
     stop('Use check, primary, sensitivity, or summarize')
-  if(args=='check') check_pbc2_v2()
-  else if(args=='primary') run_pbc2_v2_primary()
-  else if(args=='sensitivity') run_pbc2_v2_sensitivity()
-  else summarize_pbc2_v2()
+  if(args=='check') check_pbc2()
+  else if(args=='primary') run_pbc2_primary()
+  else if(args=='sensitivity') run_pbc2_sensitivity()
+  else summarize_pbc2()
 }

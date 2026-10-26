@@ -24,8 +24,8 @@ Gaussian model, cubic degree 3 and `n_basis` 8, 6, or 10, with unchanged
 family-default Gaussian priors and 3 chains, 8,000 iterations, 3,000 burn-in,
 thinning 5, adaptation 5,000 and fixed seed 541. The source package, data,
 prior defaults, model file checksum, package version and settings are recorded
-in the output manifest. A saved fit is reused, and mismatched data/code are
-rejected. The script never calls JAGS directly.
+in the output. A saved fit is reused, and mismatched data/code are
+rejected.
 
 In RStudio, set the working directory to the TDMM repository and use a fresh R
 session. Install packages if needed:
@@ -35,31 +35,31 @@ install.packages('JMbayes2', repos='https://cloud.r-project.org') # data source
 install.packages('R2jags', repos='https://cloud.r-project.org')   # if missing
 install.packages('.', repos=NULL, type='source')                 # current TDMM
 library(TDMM)
-source('applications/pbc2-v2-analysis.R')
-check_pbc2_v2()                  # optional: data checks, no fitting
-run_pbc2_v2_primary()            # fit n_basis=8; save fit
-summarize_pbc2_v2()              # inspect/regenerate tables and plots; no MCMC
-run_pbc2_v2_sensitivity()        # fit 6 and 10; reuse saved 8
-summarize_pbc2_v2()              # regenerate all comparison outputs; no MCMC
+source('applications/pbc2-analysis.R')
+check_pbc2()                  # optional: data checks, no fitting
+run_pbc2_primary()            # fit n_basis=8; save fit
+summarize_pbc2()              # inspect/regenerate tables and plots; no MCMC
+run_pbc2_sensitivity()        # fit 6 and 10; reuse saved 8
+summarize_pbc2()              # regenerate all comparison outputs; no MCMC
 ```
 
 Terminal equivalents from the TDMM repository:
 
 ```sh
-Rscript applications/pbc2-v2-analysis.R check
-Rscript applications/pbc2-v2-analysis.R primary
-Rscript applications/pbc2-v2-analysis.R summarize
-Rscript applications/pbc2-v2-analysis.R sensitivity
+Rscript applications/pbc2-analysis.R check
+Rscript applications/pbc2-analysis.R primary
+Rscript applications/pbc2-analysis.R summarize
+Rscript applications/pbc2-analysis.R sensitivity
 ```
 
-Output is separate under `results/pbc2-v2-application/`: `analysis-data.rds`,
+Output is separate under `results/pbc2-application/`: `analysis-data.rds`,
 `manifest.rds`, `data-preparation.txt`, `sessionInfo.txt`, saved fits
 `fits/n-basis-{6,8,10}.rds`, `coefficient-curves.csv`,
 `selected-time-coefficients.csv`, `time-support.csv`, `curve-diagnostics.csv`,
 `parameter-diagnostics.csv`, `model-summary.csv`, `runtime-warnings.csv`, `model-summaries.txt`,
 `primary-package-plot.pdf`, `primary-coefficients.pdf`, and
 `basis-sensitivity.pdf`. Fit-error text files appear only if needed. All plots
-and tables can be regenerated from the saved fits with `summarize_pbc2_v2()`.
+and tables can be regenerated from the saved fits with `summarize_pbc2()`.
 
 The basis sensitivity analysis compares coefficient means and 95% credible
 bands on the same 100-point time grid, random-effect and residual variance,

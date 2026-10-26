@@ -48,7 +48,7 @@ check.fit.interface <- function(fit, dat, family, method, time.var="time", nX=2L
   }
   if (family != "gaussian") {
     stopifnot(!any(c("sigma.e", "sigma2.e") %in% names(fit)),
-              identical(fit$model.settings$implementation, "V2 observation-level"))
+              identical(fit$model.settings$implementation, "observation-level"))
   }
 }
 for (family in c("gaussian", "bernoulli", "poisson")) {

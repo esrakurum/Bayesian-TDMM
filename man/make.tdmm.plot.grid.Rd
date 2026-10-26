@@ -11,12 +11,12 @@ make.tdmm.plot.grid(data, grid = NULL, n.grid = 100, time.var = "time", nknots =
 \item{grid}{Optional numeric evaluation times.}
 \item{n.grid}{Number of points when grid is NULL.}
 \item{time.var}{Observation-time column name.}
-\item{nknots}{Deprecated legacy basis argument.}
+\item{nknots}{Deprecated \code{nknots} argument.}
 \item{degree}{Spline degree for new grids.}
 \item{n_basis}{Number of basis functions for new grids.}
 \item{result}{Optional fitted tdmm object whose spline metadata is authoritative.}
 }
-\details{When result is supplied, its recorded spline convention, degree, basis dimension, and time domain are used. This preserves reconstruction of saved legacy objects.}
+\details{When result is supplied, its recorded spline convention, degree, basis dimension, and time domain are used. This preserves reconstruction of older fitted objects.}
 \value{A list containing the plotting grid and evaluated basis.}
 \seealso{\code{\link{plot.tdmm}}}
 \examples{

@@ -23,7 +23,7 @@ tdmm_control(chains = 3L, iterations = 10000L, burn_in = 3000L,
 A partial named list can also be passed directly.}
 \details{Old MCMC arguments remain available. Supplying the same setting in
 both places is an error. An omitted control list retains the serial defaults;
-the legacy \code{tdmm.parallel()} wrapper retains its older adaptation default.
+the \code{tdmm.parallel()} compatibility wrapper retains its older adaptation default.
 Parallel execution uses macOS/Linux forked workers. Evaluation
 and plotting grids are selected by \code{plot()} or \code{plot.tdmm()}, rather
 than by fitting control. Setting a seed affects the R random-number generator.}

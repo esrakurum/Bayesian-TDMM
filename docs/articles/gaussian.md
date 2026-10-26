@@ -5,6 +5,8 @@ irregular observation times, unequal visit counts, one baseline
 covariate, and one covariate measured at each visit. The coefficient
 functions are known because the data are simulated.
 
+## Repeated observations
+
 ``` r
 set.seed(27181)
 truth <- function(t) cbind(beta0 = sin(2*pi*t),
@@ -42,3 +44,19 @@ pointwise credible bands. The [Getting Started
 guide](https://esrakurum.github.io/Bayesian-TDMM/articles/getting-started.md)
 explains the scales and diagnostics and illustrates recovery from a
 larger Gaussian dataset.
+
+## Independent observations
+
+The Gaussian simulation helper can also generate one observation per
+subject. In an independent-observation study, time may represent age,
+time since an event, or time relative to an event.
+
+``` r
+independent_data <- data.gen.tdmm.gauss(random_intercept = FALSE, seed = 27181)
+fit_independent <- tdmm(independent_data, family = "gaussian",
+                        x.var = c("x1", "x2"),
+                        random_intercept = FALSE,
+                        control = tdmm_control(seed = 77181))
+summary(fit_independent)
+plot(fit_independent)
+```

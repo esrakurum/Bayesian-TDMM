@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">TDMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,12 +42,18 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="tdmm-030">TDMM 0.3.0<a class="anchor" aria-label="anchor" href="#tdmm-030"></a></h2>
+<ul><li>
+<code><a href="../reference/tdmm.html">tdmm()</a></code> and <code><a href="../reference/tdmm.parallel.html">tdmm.parallel()</a></code> support models with or without a subject-specific random intercept through <code>random_intercept</code>; <code>TRUE</code> remains the default.</li>
+<li>Gaussian, Bernoulli, and Poisson simulation helpers generate independent-observation data directly when <code>random_intercept = FALSE</code>.</li>
+<li>Repeated-observation models with a subject-specific random intercept remain supported.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="tdmm-020">TDMM 0.2.0<a class="anchor" aria-label="anchor" href="#tdmm-020"></a></h2>
 <ul><li>Fit Gaussian, Bernoulli, and Poisson longitudinal outcomes with subject-specific irregular observation times, unequal visit counts, baseline covariates, and time-varying covariates.</li>
-<li>Use cubic B-splines (degree 3, order 4) with a second-order coefficient-difference penalty and eight basis functions by default. <code>n_basis</code> specifies the actual basis dimension; legacy <code>nknots</code> calls remain supported with a deprecation warning.</li>
+<li>Use cubic B-splines (degree 3, order 4) with a second-order coefficient-difference penalty and eight basis functions by default. <code>n_basis</code> specifies the basis dimension directly; the older <code>nknots</code> argument remains supported with a deprecation warning.</li>
 <li>Fit serial or parallel chains through <code><a href="../reference/tdmm.html">tdmm()</a></code> and structured <code><a href="../reference/tdmm.control.html">tdmm_control()</a></code> and <code><a href="../reference/tdmm.priors.html">tdmm.priors()</a></code> settings. <code><a href="../reference/tdmm.parallel.html">tdmm.parallel()</a></code> remains a compatibility wrapper.</li>
-<li>Use the centered null-space spline formulation for Bernoulli outcomes. Existing Gaussian and Poisson model specifications are retained.</li>
-<li>Add package examples, a Getting Started vignette, a reproducible PBC2 application, and a pkgdown documentation site.</li>
+<li>Existing Gaussian and Poisson model specifications are retained.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="tdmm-010">TDMM 0.1.0<a class="anchor" aria-label="anchor" href="#tdmm-010"></a></h2>
@@ -57,7 +63,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Makena Grigsby, Esra Kurum.</p>
+  <p>Developed by Makena Grigsby, Esra Kürüm.</p>
 </div>
 
 <div class="pkgdown-footer-right">

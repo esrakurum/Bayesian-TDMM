@@ -5,7 +5,7 @@ serum bilirubin as the Gaussian response, years since baseline as time,
 baseline treatment assignment, and longitudinal albumin. The dataset
 contains 1,945 observations from 312 subjects, with 1–16 visits per
 subject. The [standalone
-script](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-v2-analysis.R)
+script](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-analysis.R)
 loads the source data programmatically and reproduces the preprocessing,
 primary fit, sensitivity analysis, and plots.
 
@@ -41,5 +41,5 @@ associations rather than causal effects. Late follow-up is sparse, so
 local tail fluctuations warrant caution. A comparison of 6, 8, and 10
 basis functions gave broadly stable curves and conclusions; see the
 [application
-report](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-v2-analysis.md)
+report](https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-analysis.md)
 for details.

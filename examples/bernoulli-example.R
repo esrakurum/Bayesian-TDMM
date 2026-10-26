@@ -1,10 +1,10 @@
-# Reusable Bernoulli V2 design. No fitting, file writes, or basis construction.
+# Reusable Bernoulli simulation design. No fitting, file writes, or basis construction.
 # Coefficients are log-odds effects; the seed makes the example reproducible.
-bernoulli_v2_truth <- function(time) {
+bernoulli_truth <- function(time) {
   cbind(beta0=-0.5+0.75*sin(2*pi*time),
         beta1=0.75*cos(2*pi*time), beta2=0.5+0.25*time)
 }
-simulate_bernoulli_v2 <- function(seed, n_subject=200L, visits=8:14,
+simulate_bernoulli <- function(seed, n_subject=200L, visits=8:14,
                                 sigma_b=sqrt(0.5)) {
   stopifnot(length(seed)==1L, is.finite(seed),
     length(n_subject)==1L, is.finite(n_subject), n_subject>=2,
@@ -25,7 +25,7 @@ simulate_bernoulli_v2 <- function(seed, n_subject=200L, visits=8:14,
     n <- visits[sample.int(length(visits),1)]
     time <- sort(runif(n))
     changing <- subject_component[i]+0.5*time+rnorm(n,sd=0.5)
-    beta <- bernoulli_v2_truth(time)
+    beta <- bernoulli_truth(time)
     eta <- beta[,1]+baseline[i]*beta[,2]+changing*beta[,3]+b[i]
     data.frame(id=i,time=time,y=rbinom(n,1,plogis(eta)),
       baseline=baseline[i],changing=changing,
@@ -33,20 +33,20 @@ simulate_bernoulli_v2 <- function(seed, n_subject=200L, visits=8:14,
   })
   all <- do.call(rbind,rows)
   list(data=all[,c('id','time','y','baseline','changing')],
-    truth=bernoulli_v2_truth(all$time),true_b=all$true_b,
+    truth=bernoulli_truth(all$time),true_b=all$true_b,
     eta=all$eta,probability=all$probability,
     subjects=data.frame(id=seq_len(n_subject),baseline=baseline,
       subject_component=subject_component,b=b),
     settings=list(seed=seed,n_subject=n_subject,visits=visits,sigma_b=sigma_b,
       subject_component_sd=1,time_trend=0.5,observation_noise_sd=0.5,
-      fit_n_basis=8L,fit_degree=3L,scenario='bernoulli-v2-final'))
+      fit_n_basis=8L,fit_degree=3L,scenario='bernoulli-example'))
 }
 
 # Standalone user example: source(), then run_bernoulli_example().
 # Sourcing does not run MCMC. Existing matching saved fits are reused.
 run_bernoulli_example <- function(out="bernoulli-example-output") {
   library(TDMM)
-  sim <- simulate_bernoulli_v2(seed=20261021L)
+  sim <- simulate_bernoulli(seed=20261021L)
   dat <- sim$data
   saved <- file.path(out,"fit.rds")
   if(file.exists(saved)) {
@@ -70,6 +70,6 @@ run_bernoulli_example <- function(out="bernoulli-example-output") {
   summary(fit)
   plot.tdmm(dat,fit,grid=seq(.01,.99,length.out=100))
   plot.trace.tdmm(fit,c("sigma.b",paste0("tau.alpha[",1:3,"]")))
-  invisible(list(data=dat,fit=fit,truth=bernoulli_v2_truth,
+  invisible(list(data=dat,fit=fit,truth=bernoulli_truth,
     true_sigma_b=sim$settings$sigma_b))
 }

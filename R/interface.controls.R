@@ -1,4 +1,4 @@
-# Pptional lists for computational settings and family-specific priors.
+# Optional lists for computational settings and family-specific priors.
 # If no control list is provided, model defaults are used.
 tdmm.control <- function(chains = 3L, iterations = 10000L,
                          burn_in = 3000L, thin = 5L, adapt = 5000L,
@@ -46,7 +46,7 @@ tdmm_control <- tdmm.control
     seed = "seed", cores = "n.cores")
   for (nm in intersect(names(control), names(mapping))) {
     if (!is.null(control[[nm]]) && isTRUE(supplied[mapping[[nm]]]))
-      stop("Specify either control$", nm, " or legacy ", mapping[[nm]],
+      stop("Specify either control$", nm, " or ", mapping[[nm]],
            ", not both.", call. = FALSE)
   }
   out <- list(chains = legacy$n.chains, iterations = legacy$n.iter,
@@ -99,7 +99,7 @@ tdmm.priors <- function(family = c("gaussian", "bernoulli", "poisson")) {
   }
   expected <- tdmm.priors(family)$random_intercept$distribution
   if (!identical(out$random_intercept$distribution, expected))
-    stop("The random-intercept prior family is fixed by the approved model; change its parameters only.",
+    stop("The random-intercept prior family is fixed for this response family; only its parameters can be changed.",
          call. = FALSE)
   positive <- function(v) is.numeric(v) && length(v) == 1L && is.finite(v) && v > 0
   check <- function(x, nm) for (field in nm)

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">TDMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
 
     
     
-<p>This application analyzes the <code>pbc2</code> dataset from JMbayes2 using log serum bilirubin as the Gaussian response, years since baseline as time, baseline treatment assignment, and longitudinal albumin. The dataset contains 1,945 observations from 312 subjects, with 1–16 visits per subject. The <a href="https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-v2-analysis.R" class="external-link">standalone script</a> loads the source data programmatically and reproduces the preprocessing, primary fit, sensitivity analysis, and plots.</p>
+<p>This application analyzes the <code>pbc2</code> dataset from JMbayes2 using log serum bilirubin as the Gaussian response, years since baseline as time, baseline treatment assignment, and longitudinal albumin. The dataset contains 1,945 observations from 312 subjects, with 1–16 visits per subject. The <a href="https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-analysis.R" class="external-link">standalone script</a> loads the source data programmatically and reproduces the preprocessing, primary fit, sensitivity analysis, and plots.</p>
 <p>Albumin is centered at the overall observation-level mean of <strong>3.3898868894601542 g/dL</strong>. Treatment is coded 0 for placebo and 1 for D-penicillamine. The intercept therefore represents the modeled placebo trajectory at the centering value and random intercept zero.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://esrakurum.github.io/Bayesian-TDMM/">TDMM</a></span><span class="op">)</span></span>
@@ -89,14 +89,14 @@
 <span>            priors<span class="op">=</span><span class="fu"><a href="../reference/tdmm.priors.html">tdmm.priors</a></span><span class="op">(</span><span class="st">"gaussian"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
-<p>The treatment 95% credible band includes zero across the evaluation grid. The albumin coefficient is negative, with its band below zero throughout that grid. The modeled intercept generally rises over the better-supported follow-up period. Treatment estimates are conditional associations rather than causal effects. Late follow-up is sparse, so local tail fluctuations warrant caution. A comparison of 6, 8, and 10 basis functions gave broadly stable curves and conclusions; see the <a href="https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-v2-analysis.md" class="external-link">application report</a> for details.</p>
+<p>The treatment 95% credible band includes zero across the evaluation grid. The albumin coefficient is negative, with its band below zero throughout that grid. The modeled intercept generally rises over the better-supported follow-up period. Treatment estimates are conditional associations rather than causal effects. Late follow-up is sparse, so local tail fluctuations warrant caution. A comparison of 6, 8, and 10 basis functions gave broadly stable curves and conclusions; see the <a href="https://github.com/esrakurum/Bayesian-TDMM/blob/main/applications/pbc2-analysis.md" class="external-link">application report</a> for details.</p>
   </main>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Makena Grigsby, Esra Kurum.</p>
+  <p>Developed by Makena Grigsby, Esra Kürüm.</p>
 </div>
 
 <div class="pkgdown-footer-right">

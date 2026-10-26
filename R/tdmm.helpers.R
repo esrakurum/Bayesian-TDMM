@@ -20,7 +20,8 @@
 ## Locate the JAGS model file
 ############################################################
 
-get.tdmm.model.file <- function(family, jags.dir = NULL) {
+get.tdmm.model.file <- function(family, jags.dir = NULL,
+                                random_intercept = TRUE) {
 
   ## Select the JAGS model file that matches the requested
   ## response family.
@@ -35,9 +36,12 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
 
   model.file <- switch(
     family,
-    gaussian  = "TDMM_Gaussian_JAGS.txt",
-    bernoulli = "TDMM_Bernoulli_JAGS.txt",
-    poisson   = "TDMM_Poisson_JAGS.txt"
+    gaussian  = if (random_intercept) "TDMM_Gaussian_JAGS.txt" else
+      "TDMM_Gaussian_NoRandomIntercept_JAGS.txt",
+    bernoulli = if (random_intercept) "TDMM_Bernoulli_JAGS.txt" else
+      "TDMM_Bernoulli_NoRandomIntercept_JAGS.txt",
+    poisson   = if (random_intercept) "TDMM_Poisson_JAGS.txt" else
+      "TDMM_Poisson_NoRandomIntercept_JAGS.txt"
   )
 
   ##########
@@ -87,7 +91,8 @@ get.tdmm.model.file <- function(family, jags.dir = NULL) {
 ## Family-specific model configuration
 ############################################################
 
-get.tdmm.family.config <- function(family, jags.dir = NULL) {
+get.tdmm.family.config <- function(family, jags.dir = NULL,
+                                   random_intercept = TRUE) {
 
   ## This helper stores the family-specific settings used by
   ## tdmm() and tdmm.parallel().
@@ -100,7 +105,8 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
 
   model.file <- get.tdmm.model.file(
     family = family,
-    jags.dir = jags.dir
+    jags.dir = jags.dir,
+    random_intercept = random_intercept
   )
 
   ## The JAGS model files use matrix-style spline coefficients:
@@ -113,17 +119,18 @@ get.tdmm.family.config <- function(family, jags.dir = NULL) {
 
   params <- c(
     "alpha",
-    "tau.alpha",
-    "tau.b",
-    "sigma2.b",
-    "sigma.b"
+    "tau.alpha"
   )
+
+  if (random_intercept)
+    params <- c(params, "tau.b", "sigma2.b", "sigma.b")
 
   if (family == "gaussian") {
     params <- c(params, "tau.e", "sigma2.e", "sigma.e")
   }
 
-  if (family %in% c("poisson", "bernoulli")) params <- c(params, "b")
+  if (family %in% c("poisson", "bernoulli") && random_intercept)
+    params <- c(params, "b")
   if (family == "bernoulli") params <- c(params, "theta", "gamma")
 
   list(
@@ -367,7 +374,8 @@ build.tdmm.subject.inputs <- function(data,
 
 build.tdmm.jags.data <- function(inputs,
                                  family = c("gaussian", "bernoulli", "poisson"),
-                                 priors = NULL) {
+                                 priors = NULL,
+                                 random_intercept = TRUE) {
 
   ## This helper builds the list passed to JAGS.
   ##
@@ -385,20 +393,27 @@ build.tdmm.jags.data <- function(inputs,
   hyperparameters <- .tdmm.prior.jags.data(family, priors)
 
   if (family %in% c("gaussian", "poisson")) {
-    return(c(list(N = inputs$N, n.subject = inputs$n.subject,
-                nX = inputs$nX, n_basis = inputs$n_basis, y = inputs$y,
-                subject.ID = inputs$subject.ID, X = inputs$X.obs,
-                bases.obs = inputs$bases.obs,
-                Penalty.bases = inputs$Penalty.bases), hyperparameters))
+    jags.data <- c(list(N = inputs$N, n.subject = inputs$n.subject,
+                        nX = inputs$nX, n_basis = inputs$n_basis, y = inputs$y,
+                        subject.ID = inputs$subject.ID, X = inputs$X.obs,
+                        bases.obs = inputs$bases.obs,
+                        Penalty.bases = inputs$Penalty.bases), hyperparameters)
+  } else {
+    # The centered null-space decomposition uses the penalty's positive
+    # eigenvalues and independent fixed-variance priors for two null directions.
+    ns <- .bernoulli.null.space(inputs$Penalty.bases)
+    ns$tau.null <- NULL
+    jags.data <- c(list(N = inputs$N, n.subject = inputs$n.subject,
+                        nX = inputs$nX, n_basis = inputs$n_basis, y = inputs$y,
+                        subject.ID = inputs$subject.ID, X = inputs$X.obs,
+                        bases.obs = inputs$bases.obs), ns, hyperparameters)
   }
-  # The centered null-space decomposition uses the penalty's positive
-  # eigenvalues and independent fixed-variance priors for two null directions.
-  ns <- .bernoulli.null.space(inputs$Penalty.bases)
-  ns$tau.null <- NULL
-  c(list(N = inputs$N, n.subject = inputs$n.subject,
-         nX = inputs$nX, n_basis = inputs$n_basis, y = inputs$y,
-         subject.ID = inputs$subject.ID, X = inputs$X.obs,
-         bases.obs = inputs$bases.obs), ns, hyperparameters)
+
+  if (!random_intercept) {
+    jags.data[c("n.subject", "subject.ID", "random.shape",
+                "random.rate", "random.sd.max")] <- NULL
+  }
+  jags.data
 
 }
 
@@ -560,19 +575,21 @@ build.tdmm.output <- function(family,
   ## Variance summaries
   ##########
 
-  sigma2.b <- NA_real_
-  sigma.b <- NA_real_
+  sigma2.b <- if (isFALSE(model.settings$random_intercept)) NULL else NA_real_
+  sigma.b <- if (isFALSE(model.settings$random_intercept)) NULL else NA_real_
   sigma2.e <- NA_real_
   sigma.e <- NA_real_
 
-  if ("sigma2.b" %in% colnames(post.mat)) {
-    sigma2.b <- mean(post.mat[, "sigma2.b"])
-  }
+  if (!isFALSE(model.settings$random_intercept)) {
+    if ("sigma2.b" %in% colnames(post.mat)) {
+      sigma2.b <- mean(post.mat[, "sigma2.b"])
+    }
 
-  if ("sigma.b" %in% colnames(post.mat)) {
-    sigma.b <- mean(post.mat[, "sigma.b"])
-  } else if (!is.na(sigma2.b)) {
-    sigma.b <- sqrt(sigma2.b)
+    if ("sigma.b" %in% colnames(post.mat)) {
+      sigma.b <- mean(post.mat[, "sigma.b"])
+    } else if (!is.na(sigma2.b)) {
+      sigma.b <- sqrt(sigma2.b)
+    }
   }
 
   if (family == "gaussian") {

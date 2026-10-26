@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">TDMM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,12 +70,12 @@
 
     
     
-<p>TDMM fits Bayesian time-dynamic mixed-effects models with coefficient functions that vary over time and subject-specific random intercepts. Gaussian, Bernoulli, and Poisson responses are supported. Subjects may have different observation times and visit counts. Numeric covariates can be constant within subject or change at each visit. The default is eight cubic B-spline basis functions (degree 3, order 4) with a second-order coefficient-difference penalty. Install <a href="https://mcmc-jags.sourceforge.io/" class="external-link">JAGS</a> before fitting.</p>
+<p>TDMM fits Bayesian time-dynamic regression models for Gaussian, Bernoulli, and Poisson responses. Regression coefficients vary smoothly over time. With a subject-specific random intercept, subjects may have different observation times and visit counts. Numeric covariates can be constant within subject or change at each visit. The default is eight cubic B-spline basis functions (degree 3, order 4) with a second-order coefficient-difference penalty. Install <a href="https://mcmc-jags.sourceforge.io/" class="external-link">JAGS</a> before fitting.</p>
 <p>This page accompanies the package’s <a href="https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/getting-started.Rnw" class="external-link">Getting Started vignette</a>.</p>
 <div class="section level2">
 <h2 id="data-and-fitting">Data and fitting<a class="anchor" aria-label="anchor" href="#data-and-fitting"></a>
 </h2>
-<p>Provide one row per observed subject and visit, with columns for subject ID, numeric time, response, and covariates. The order of <code>x.var</code> determines the coefficient labels: <code>beta1</code> multiplies the first covariate, <code>beta2</code> the second, and so on.</p>
+<p>Provide one row per observation, with columns for subject ID, numeric time, response, and covariates. The order of <code>x.var</code> determines the coefficient labels: <code>beta1</code> multiplies the first covariate, <code>beta2</code> the second, and so on.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://esrakurum.github.io/Bayesian-TDMM/">TDMM</a></span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tdmm.html">tdmm</a></span><span class="op">(</span><span class="va">long_data</span>, family <span class="op">=</span> <span class="st">"gaussian"</span>,</span>
@@ -89,6 +89,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot.trace.tdmm.html">plot.trace.tdmm</a></span><span class="op">(</span><span class="va">fit</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sigma.b"</span>, <span class="st">"sigma2.e"</span>, <span class="st">"tau.alpha[1]"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Here <code>baseline</code> should be repeated within subject and <code>changing</code> may vary by visit. TDMM handles the subject indexing and spline construction. The Gaussian coefficient curves are on the response scale; Bernoulli coefficients are on the log-odds scale and Poisson coefficients on the log-mean scale. Inspect trace plots, R-hat, effective sample size, and credible bands before interpretation.</p>
+<p><code>random_intercept = TRUE</code> is the default and includes a subject-specific random intercept, as in the call above. For independent observations, use <code>random_intercept = FALSE</code> to omit it. In that setting, time may represent age, time since an event, or time relative to an event.</p>
 </div>
 <div class="section level2">
 <h2 id="coefficient-function-recovery">Coefficient-function recovery<a class="anchor" aria-label="anchor" href="#coefficient-function-recovery"></a>
@@ -115,7 +116,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Makena Grigsby, Esra Kurum.</p>
+  <p>Developed by Makena Grigsby, Esra Kürüm.</p>
 </div>
 
 <div class="pkgdown-footer-right">
