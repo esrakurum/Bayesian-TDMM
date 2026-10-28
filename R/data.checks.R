@@ -10,7 +10,7 @@
 ##   - covariates are numeric
 ##   - the response matches the selected family
 ##
-## The updated checks allow:
+## The checks support:
 ##   - balanced measurement times
 ##   - irregular measurement times
 ##   - baseline covariates
@@ -19,7 +19,7 @@
 
 
 ############################################################
-## Check repeated-measure structure
+## Check subject-level observation structure
 ############################################################
 
 check.tdmm.subject.balance <- function(data,
@@ -248,7 +248,7 @@ check.tdmm.data.structure <- function(data,
   }
 
   ##########
-  ## Summarize repeated-measure structure
+  ## Summarize observations per subject
   ##########
 
   subject.balance <- check.tdmm.subject.balance(

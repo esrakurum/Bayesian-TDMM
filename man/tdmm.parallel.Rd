@@ -11,7 +11,7 @@ tdmm.parallel(data, family = c("gaussian", "bernoulli", "poisson"), nknots = NUL
 \arguments{
 \item{data}{Data frame with one row per observation and columns for subject ID, time, response, and covariates.}
 \item{family}{One of "gaussian", "bernoulli", or "poisson".}
-\item{nknots}{Deprecated compatibility argument with its historical interval-count interpretation. Do not supply with n_basis.}
+\item{nknots}{Deprecated \code{nknots} argument using the interval-count convention. Do not supply with \code{n_basis}.}
 \item{subject.var}{Name of the subject ID column.}
 \item{time.var}{Name of the numeric observation-time column.}
 \item{y.var}{Name of the response column.}

@@ -2,7 +2,7 @@ library(TDMM)
 specification <- getFromNamespace('.make.spline.spec','TDMM')
 evaluate <- getFromNamespace('.evaluate.spline','TDMM')
 resolve <- getFromNamespace('.resolve.n_basis','TDMM')
-legacy <- getFromNamespace('.legacy.bbase','TDMM')
+signed.basis <- getFromNamespace('.legacy.bbase','TDMM')
 fitted.spec <- getFromNamespace('.fitted.spline.spec','TDMM')
 near <- function(a,b,tol=1e-10) stopifnot(isTRUE(all.equal(a,b,tolerance=tol,check.attributes=FALSE)))
 error <- function(expr) stopifnot(inherits(tryCatch({force(expr);NULL},error=identity),'error'))
@@ -23,7 +23,7 @@ for(d in c(1,2,3,4)) for(q in c(6L,8L,15L,25L)) {
 }
 # Independent check against the cubic basis formula.
 s <- specification(0,1,6,3);x <- seq(0,1,length.out=301)
-near(evaluate(x,s),legacy(x,0,1,3,3))
+near(evaluate(x,s),signed.basis(x,0,1,3,3))
 # Affine transformations retain the basis shape on a well-resolved scale.
 near(evaluate(x,s),evaluate(1976+6*x,specification(1976,1982,6,3)))
 stopifnot(resolve()==8L,suppressWarnings(resolve(nknots=6,degree=3))==7L,
@@ -56,7 +56,7 @@ for(convention in c('standard','legacy-signed')) {
   obj$inputs$degree <- NULL
   error(fitted.spec(obj))
 }
-# New fits use exact stored knots, even when the plotting data range differs.
+# Fitted objects use exact stored knots, even when the plotting data range differs.
 s <- specification(0,1,6,3)
 obj <- structure(list(inputs=list(spline=s)),class='tdmm')
 near(make.tdmm.plot.grid(data.frame(time=c(-9,9)),grid=x,result=obj)$bases.grid,evaluate(x,s))

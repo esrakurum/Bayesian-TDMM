@@ -10,13 +10,13 @@
     width = 2200, height = 700, res = 150, n_basis = NULL, data = NULL, ...) 
 }
 \arguments{
-\item{x}{A fitted tdmm object for plot(fit), or data argument in an earlier calling form.}
-\item{result}{A fitted tdmm object for the earlier plot.tdmm(data, result) calling form.}
+\item{x}{A fitted tdmm object for plot(fit), or the data argument in the two-argument calling form.}
+\item{result}{A fitted tdmm object when data and result are supplied separately.}
 \item{sd}{If TRUE, show posterior standard-deviation bands rather than credible intervals.}
 \item{level}{Pointwise credible level.}
 \item{grid}{Optional numeric evaluation times within the fitted time domain.}
 \item{n.grid}{Number of plotting-grid points when grid is NULL.}
-\item{time.var}{Observation-time column name for earlier calling forms.}
+\item{time.var}{Observation-time column name when data and result are supplied separately.}
 \item{nknots}{Deprecated basis argument; fitted metadata takes precedence.}
 \item{degree}{Optional degree check; cannot differ from fitted degree.}
 \item{file}{Optional PNG output path.}

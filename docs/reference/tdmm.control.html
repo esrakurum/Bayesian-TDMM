@@ -93,9 +93,9 @@ A partial named list can also be passed directly.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Old MCMC arguments remain available. Supplying the same setting in
+    <p>Individual MCMC arguments remain available. Supplying the same setting in
 both places is an error. An omitted control list retains the serial defaults;
-the <code><a href="tdmm.parallel.html">tdmm.parallel()</a></code> compatibility wrapper retains its older adaptation default.
+the <code><a href="tdmm.parallel.html">tdmm.parallel()</a></code> compatibility wrapper retains its existing adaptation default.
 Parallel execution uses macOS/Linux forked workers. Evaluation
 and plotting grids are selected by <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> or <code><a href="plot.tdmm.html">plot.tdmm()</a></code>, rather
 than by fitting control. Setting a seed affects the R random-number generator.</p>

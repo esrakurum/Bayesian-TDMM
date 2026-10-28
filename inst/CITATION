@@ -2,9 +2,10 @@ citHeader("To cite TDMM in publications, use:")
 
 bibentry(
   bibtype = "Manual",
-  title = "TDMM: Bayesian Time-Dynamic Mixed-Effects Models for Longitudinal Data",
+  title = "TDMM: Bayesian Time-Dynamic Models with Optional Mixed Effects",
   author = c(person("Makena", "Grigsby"), person("Esra", "Kürüm")),
   year = "2026",
   note = paste("R package version", as.character(utils::packageVersion("TDMM"))),
-  url = "https://github.com/esrakurum/Bayesian-TDMM"
+  url = "https://github.com/esrakurum/Bayesian-TDMM",
+  doi = "10.5281/zenodo.23742177"
 )

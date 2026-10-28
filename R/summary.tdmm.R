@@ -7,7 +7,7 @@
 ## It reports:
 ##   - response family
 ##   - number of subjects
-##   - number of repeated time points
+##   - number of unique observed time points
 ##   - number of baseline covariates
 ##   - covariate names
 ##   - MCMC settings
@@ -75,9 +75,13 @@ summary.tdmm <- function(object, ...) {
   }
 
   if (!is.null(settings$priors)) {
+    displayed.priors <- settings$priors
+    if (isFALSE(settings$random_intercept)) {
+      displayed.priors$random_intercept <- NULL
+    }
     cat("\nPrior settings\n")
     cat("--------------\n")
-    print(settings$priors)
+    print(displayed.priors)
   }
   
   cat("\nCoefficient functions\n")

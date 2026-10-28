@@ -57,6 +57,7 @@ for (family in names(response)) {
               is.null(sm$sigma.b), is.null(sm$sigma2.b),
               length(random.names(fit)) == 0L,
               !any(grepl("^sigma(2)?[.]b:", summary.lines)),
+              !any(grepl("random_intercept", summary.lines, fixed = TRUE)),
               all(is.finite(fit$beta.hat)))
     if (family == "gaussian")
       stopifnot(is.finite(fit$sigma2.e), is.finite(sm$sigma2.e))
@@ -70,7 +71,8 @@ check("default TRUE retains random-intercept output", {
             all(c("tau.b", "sigma.b", "sigma2.b") %in% random.names(fit)),
             is.finite(fit$sigma.b), is.finite(fit$sigma2.b),
             any(grepl("^sigma.b:", summary.lines)),
-            any(grepl("^sigma2.b:", summary.lines)))
+            any(grepl("^sigma2.b:", summary.lines)),
+            any(grepl("random_intercept", summary.lines, fixed = TRUE)))
 })
 
 check("parallel wrapper forwards FALSE", {

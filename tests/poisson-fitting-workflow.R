@@ -39,7 +39,7 @@ for (method in c("serial","parallel")) {
   mc <- coda::mcmc.list(lapply(curve,coda::mcmc))
   stopifnot(all(is.finite(coda::effectiveSize(mc))),
     nrow(coda::gelman.diag(mc,multivariate=FALSE,autoburnin=FALSE)$psrf)==nrow(p$bases.grid))
-  cat("PASS Poisson V2",method,"public workflow, scales, alignment and curve diagnostics\n")
+  cat("PASS Poisson",method,"public workflow, scales, alignment and curve diagnostics\n")
 }
 for (bad in list(-1,.5,Inf,"not a count")) {
   d <- dat; d$y[1] <- bad
@@ -47,7 +47,7 @@ for (bad in list(-1,.5,Inf,"not a count")) {
     x.var=c("baseline","changing")),silent=TRUE),"try-error"))
 }
 
-# Lock the supplied V2 likelihood/prior specification against accidental drift.
+# Check the Poisson likelihood and prior specification against accidental drift.
 model <- paste(readLines(system.file("jags","TDMM_Poisson_JAGS.txt",package="TDMM")),collapse=" ")
 for (term in c("log(lambda[j]) <- eta[j]", "y[j] ~ dpois(lambda[j])",
                "b[subject.ID[j]]", "sigma.b ~ dunif(0, random.sd.max)",

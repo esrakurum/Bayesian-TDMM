@@ -49,7 +49,7 @@ for (method in c("serial","parallel")) {
   mc <- coda::mcmc.list(lapply(curve,coda::mcmc))
   stopifnot(all(is.finite(coda::effectiveSize(mc))),
     nrow(coda::gelman.diag(mc,multivariate=FALSE,autoburnin=FALSE)$psrf)==nrow(p$bases.grid))
-  cat("PASS Bernoulli V2",method,"public workflow, scales, alignment and curve diagnostics\n")
+  cat("PASS Bernoulli",method,"public workflow, scales, alignment and curve diagnostics\n")
 }
 for (bad in list(-1,.5,2,Inf,"not binary")) {
   d <- dat; d$y[1] <- bad

@@ -80,7 +80,7 @@ get.tdmm.model.file <- function(family, jags.dir = NULL,
 
   stop(
     "Could not find the JAGS model file: ", model.file,
-    "\nIf you are working locally, try setting jags.dir = 'jags'.",
+    "\nFor a repository checkout, use jags.dir = 'inst/jags', or supply the directory containing the TDMM JAGS model files.",
     "\nIf the package was installed from GitHub, make sure the JAGS files are included in the installed package.",
     call. = FALSE
   )
@@ -114,8 +114,8 @@ get.tdmm.family.config <- function(family, jags.dir = NULL,
   ##
   ## where k = 1, ..., nX.
   ##
-  ## nX includes the intercept function and all baseline
-  ## covariate coefficient functions.
+  ## nX includes the intercept function and all covariate
+  ## coefficient functions.
 
   params <- c(
     "alpha",
@@ -385,7 +385,7 @@ build.tdmm.jags.data <- function(inputs,
   ## In the JAGS files:
   ##   X contains the intercept column and covariates
   ##   nX is the number of coefficient functions
-  ##   bases.time is the spline basis evaluated on the observed time grid
+  ##   bases.obs is the spline basis evaluated at observation times
   ##   n_basis is the number of spline basis functions
 
   family <- match.arg(family)

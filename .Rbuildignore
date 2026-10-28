@@ -16,7 +16,6 @@
 ^TDMM_.*\.tar\.gz$
 ^\.DS_Store$
 
-^PHASE2A_.*\.md$
 ^CITATION\.cff$
 ^tools$
 

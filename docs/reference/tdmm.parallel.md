@@ -24,8 +24,8 @@ tdmm.parallel(data, family = c("gaussian", "bernoulli", "poisson"), nknots = NUL
 
   - nknots:
 
-    Deprecated compatibility argument with its historical interval-count
-    interpretation. Do not supply with n\_basis.
+    Deprecated `nknots` argument using the interval-count convention. Do
+    not supply with `n_basis`.
 
   - subject.var:
 

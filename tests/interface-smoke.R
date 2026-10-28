@@ -12,12 +12,12 @@ expect.error <- function(expr, pattern) {
   error <- tryCatch({force(expr); NULL}, error = identity)
   stopifnot(inherits(error, "error"), grepl(pattern, conditionMessage(error), fixed = TRUE))
 }
-# Check that legacy fitting arguments remain available.
-legacy.args <- c("data", "family", "nknots", "subject.var", "time.var", "y.var",
+# Check that compatibility fitting arguments remain available.
+compatibility.args <- c("data", "family", "nknots", "subject.var", "time.var", "y.var",
                  "x.var", "degree", "n.chains", "n.iter", "n.burn", "n.thin",
                  "n.adapt", "jags.dir", "quiet")
-stopifnot(all(legacy.args %in% names(formals(tdmm))),
-          all(c(legacy.args, "n.cores", "seed") %in% names(formals(tdmm.parallel))),
+stopifnot(all(compatibility.args %in% names(formals(tdmm))),
+          all(c(compatibility.args, "n.cores", "seed") %in% names(formals(tdmm.parallel))),
           identical(formals(tdmm)$degree, 3), is.null(formals(tdmm)$nknots))
 check.fit.interface <- function(fit, dat, family, method, time.var="time", nX=2L) {
   required <- c("post.samples", "post.mat", "beta.hat", "beta.covariates.hat",
@@ -71,13 +71,13 @@ for (family in c("gaussian", "bernoulli", "poisson")) {
     grDevices::pdf(file = tempfile(fileext=".pdf"))
     plot.tdmm(dat, fit)
     plot.trace.tdmm(fit, c("sigma.b", "sigma2.b"))
-    # A V2-shaped SD-only object must not request or invent variance draws.
+    # An SD-only object must not request or invent variance draws.
     sd.fit <- fit
     sd.fit$post.mat <- fit$post.mat[, colnames(fit$post.mat) != "sigma2.b", drop=FALSE]
     plot.trace.tdmm(sd.fit, "sigma.b")
     expect.error(plot.trace.tdmm(sd.fit, "sigma2.b"), "not found")
     grDevices::dev.off()
-    cat("PASS", family, method, "V1-style fit, summary and plots\n")
+    cat("PASS", family, method, "common-grid fit, summary and plots\n")
   }
 }
 for (method in c("serial", "parallel")) {

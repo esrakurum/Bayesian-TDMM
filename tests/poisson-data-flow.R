@@ -75,4 +75,4 @@ stopifnot(identical(dim(b$beta.draws),c(4L,5L,3L)),
 near(b$beta.hat[,1],mean(1:4)*z$basis[,1])
 near(b$beta.hat[,2],mean(2*(1:4))*z$basis[,7])
 near(b$beta.hat[,3],mean(-(1:4))*z$basis[,15])
-cat("PASS Poisson V2 row alignment, ID types, repeated times and reconstruction dimensions\n")
+cat("PASS Poisson row alignment, ID types, repeated times and reconstruction dimensions\n")

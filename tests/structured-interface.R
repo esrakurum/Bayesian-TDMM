@@ -71,12 +71,12 @@ err(tdmm(d,family='poisson',control=list(parallel=1)),'control$parallel')
 err(tdmm.parallel(d,family='poisson',seed=1,control=list(seed=1)),
     'either control$seed')
 stopifnot(identical(formals(tdmm.parallel)$n.adapt,10000))
-# The old parallel entry point delegates to tdmm(), including old dotted
-# control objects whose new parallel field defaults to FALSE.
-legacy <- suppressWarnings(tdmm.parallel(d,family='poisson',subject.var='id',
+# The parallel wrapper delegates to tdmm(), including dotted control
+# arguments when the parallel field defaults to FALSE.
+compatibility.fit <- suppressWarnings(tdmm.parallel(d,family='poisson',subject.var='id',
   x.var=c('baseline','changing'),quiet=TRUE,
   control=tdmm.control(chains=2,iterations=100,burn_in=50,
     thin=1,adapt=100,cores=2,seed=246)))
-stopifnot(inherits(legacy,'tdmm'),inherits(legacy$post.samples,'mcmc.list'),
-  isTRUE(legacy$model.settings$control$parallel),
-  identical(legacy$model.settings$parallel.method,'mclapply'))
+stopifnot(inherits(compatibility.fit,'tdmm'),inherits(compatibility.fit$post.samples,'mcmc.list'),
+  isTRUE(compatibility.fit$model.settings$control$parallel),
+  identical(compatibility.fit$model.settings$parallel.method,'mclapply'))

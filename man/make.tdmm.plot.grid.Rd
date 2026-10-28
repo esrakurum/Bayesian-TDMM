@@ -16,7 +16,7 @@ make.tdmm.plot.grid(data, grid = NULL, n.grid = 100, time.var = "time", nknots =
 \item{n_basis}{Number of basis functions for new grids.}
 \item{result}{Optional fitted tdmm object whose spline metadata is authoritative.}
 }
-\details{When result is supplied, its recorded spline convention, degree, basis dimension, and time domain are used. This preserves reconstruction of older fitted objects.}
+\details{When result is supplied, its stored spline convention, degree, basis dimension, and time domain are used for reconstruction.}
 \value{A list containing the plotting grid and evaluated basis.}
 \seealso{\code{\link{plot.tdmm}}}
 \examples{

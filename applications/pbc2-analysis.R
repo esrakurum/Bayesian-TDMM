@@ -10,8 +10,8 @@ pbc2_data <- function() {
   raw <- e$pbc2
   required <- c('id','year','serBilir','drug','albumin')
   if(!all(required %in% names(raw))) stop('JMbayes2::pbc2 column names changed.')
-  if(anyNA(raw[,required])) stop('Missing values in analysis columns; review before changing the historical inclusion rule.')
-  if(any(raw$serBilir<=0)) stop('Nonpositive bilirubin prevents the historical log transform.')
+  if(anyNA(raw[,required])) stop('Missing values in analysis columns; review before changing the analysis inclusion rule.')
+  if(any(raw$serBilir<=0)) stop('Nonpositive bilirubin prevents the specified log transform.')
   if(!identical(levels(raw$drug),c('placebo','D-penicil')))
     stop('Treatment levels changed; review coding before fitting.')
   albumin_center <- mean(raw$albumin,na.rm=TRUE) # all source observations

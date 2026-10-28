@@ -1,6 +1,6 @@
 Package: TDMM
 Type: Package
-Title: Bayesian Time-Dynamic Mixed-Effects Models
+Title: Bayesian Time-Dynamic Models with Optional Mixed Effects
 Version: 0.3.0
 Authors@R: c(
     person("Makena", "Grigsby", email = "makenavgrigsby@gmail.com", role = "aut"),
