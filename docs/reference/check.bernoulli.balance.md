@@ -11,15 +11,15 @@ check.bernoulli.balance(data, y.var = "y", time.var = "time")
 ## Arguments
 
   - data:
-    
-    Long-format data frame.
+
+    Data frame with one row per observation.
 
   - y.var:
-    
+
     Response column name.
 
   - time.var:
-    
+
     Numeric observation-time column name.
 
 ## Value

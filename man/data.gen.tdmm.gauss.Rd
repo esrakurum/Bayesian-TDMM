@@ -13,7 +13,7 @@ data.gen.tdmm.gauss(n.subject = 200, n.time = 20, sigma2.b = 0.5, sigma2.e = 0.1
 \item{seed}{Optional random seed.}
 \item{random_intercept}{A single logical value. \code{TRUE} retains the balanced repeated-measures simulation. \code{FALSE} generates one independent observation per subject, with no random intercept.}
 }
-\value{A data frame with \code{subject.ID}, \code{time}, \code{y}, and \code{x1}. The \code{random_intercept = FALSE} case also has the time-varying covariate \code{x2}.}
+\value{A data frame with \code{subject.ID}, \code{time}, \code{y}, and \code{x1}. The \code{random_intercept = FALSE} case also has the additional covariate \code{x2}.}
 \details{When \code{random_intercept = FALSE}, time and an independent variable \code{u} are each Uniform(0, 1), \code{x1} is standard normal, and \code{x2 = sin(2 * pi * u) + e} with \code{e} normal with standard deviation 0.25. The coefficient functions are \code{sin(2 * pi * time)}, \code{cos(2 * pi * time)}, and \code{1.5 * (time - 0.5)} for the intercept, \code{x1}, and \code{x2}, respectively. Residual errors are independent normal with variance \code{sigma2.e}.}
 \examples{
 set.seed(1)

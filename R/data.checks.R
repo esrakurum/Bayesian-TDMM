@@ -5,7 +5,7 @@
 ##
 ## The checks make sure:
 ##   - required columns are present
-##   - data are in long format
+##   - data use one row per observation
 ##   - the time variable is numeric
 ##   - covariates are numeric
 ##   - the response matches the selected family

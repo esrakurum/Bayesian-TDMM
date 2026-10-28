@@ -8,7 +8,7 @@
 ##   - response family
 ##   - number of subjects
 ##   - number of unique observed time points
-##   - number of baseline covariates
+##   - number of covariates
 ##   - covariate names
 ##   - MCMC settings
 ##   - variance summaries

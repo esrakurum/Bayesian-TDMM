@@ -14,7 +14,8 @@ make.tdmm.plot.grid(data, grid = NULL, n.grid = 100, time.var = "time", nknots =
 
   - data:
 
-    Long-format data frame or fitted TDMM object.
+    Data frame with one row per observation when `result` is NULL; may
+    be NULL when `result` is supplied.
 
   - grid:
 
@@ -61,6 +62,6 @@ A list containing the plotting grid and evaluated basis.
 
 ``` r
 if (FALSE) { # \dontrun{
-grid <- make.tdmm.plot.grid(fit)
+grid <- make.tdmm.plot.grid(NULL, result = fit)
 } # }
 ```

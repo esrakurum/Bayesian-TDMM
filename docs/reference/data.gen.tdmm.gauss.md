@@ -45,8 +45,7 @@ data.gen.tdmm.gauss(n.subject = 200, n.time = 20, sigma2.b = 0.5, sigma2.e = 0.1
 ## Value
 
 A data frame with `subject.ID`, `time`, `y`, and `x1`. The
-`random_intercept = FALSE` case also has the time-varying covariate
-`x2`.
+`random_intercept = FALSE` case also has the additional covariate `x2`.
 
 ## Details
 

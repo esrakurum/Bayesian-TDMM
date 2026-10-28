@@ -30,10 +30,9 @@
   - `check.gaussian.response()` : Check a numeric Gaussian response.
   - `check.poisson.counts()` : Check a nonnegative integer Poisson
     response.
-  - `check.tdmm.data.structure()` : Check TDMM long-format input
-    structure
+  - `check.tdmm.data.structure()` : Check TDMM input data structure
   - `check.tdmm.family.data()` : Check TDMM data for an outcome family
-  - `check.tdmm.subject.balance()` : Inspect subject visit counts
+  - `check.tdmm.subject.balance()` : Inspect observations per subject
 
 ## Simulation helpers
 

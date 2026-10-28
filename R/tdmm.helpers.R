@@ -4,7 +4,7 @@
 ##
 ## They handle:
 ##   - locating the family-specific JAGS model file
-##   - preparing subject-level inputs
+##   - preparing observation-level inputs
 ##   - building the JAGS data list
 ##   - selecting monitored parameters by family
 ##   - recovering fitted coefficient functions
@@ -98,7 +98,7 @@ get.tdmm.family.config <- function(family, jags.dir = NULL,
   ## tdmm() and tdmm.parallel().
   ##
   ## The monitored parameters include the spline coefficients,
-  ## smoothing parameters, random intercept variance, and, for
+  ## smoothing parameters, random-intercept variance when included, and, for
   ## Gaussian outcomes, the residual variance.
 
   family <- match.arg(family, c("gaussian", "bernoulli", "poisson"))
@@ -142,7 +142,7 @@ get.tdmm.family.config <- function(family, jags.dir = NULL,
 
 
 ############################################################
-## Build subject-level TDMM inputs
+## Build observation-level TDMM inputs
 ############################################################
 
 build.tdmm.subject.inputs <- function(data,

@@ -8,17 +8,20 @@
 ## fitted coefficient curves.
 ##
 ## Examples of parameters:
-##   ## Gaussian models include random-intercept and residual variance terms
+##   ## Gaussian models include a residual variance term; the
+##   ## random-intercept variance is available when random_intercept = TRUE
 ##   params = c("sigma2.b", "sigma2.e")
 ##
-##   ## Bernoulli and Poisson models include only the random-intercept variance
+##   ## Bernoulli and Poisson fits with random_intercept = TRUE
+##   ## include the random-intercept variance
 ##   params = c("sigma2.b")
 ##
 ##   ## Spline coefficient traces can also be checked
 ##   params = paste0("alpha[1,", 1:5, "]")
 ##
 ## Note:
-## Parameter names are used exactly; sigma.b is SD and sigma2.b is variance.
+## Parameter names are used exactly; when random_intercept = TRUE,
+## sigma.b is its SD and sigma2.b is its variance.
 ############################################################
 
 plot.trace.tdmm <- function(result,

@@ -70,10 +70,13 @@ supported prior parameters.</p>
     <p>All Gamma distributions use shape and rate parameterization.</p>
 <p>For all response families, the smoothing precision has a
 Gamma(1, 0.001) prior.</p>
-<p>For Gaussian outcomes, the random-intercept precision and residual
-precision each have Gamma(1, 0.005) priors.</p>
+<p>For Gaussian outcomes, the random-intercept precision has a
+Gamma(1, 0.005) prior when <code>random_intercept = TRUE</code>; the residual
+precision has a Gamma(1, 0.005) prior in either setting.</p>
 <p>For Bernoulli and Poisson outcomes, the random-intercept standard
-deviation has a Uniform(0, 5) prior.</p>
+deviation has a Uniform(0, 5) prior when <code>random_intercept = TRUE</code>.
+When <code>random_intercept = FALSE</code>, the random-intercept prior settings
+returned by <code>tdmm.priors()</code> are not used by JAGS.</p>
 <p>For Bernoulli outcomes, <code>null_space = list(sd = 10)</code> specifies
 the standard deviation used for the two unpenalized spline components.</p>
 <p>Users may modify the numerical parameters of these priors, but the

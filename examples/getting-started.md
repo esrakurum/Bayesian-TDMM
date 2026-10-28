@@ -2,8 +2,9 @@
 
 From the TDMM repository root, install the package and system
 JAGS, then run either example in RStudio. Sourcing defines a function and does
-not fit anything. Data-only calls are useful for inspecting the long-format
-structure. An explicit fit call uses `tdmm()`, saves the
+not fit anything. Data-only calls are useful for inspecting the one-row-per-observation
+structure. These Bernoulli and Poisson examples use repeated observations;
+their `tdmm()` calls explicitly set `random_intercept = TRUE`. A fit call saves the
 fit, and reuses it on later calls with the same data.
 
 ```r

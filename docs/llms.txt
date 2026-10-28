@@ -27,8 +27,9 @@ library(TDMM)
 
 ## Fit a model
 
-Supply one row per observed visit. Here `baseline` is constant within
-subject and `changing` varies by visit:
+Supply one row per observation. The example below uses repeated
+observations; here `baseline` is constant within subject and `changing`
+varies by visit:
 
 ``` r
 fit <- tdmm(long_data, family = "gaussian",
@@ -101,10 +102,9 @@ license](https://esrakurum.github.io/Bayesian-TDMM/LICENSE.md).
   - `check.gaussian.response()` : Check a numeric Gaussian response.
   - `check.poisson.counts()` : Check a nonnegative integer Poisson
     response.
-  - `check.tdmm.data.structure()` : Check TDMM long-format input
-    structure
+  - `check.tdmm.data.structure()` : Check TDMM input data structure
   - `check.tdmm.family.data()` : Check TDMM data for an outcome family
-  - `check.tdmm.subject.balance()` : Inspect subject visit counts
+  - `check.tdmm.subject.balance()` : Inspect observations per subject
 
 ## Simulation helpers
 

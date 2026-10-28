@@ -1,13 +1,13 @@
 \name{check.tdmm.family.data}
 \alias{check.tdmm.family.data}
 \title{Check TDMM data for an outcome family}
-\description{Apply structural and family-specific response checks to long-format TDMM data.}
+\description{Apply structural and family-specific response checks to TDMM data with one row per observation.}
 \usage{
 check.tdmm.family.data(data, family = c("gaussian", "bernoulli", "poisson"), subject.var = "subject.ID", time.var = "time", 
     y.var = "y", x.var = NULL, stop.on.fail = TRUE) 
 }
 \arguments{
-\item{data}{Long-format data frame.}
+\item{data}{Data frame with one row per observation.}
 \item{family}{One of "gaussian", "bernoulli", or "poisson".}
 \item{subject.var}{Subject ID column name.}
 \item{time.var}{Numeric observation-time column name.}

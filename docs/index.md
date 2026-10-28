@@ -27,8 +27,9 @@ library(TDMM)
 
 ## Fit a model
 
-Supply one row per observed visit. Here `baseline` is constant within
-subject and `changing` varies by visit:
+Supply one row per observation. The example below uses repeated
+observations; here `baseline` is constant within subject and `changing`
+varies by visit:
 
 ``` r
 fit <- tdmm(long_data, family = "gaussian",

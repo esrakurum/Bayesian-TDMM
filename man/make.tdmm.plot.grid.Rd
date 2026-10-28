@@ -7,7 +7,7 @@ make.tdmm.plot.grid(data, grid = NULL, n.grid = 100, time.var = "time", nknots =
     result = NULL) 
 }
 \arguments{
-\item{data}{Long-format data frame or fitted TDMM object.}
+\item{data}{Data frame with one row per observation when \code{result} is NULL; may be NULL when \code{result} is supplied.}
 \item{grid}{Optional numeric evaluation times.}
 \item{n.grid}{Number of points when grid is NULL.}
 \item{time.var}{Observation-time column name.}
@@ -21,6 +21,6 @@ make.tdmm.plot.grid(data, grid = NULL, n.grid = 100, time.var = "time", nknots =
 \seealso{\code{\link{plot.tdmm}}}
 \examples{
 \dontrun{
-grid <- make.tdmm.plot.grid(fit)
+grid <- make.tdmm.plot.grid(NULL, result = fit)
 }
 }

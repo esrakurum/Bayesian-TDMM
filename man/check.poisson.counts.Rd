@@ -6,7 +6,7 @@
 check.poisson.counts(data, y.var = "y", time.var = "time") 
 }
 \arguments{
-\item{data}{Long-format data frame.}
+\item{data}{Data frame with one row per observation.}
 \item{y.var}{Response column name.}
 \item{time.var}{Numeric observation-time column name.}
 }

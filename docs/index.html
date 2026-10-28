@@ -74,7 +74,7 @@
 <div class="section level2">
 <h2 id="fit-a-model">Fit a model<a class="anchor" aria-label="anchor" href="#fit-a-model"></a>
 </h2>
-<p>Supply one row per observed visit. Here <code>baseline</code> is constant within subject and <code>changing</code> varies by visit:</p>
+<p>Supply one row per observation. The example below uses repeated observations; here <code>baseline</code> is constant within subject and <code>changing</code> varies by visit:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tdmm.html">tdmm</a></span><span class="op">(</span><span class="va">long_data</span>, family <span class="op">=</span> <span class="st">"gaussian"</span>,</span>
 <span>            subject.var <span class="op">=</span> <span class="st">"id"</span>, time.var <span class="op">=</span> <span class="st">"time"</span>, y.var <span class="op">=</span> <span class="st">"y"</span>,</span>

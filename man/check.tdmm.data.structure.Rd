@@ -1,12 +1,12 @@
 \name{check.tdmm.data.structure}
 \alias{check.tdmm.data.structure}
-\title{Check TDMM long-format input structure}
-\description{Check required columns, data types, missingness, repeated measurements, and covariate structure before model fitting.}
+\title{Check TDMM input data structure}
+\description{Check required columns, data types, missingness, observations per subject, and covariate structure before model fitting.}
 \usage{
 check.tdmm.data.structure(data, subject.var = "subject.ID", time.var = "time", y.var = "y", x.var = NULL, stop.on.fail = TRUE) 
 }
 \arguments{
-\item{data}{Long-format data frame.}
+\item{data}{Data frame with one row per observation.}
 \item{subject.var}{Subject ID column name.}
 \item{time.var}{Numeric observation-time column name.}
 \item{y.var}{Response column name.}
