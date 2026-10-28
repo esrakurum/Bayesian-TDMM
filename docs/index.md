@@ -58,10 +58,11 @@ are also available in the repository.
 Use `citation("TDMM")` or the repository’s [citation
 metadata](https://github.com/esrakurum/Bayesian-TDMM/blob/main/CITATION.cff).
 
-The v0.2.0 release is archived at [Zenodo
-DOI 10.5281/zenodo.23608508](https://doi.org/10.5281/zenodo.23608508);
-the v0.1.0 release has [Zenodo
-DOI 10.5281/zenodo.20617705](https://doi.org/10.5281/zenodo.20617705).
+The v0.3.0 release is archived at [Zenodo
+DOI 10.5281/zenodo.23742177](https://doi.org/10.5281/zenodo.23742177).
+Earlier releases are archived as
+[v0.2.0](https://doi.org/10.5281/zenodo.23608508) and
+[v0.1.0](https://doi.org/10.5281/zenodo.20617705).
 
 TDMM is released under the [MIT
 license](https://esrakurum.github.io/Bayesian-TDMM/LICENSE.md).

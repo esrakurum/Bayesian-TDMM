@@ -8,6 +8,10 @@ authors:
   - family-names: Kürüm
     given-names: Esra
 version: 0.3.0
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23742177
+date-released: 2026-10-28
 license: MIT
 repository-code: "https://github.com/esrakurum/Bayesian-TDMM"
 abstract: "TDMM provides Bayesian time-dynamic regression models for Gaussian, Bernoulli, and Poisson outcomes. Coefficients vary smoothly over time, with an optional subject-specific random intercept for repeated observations. Models without a random intercept support independent observations."
