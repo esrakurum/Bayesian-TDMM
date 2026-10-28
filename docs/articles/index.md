@@ -8,11 +8,11 @@
 ### Examples
 
   - [Gaussian
-    example](https://esrakurum.github.io/Bayesian-TDMM/articles/gaussian.md):
+    examples](https://esrakurum.github.io/Bayesian-TDMM/articles/gaussian.md):
   - [Bernoulli
-    example](https://esrakurum.github.io/Bayesian-TDMM/articles/bernoulli.md):
+    examples](https://esrakurum.github.io/Bayesian-TDMM/articles/bernoulli.md):
   - [Poisson
-    example](https://esrakurum.github.io/Bayesian-TDMM/articles/poisson.md):
+    examples](https://esrakurum.github.io/Bayesian-TDMM/articles/poisson.md):
   - [PBC2 real-data
     application](https://esrakurum.github.io/Bayesian-TDMM/articles/pbc2.md):
 

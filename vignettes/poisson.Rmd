@@ -1,15 +1,17 @@
 ---
-title: "Poisson example"
+title: "Poisson examples"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Poisson example}
+  %\VignetteIndexEntry{Poisson examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-Use `family = "poisson"` for counts. Coefficient functions are on the log-mean scale. The [standalone runnable example](https://github.com/esrakurum/Bayesian-TDMM/blob/main/examples/poisson-getting-started.R) generates subject-specific irregular visits, a baseline covariate, and a genuinely time-varying covariate with within-time variation; it fits with `random_intercept = TRUE`.
+Use `family = "poisson"` for counts. This page shows TDMM workflows for both repeated observations (`random_intercept = TRUE`) and independent observations (`random_intercept = FALSE`). Coefficient functions are on the log-mean scale.
 
 ## Repeated observations
+
+The [standalone runnable example](https://github.com/esrakurum/Bayesian-TDMM/blob/main/examples/poisson-getting-started.R) generates subject-specific irregular visits, a baseline covariate, and a genuinely time-varying covariate with within-time variation; it fits with `random_intercept = TRUE`.
 
 From the repository root:
 

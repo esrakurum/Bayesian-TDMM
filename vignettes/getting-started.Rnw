@@ -18,8 +18,9 @@ smoothly over time. With \verb|random_intercept = TRUE| (the default), a
 subject-specific random intercept supports repeated observations at irregular
 times and unequal visit counts. With \verb|random_intercept = FALSE|, the
 model supports independent observations; time may represent age, time since
-an event, or time relative to an event. Numeric covariates may be
-constant within subject (baseline) or change at each visit. The default is
+an event, or time relative to an event. With repeated observations, numeric
+covariates may be constant within subject (baseline) or change at each visit.
+The default is
 eight cubic B-spline basis functions (polynomial degree 3, order 4) with a
 second-order coefficient-difference penalty. JAGS is required for fitting;
 TDMM constructs the model matrices and selects the JAGS model internally.
@@ -55,7 +56,8 @@ c(subjects=length(unique(dat$id)), observations=nrow(dat),
 
 The recommended workflow is \verb|data -> tdmm() -> summary() -> plot()|,
 followed by convergence diagnostics. After installing JAGS, fit the simulated
-data with the following call. Adjust the MCMC settings and review diagnostics
+data with the following repeated-observation call, which uses
+\verb|random_intercept = TRUE|. Adjust the MCMC settings and review diagnostics
 before drawing conclusions from your own data.
 
 \verb|random_intercept = TRUE| is the default and includes a subject-specific
@@ -86,10 +88,13 @@ as printing a concise summary. \verb|plot(fit)| reconstructs curves on a
 grid consistent with the fitted spline specification.
 
 \subsection{Coefficient-function recovery}
-The figure illustrates coefficient-function recovery from a larger Gaussian
-simulation with the same known coefficient functions. The posterior mean
-curves follow the true functions across time. Dashed lines show the truth;
-shaded regions show pointwise 95\% credible bands.
+The figure illustrates coefficient-function recovery from a larger
+repeated-observation Gaussian simulation fit with
+\verb|random_intercept = TRUE| and the same known coefficient functions.
+The posterior mean curves follow the true functions across time. Dashed lines
+show the truth; shaded regions show pointwise 95\% credible bands. The Gaussian,
+Bernoulli, and Poisson example pages also show independent-observation
+workflows with \verb|random_intercept = FALSE|.
 
 <<gaussian-curves,echo=TRUE,fig=TRUE,width=9,height=3.4>>=
 example_data_path <- function(filename) {
@@ -183,10 +188,20 @@ and substantive conclusions were stable. This is robustness assessment, not
 selection of the most favorable result.
 
 \section{Using your own data and sensitivity analysis}
-Replace the column names and family in the template below. Provide covariates
-in the intended coefficient order; with repeated observations, a covariate can
-be baseline or measured at each visit. The data checks reject missing analysis values; decide how
-to handle missing data before fitting rather than relying on implicit imputation.
+First determine whether your data contain repeated observations or independent
+observations. For repeated observations, use \verb|random_intercept = TRUE|
+(the default) to include a subject-specific random intercept; subject IDs may
+appear on multiple rows. For independent observations, use
+\verb|random_intercept = FALSE|; each subject contributes one observation,
+and time may represent age, time since an event, or time relative to an event.
+Then choose \verb|family = 'gaussian'|, \verb|'bernoulli'|, or
+\verb|'poisson'| and provide covariates in the intended \verb|x.var| order.
+The data checks reject missing analysis values; decide how to handle missing
+data before fitting rather than relying on implicit imputation.
+
+The following Poisson template is for repeated observations. An
+independent-observation analysis should instead set
+\verb|random_intercept = FALSE|.
 
 \begin{verbatim}
 fit <- tdmm(my_long_data, family='poisson',
@@ -208,7 +223,7 @@ Poisson outcomes, use the same workflow with the corresponding \verb|family|
 value. Short examples for both families are in the repository's
 \verb|examples| folder.
 
-To use independent chains on macOS or Linux, use the same fitter with:
+To run MCMC chains in parallel on macOS or Linux, use the same fitter with:
 \begin{verbatim}
 control=tdmm_control(parallel=TRUE, cores=2, ...)
 \end{verbatim}

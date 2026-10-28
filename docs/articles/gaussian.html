@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Gaussian example • TDMM</title>
+<title>Gaussian examples • TDMM</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Gaussian example">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Gaussian examples">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -61,7 +61,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Gaussian example</h1>
+      <h1>Gaussian examples</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/gaussian.Rmd" class="external-link"><code>vignettes/gaussian.Rmd</code></a></small>
@@ -70,10 +70,11 @@
 
     
     
-<p>This example shows how to fit a Gaussian TDMM when subjects have irregular observation times, unequal visit counts, one baseline covariate, and one covariate measured at each visit. The coefficient functions are known because the data are simulated.</p>
+<p>Use <code>family = "gaussian"</code> for continuous responses. This page shows TDMM workflows for both repeated observations (<code>random_intercept = TRUE</code>) and independent observations (<code>random_intercept = FALSE</code>). Coefficient functions are on the response scale. Because the examples are simulated, the true coefficient functions are known.</p>
 <div class="section level2">
 <h2 id="repeated-observations">Repeated observations<a class="anchor" aria-label="anchor" href="#repeated-observations"></a>
 </h2>
+<p>This repeated-observation example uses irregular observation times, unequal visit counts, one baseline covariate, and one covariate measured at each visit.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">27181</span><span class="op">)</span></span>
 <span><span class="va">truth</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>beta0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">pi</span><span class="op">*</span><span class="va">t</span><span class="op">)</span>,</span>
@@ -103,7 +104,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot.trace.tdmm.html">plot.trace.tdmm</a></span><span class="op">(</span><span class="va">fit</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sigma.b"</span>,<span class="st">"sigma2.e"</span>,<span class="st">"tau.alpha[1]"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Compare the reconstructed curves with <code>truth()</code> and examine the pointwise credible bands. The <a href="getting-started.html">Getting Started guide</a> explains the scales and diagnostics and illustrates recovery from a larger Gaussian dataset.</p>
+<p>Compare the reconstructed curves with <code>truth()</code> and examine the pointwise credible bands. The <a href="getting-started.html">Getting Started guide</a> explains the scales and diagnostics and illustrates recovery from a larger repeated-observation Gaussian dataset.</p>
 </div>
 <div class="section level2">
 <h2 id="independent-observations">Independent observations<a class="anchor" aria-label="anchor" href="#independent-observations"></a>

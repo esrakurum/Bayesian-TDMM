@@ -1,13 +1,17 @@
-# Poisson example
+# Poisson examples
 
-Use `family = "poisson"` for counts. Coefficient functions are on the
-log-mean scale. The [standalone runnable
+Use `family = "poisson"` for counts. This page shows TDMM workflows for
+both repeated observations (`random_intercept = TRUE`) and independent
+observations (`random_intercept = FALSE`). Coefficient functions are on
+the log-mean scale.
+
+## Repeated observations
+
+The [standalone runnable
 example](https://github.com/esrakurum/Bayesian-TDMM/blob/main/examples/poisson-getting-started.R)
 generates subject-specific irregular visits, a baseline covariate, and a
 genuinely time-varying covariate with within-time variation; it fits
 with `random_intercept = TRUE`.
-
-## Repeated observations
 
 From the repository root:
 

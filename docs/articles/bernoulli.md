@@ -1,7 +1,10 @@
-# Bernoulli example
+# Bernoulli examples
 
-Use `family = "bernoulli"` for a binary response. Coefficient functions
-are on the log-odds scale, and `x.var` order controls their labels.
+Use `family = "bernoulli"` for a binary response. This page shows TDMM
+workflows for both repeated observations (`random_intercept = TRUE`) and
+independent observations (`random_intercept = FALSE`). Coefficient
+functions are on the log-odds scale, and `x.var` order controls their
+labels.
 
 ## Repeated observations
 

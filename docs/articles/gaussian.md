@@ -1,11 +1,16 @@
-# Gaussian example
+# Gaussian examples
 
-This example shows how to fit a Gaussian TDMM when subjects have
-irregular observation times, unequal visit counts, one baseline
-covariate, and one covariate measured at each visit. The coefficient
-functions are known because the data are simulated.
+Use `family = "gaussian"` for continuous responses. This page shows TDMM
+workflows for both repeated observations (`random_intercept = TRUE`) and
+independent observations (`random_intercept = FALSE`). Coefficient
+functions are on the response scale. Because the examples are simulated,
+the true coefficient functions are known.
 
 ## Repeated observations
+
+This repeated-observation example uses irregular observation times,
+unequal visit counts, one baseline covariate, and one covariate measured
+at each visit.
 
 ``` r
 set.seed(27181)
@@ -44,7 +49,7 @@ Compare the reconstructed curves with `truth()` and examine the
 pointwise credible bands. The [Getting Started
 guide](https://esrakurum.github.io/Bayesian-TDMM/articles/getting-started.md)
 explains the scales and diagnostics and illustrates recovery from a
-larger Gaussian dataset.
+larger repeated-observation Gaussian dataset.
 
 ## Independent observations
 

@@ -7,9 +7,10 @@ default), a subject-specific random intercept supports repeated
 observations at irregular times and unequal visit counts. With
 `random_intercept = FALSE`, the model supports independent observations;
 time may represent age, time since an event, or time relative to an
-event. Numeric covariates can be constant within subject or change at
-each visit. The default is eight cubic B-spline basis functions (degree
-3, order 4) with a second-order coefficient-difference penalty. Install
+event. With repeated observations, numeric covariates can be constant
+within subject or change at each visit. The default is eight cubic
+B-spline basis functions (degree 3, order 4) with a second-order
+coefficient-difference penalty. Install
 [JAGS](https://mcmc-jags.sourceforge.io/) before fitting.
 
 This page accompanies the package’s [Getting Started
@@ -20,7 +21,8 @@ vignette](https://github.com/esrakurum/Bayesian-TDMM/blob/main/vignettes/getting
 Provide one row per observation, with columns for subject ID, numeric
 time, response, and covariates. The order of `x.var` determines the
 coefficient labels: `beta1` multiplies the first covariate, `beta2` the
-second, and so on.
+second, and so on. The following Gaussian fit demonstrates repeated
+observations and uses `random_intercept = TRUE`.
 
 ``` r
 library(TDMM)
@@ -49,13 +51,15 @@ subject-specific random intercept.
 
 ## Coefficient-function recovery
 
-The figure illustrates recovery from simulated data with known
-coefficient functions. Solid lines show posterior means, dashed lines
-the truth, and shaded regions pointwise 95% credible bands. The
-[Gaussian
-example](https://esrakurum.github.io/Bayesian-TDMM/articles/gaussian.md)
-gives the fitting code. The Bernoulli and Poisson examples show the same
-workflow for binary and count outcomes.
+The figure illustrates coefficient-function recovery for a simulated
+repeated-observation Gaussian study fit with `random_intercept = TRUE`.
+Solid lines show posterior means, dashed lines the truth, and shaded
+regions pointwise 95% credible bands. The repeated-observation section
+of the [Gaussian
+examples](https://esrakurum.github.io/Bayesian-TDMM/articles/gaussian.md)
+shows the corresponding fitting workflow. The Gaussian, Bernoulli, and
+Poisson example pages also include independent-observation workflows
+using `random_intercept = FALSE`.
 
 ![](getting-started_files/figure-html/gaussian-curves-1.png)
 
@@ -81,11 +85,18 @@ clinical changes.
 
 ## Using your own data
 
-Choose `family = "gaussian"`, `"bernoulli"`, or `"poisson"` and supply
-the intended covariates in `x.var` order. The data checks reject missing
-analysis values; decide how to handle missingness before fitting.
-Varying `n_basis` is a useful sensitivity check; scientifically
-important smoothing or variance priors can also be examined using
-`tdmm.priors()`. For independent chains on macOS or Linux, select
-parallel execution through `tdmm_control(parallel = TRUE, cores = 2,
-...)`.
+First determine whether your data contain repeated observations or
+independent observations. For repeated observations, use
+`random_intercept = TRUE` (the default) to include a subject-specific
+random intercept; subject IDs may appear on multiple rows. For
+independent observations, use `random_intercept = FALSE`; each subject
+contributes one observation, and time may represent age, time since an
+event, or time relative to an event. Then choose `family = "gaussian"`,
+`"bernoulli"`, or `"poisson"` and supply the intended covariates in
+`x.var` order.
+
+The data checks reject missing analysis values; decide how to handle
+missingness before fitting. Varying `n_basis` is a useful sensitivity
+check; scientifically important smoothing or variance priors can also be
+examined using `tdmm.priors()`. To run MCMC chains in parallel on macOS
+or Linux, use `tdmm_control(parallel = TRUE, cores = 2, ...)`.

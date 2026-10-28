@@ -1,13 +1,13 @@
 ---
-title: "Bernoulli example"
+title: "Bernoulli examples"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Bernoulli example}
+  %\VignetteIndexEntry{Bernoulli examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-Use `family = "bernoulli"` for a binary response. Coefficient functions are on the log-odds scale, and `x.var` order controls their labels.
+Use `family = "bernoulli"` for a binary response. This page shows TDMM workflows for both repeated observations (`random_intercept = TRUE`) and independent observations (`random_intercept = FALSE`). Coefficient functions are on the log-odds scale, and `x.var` order controls their labels.
 
 ## Repeated observations
 
