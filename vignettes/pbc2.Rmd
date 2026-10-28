@@ -23,6 +23,7 @@ pbc <- data.frame(id=as.numeric(raw$id), time=raw$year,
                   albumin=raw$albumin-albumin_center)
 fit <- tdmm(pbc, family="gaussian", subject.var="id", time.var="time",
             y.var="y", x.var=c("drug","albumin"), degree=3, n_basis=8,
+            random_intercept=TRUE,
             control=tdmm_control(chains=3, iterations=8000,
               burn_in=3000, thin=5, adapt=5000, seed=541),
             priors=tdmm.priors("gaussian"))

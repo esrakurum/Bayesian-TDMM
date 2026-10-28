@@ -1,10 +1,11 @@
 # TDMM
 
-TDMM provides Bayesian time-dynamic regression models for **Gaussian,
-Bernoulli, and Poisson** outcomes. Regression coefficients vary smoothly
-over time. With `random_intercept = TRUE` (the default), subjects may
-have repeated observations, irregular observation times, unequal visit
-counts, baseline covariates, and covariates that vary by visit. With
+**TDMM: Bayesian Time-Dynamic Models with Optional Mixed Effects**
+provides Bayesian time-dynamic models for **Gaussian, Bernoulli, and
+Poisson** outcomes. Regression coefficients vary smoothly over time.
+With `random_intercept = TRUE` (the default), subjects may have repeated
+observations, irregular observation times, unequal visit counts,
+baseline covariates, and covariates that vary by visit. With
 `random_intercept = FALSE`, the model omits the subject-specific random
 intercept for independent observations; time may represent age, time
 since an event, or time relative to an event.
@@ -33,6 +34,7 @@ subject and `changing` varies by visit:
 fit <- tdmm(long_data, family = "gaussian",
             subject.var = "id", time.var = "time", y.var = "y",
             x.var = c("baseline", "changing"), n_basis = 8,
+            random_intercept = TRUE,
             control = tdmm_control(chains = 3, seed = 123))
 summary(fit)
 plot(fit)

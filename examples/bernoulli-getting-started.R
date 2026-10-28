@@ -22,7 +22,8 @@ run_small_bernoulli <- function(out='results/bernoulli-user-example',
   } else {
     fitted <- tdmm(dat, family='bernoulli', subject.var='id',
       time.var='time', y.var='y', x.var=c('baseline','changing'),
-      n_basis=8, control=tdmm_control(chains=3, iterations=4000,
+      n_basis=8, random_intercept=TRUE,
+      control=tdmm_control(chains=3, iterations=4000,
         burn_in=1500, thin=2, adapt=2000, seed=77181),
       priors=tdmm.priors('bernoulli'), quiet=TRUE)
     saveRDS(fitted,path)

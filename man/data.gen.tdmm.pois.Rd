@@ -16,7 +16,8 @@ data.gen.tdmm.pois(n.subject = 200, n.time = 20, sigma2.b = 0.5,
 \details{With \code{random_intercept = FALSE}, \code{x1} is standard Normal and \code{x2 = u + 0.5*time + e}, where \code{u} is standard Normal and \code{e} is Normal with standard deviation 0.5, independently drawn for each subject. The log mean is \code{beta0(time) + x1*beta1(time) + x2*beta2(time)}, where \code{beta0(t) = 0.25 + 0.35*sin(2*pi*t)}, \code{beta1(t) = 0.35*cos(2*pi*t)}, and \code{beta2(t) = 0.25 + 0.20*t}.}
 \value{A data frame with \code{subject.ID}, \code{time}, \code{y}, and \code{x1}; the independent-observation design also has \code{x2}.}
 \examples{
-d <- data.gen.tdmm.pois(n.subject = 5, n.time = 4, seed = 1)
+d <- data.gen.tdmm.pois(n.subject = 5, n.time = 4, seed = 1,
+  random_intercept = TRUE)
 d.independent <- data.gen.tdmm.pois(n.subject = 10,
   random_intercept = FALSE, seed = 1)
 }

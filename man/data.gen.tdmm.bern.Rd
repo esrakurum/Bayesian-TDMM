@@ -16,7 +16,8 @@ data.gen.tdmm.bern(n.subject = 200, n.time = 20, sigma2.b = 0.5,
 \details{Both settings use \code{beta0(t) = sin(2*pi*t)} and \code{beta1(t) = cos(2*pi*t)}. With \code{random_intercept = FALSE}, \code{x1} is drawn independently from a standard Normal distribution for each subject, and the logit probability is \code{beta0(time) + x1*beta1(time)}. With \code{random_intercept = TRUE}, a subject-specific random intercept is added to that expression.}
 \value{A data frame with \code{subject.ID}, \code{time}, \code{y}, and \code{x1}.}
 \examples{
-d <- data.gen.tdmm.bern(n.subject = 5, n.time = 4, seed = 1)
+d <- data.gen.tdmm.bern(n.subject = 5, n.time = 4, seed = 1,
+  random_intercept = TRUE)
 d.independent <- data.gen.tdmm.bern(n.subject = 10,
   random_intercept = FALSE, seed = 1)
 }

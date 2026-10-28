@@ -39,6 +39,7 @@ tdmm.parallel(data, family = c("gaussian", "bernoulli", "poisson"), nknots = NUL
 ## my_long_data is a long-format data frame; see the tdmm() example.
 fit <- tdmm.parallel(my_long_data, family = "gaussian",
                      subject.var = "id", time.var = "time", y.var = "y",
-                     x.var = "baseline", n.cores = 2)
+                     x.var = "baseline", random_intercept = TRUE,
+                     n.cores = 2)
 }
 }

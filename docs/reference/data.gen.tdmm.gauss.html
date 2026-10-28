@@ -86,7 +86,8 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">data.gen.tdmm.gauss</span><span class="op">(</span>n.subject <span class="op">=</span> <span class="fl">5</span>, n.time <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">data.gen.tdmm.gauss</span><span class="op">(</span>n.subject <span class="op">=</span> <span class="fl">5</span>, n.time <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>  random_intercept <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d.independent</span> <span class="op">&lt;-</span> <span class="fu">data.gen.tdmm.gauss</span><span class="op">(</span>n.subject <span class="op">=</span> <span class="fl">10</span>,</span></span>
 <span class="r-in"><span>  random_intercept <span class="op">=</span> <span class="cn">FALSE</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 </code></pre></div>

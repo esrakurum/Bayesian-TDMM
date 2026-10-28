@@ -19,7 +19,7 @@ constant centering changes the intercept interpretation but not that slope.
 The treatment coefficient is the modeled D-penicillamine-versus-placebo
 association, not a causal effect established by this analysis.
 
-The primary and sensitivity fits use `TDMM::tdmm()` with the
+The primary and sensitivity fits use `TDMM::tdmm(random_intercept = TRUE)` with the
 Gaussian model, cubic degree 3 and `n_basis` 8, 6, or 10, with unchanged
 family-default Gaussian priors and 3 chains, 8,000 iterations, 3,000 burn-in,
 thinning 5, adaptation 5,000 and fixed seed 541. The source package, data,

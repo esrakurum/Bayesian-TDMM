@@ -1,12 +1,15 @@
 # Getting Started with TDMM
 
-TDMM fits Bayesian time-dynamic regression models for Gaussian,
-Bernoulli, and Poisson responses. Regression coefficients vary smoothly
-over time. With a subject-specific random intercept, subjects may have
-different observation times and visit counts. Numeric covariates can be
-constant within subject or change at each visit. The default is eight
-cubic B-spline basis functions (degree 3, order 4) with a second-order
-coefficient-difference penalty. Install
+**TDMM: Bayesian Time-Dynamic Models with Optional Mixed Effects** fits
+Gaussian, Bernoulli, and Poisson responses with regression coefficients
+that vary smoothly over time. With `random_intercept = TRUE` (the
+default), a subject-specific random intercept supports repeated
+observations at irregular times and unequal visit counts. With
+`random_intercept = FALSE`, the model supports independent observations;
+time may represent age, time since an event, or time relative to an
+event. Numeric covariates can be constant within subject or change at
+each visit. The default is eight cubic B-spline basis functions (degree
+3, order 4) with a second-order coefficient-difference penalty. Install
 [JAGS](https://mcmc-jags.sourceforge.io/) before fitting.
 
 This page accompanies the package’s [Getting Started
@@ -24,6 +27,7 @@ library(TDMM)
 fit <- tdmm(long_data, family = "gaussian",
             subject.var = "id", time.var = "time", y.var = "y",
             x.var = c("baseline", "changing"), n_basis = 8,
+            random_intercept = TRUE,
             control = tdmm_control(chains = 3, iterations = 4000,
                                    burn_in = 1500, thin = 2,
                                    adapt = 2000, seed = 77181),
@@ -40,10 +44,8 @@ Bernoulli coefficients are on the log-odds scale and Poisson
 coefficients on the log-mean scale. Inspect trace plots, R-hat,
 effective sample size, and credible bands before interpretation.
 
-`random_intercept = TRUE` is the default and includes a subject-specific
-random intercept, as in the call above. For independent observations,
-use `random_intercept = FALSE` to omit it. In that setting, time may
-represent age, time since an event, or time relative to an event.
+For independent observations, use `random_intercept = FALSE` to omit the
+subject-specific random intercept.
 
 ## Coefficient-function recovery
 

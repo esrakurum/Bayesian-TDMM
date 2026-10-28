@@ -100,7 +100,7 @@ check_pbc2 <- function() {
   elapsed <- system.time(ans <- tryCatch(withCallingHandlers(
     TDMM::tdmm(prep$data,family='gaussian',subject.var='id',
       time.var='time',y.var='y',x.var=c('drug','albumin'),
-      n_basis=n_basis,degree=s$degree,
+      n_basis=n_basis,degree=s$degree,random_intercept=TRUE,
       control=TDMM::tdmm_control(chains=s$chains,iterations=s$iterations,
         burn_in=s$burn_in,thin=s$thin,adapt=s$adapt,seed=s$seed),
       priors=TDMM::tdmm.priors('gaussian'),quiet=TRUE),

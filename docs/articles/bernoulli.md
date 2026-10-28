@@ -8,8 +8,8 @@ are on the log-odds scale, and `x.var` order controls their labels.
 The [standalone runnable
 example](https://github.com/esrakurum/Bayesian-TDMM/blob/main/examples/bernoulli-getting-started.R)
 generates irregular visits with a baseline and time-varying covariate,
-fits one dataset, and saves summaries and plots. From the repository
-root:
+fits one dataset with `random_intercept = TRUE`, and saves summaries and
+plots. From the repository root:
 
 ``` r
 library(TDMM)

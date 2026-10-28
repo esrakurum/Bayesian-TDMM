@@ -1,7 +1,10 @@
 # Technical documentation
 
-TDMM models Gaussian, Bernoulli, and Poisson outcomes using coefficient
-functions that vary smoothly over time. The [reference
+**TDMM: Bayesian Time-Dynamic Models with Optional Mixed Effects**
+models Gaussian, Bernoulli, and Poisson outcomes using coefficient
+functions that vary smoothly over time. Repeated observations use a
+subject-specific random intercept by default; `random_intercept = FALSE`
+supports independent observations. The [reference
 index](https://esrakurum.github.io/Bayesian-TDMM/reference/index.md)
 documents fitting, priors, computational controls, plotting,
 diagnostics, and data checks. The [Getting Started

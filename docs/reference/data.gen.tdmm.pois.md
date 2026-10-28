@@ -57,7 +57,8 @@ independent-observation design also has `x2`.
 ## Examples
 
 ``` r
-d <- data.gen.tdmm.pois(n.subject = 5, n.time = 4, seed = 1)
+d <- data.gen.tdmm.pois(n.subject = 5, n.time = 4, seed = 1,
+  random_intercept = TRUE)
 d.independent <- data.gen.tdmm.pois(n.subject = 10,
   random_intercept = FALSE, seed = 1)
 ```

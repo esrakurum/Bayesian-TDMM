@@ -4,7 +4,8 @@
 
 <!-- end list -->
 
-  - `tdmm()` : Fit a Bayesian time-dynamic regression model
+  - `tdmm()` : Fit a Bayesian time-dynamic model with optional mixed
+    effects
   - `tdmm.control()` `tdmm_control()` : Computational controls for TDMM
     fits
   - `tdmm.priors()` : Family-specific default TDMM priors

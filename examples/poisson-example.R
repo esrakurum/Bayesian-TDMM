@@ -64,6 +64,7 @@ run_poisson_example <- function(out='poisson-example-output') {
     set.seed(87181L) # Separate fitting seed; initialization uses package defaults.
     fit <- tdmm(dat,family='poisson',subject.var='id',
       x.var=c('baseline','changing'),n_basis=8,degree=3,
+      random_intercept=TRUE,
       n.chains=3,n.iter=8000,n.burn=3000,n.thin=5,n.adapt=5000)
     saveRDS(fit,saved)
   }

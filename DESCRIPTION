@@ -6,7 +6,7 @@ Authors@R: c(
     person("Makena", "Grigsby", email = "makenavgrigsby@gmail.com", role = "aut"),
     person("Esra", "Kürüm", email = "esra.kurum@ucr.edu", role = c("aut", "cre"))
     )
-Description: Fits Bayesian time-dynamic regression models for Gaussian,
+Description: Fits Bayesian time-dynamic models with optional mixed effects for Gaussian,
     Bernoulli, and Poisson outcomes. Regression coefficients are modeled as
     smooth functions of time. Models may include a subject-specific random
     intercept for repeated observations or omit it for independent observations.

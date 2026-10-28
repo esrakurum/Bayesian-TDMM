@@ -17,7 +17,8 @@ data.gen.tdmm.gauss(n.subject = 200, n.time = 20, sigma2.b = 0.5, sigma2.e = 0.1
 \details{When \code{random_intercept = FALSE}, time and an independent variable \code{u} are each Uniform(0, 1), \code{x1} is standard normal, and \code{x2 = sin(2 * pi * u) + e} with \code{e} normal with standard deviation 0.25. The coefficient functions are \code{sin(2 * pi * time)}, \code{cos(2 * pi * time)}, and \code{1.5 * (time - 0.5)} for the intercept, \code{x1}, and \code{x2}, respectively. Residual errors are independent normal with variance \code{sigma2.e}.}
 \examples{
 set.seed(1)
-d <- data.gen.tdmm.gauss(n.subject = 5, n.time = 4)
+d <- data.gen.tdmm.gauss(n.subject = 5, n.time = 4,
+  random_intercept = TRUE)
 d.independent <- data.gen.tdmm.gauss(n.subject = 10,
   random_intercept = FALSE, seed = 1)
 }

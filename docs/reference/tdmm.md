@@ -1,8 +1,10 @@
-# Fit a Bayesian time-dynamic regression model
+# Fit a Bayesian time-dynamic model with optional mixed effects
 
-Fit Bayesian time-dynamic regression models for Gaussian, Bernoulli, or
-Poisson outcomes. Regression coefficients vary smoothly over time; a
-subject-specific random intercept is optional.
+Fit Bayesian time-dynamic models with optional mixed effects for
+Gaussian, Bernoulli, or Poisson outcomes. Regression coefficients vary
+smoothly over time. A subject-specific random intercept supports
+repeated observations; models without it support independent
+observations.
 
 ## Usage
 
@@ -137,7 +139,7 @@ my_long_data <- do.call(rbind, lapply(seq_len(20), function(id) {
 }))
 fit <- tdmm(my_long_data, family = "gaussian", subject.var = "id",
             time.var = "time", y.var = "y", x.var = c("baseline", "changing"),
-            control = tdmm_control(seed = 42))
+            random_intercept = TRUE, control = tdmm_control(seed = 42))
 summary(fit)
 plot(fit)
 } # }

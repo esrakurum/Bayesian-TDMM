@@ -56,7 +56,8 @@ A data frame with `subject.ID`, `time`, `y`, and `x1`.
 ## Examples
 
 ``` r
-d <- data.gen.tdmm.bern(n.subject = 5, n.time = 4, seed = 1)
+d <- data.gen.tdmm.bern(n.subject = 5, n.time = 4, seed = 1,
+  random_intercept = TRUE)
 d.independent <- data.gen.tdmm.bern(n.subject = 10,
   random_intercept = FALSE, seed = 1)
 ```

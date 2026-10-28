@@ -64,6 +64,7 @@ run_bernoulli_example <- function(out="bernoulli-example-output") {
     set.seed(87181L)
     fit <- tdmm(dat,family="bernoulli",subject.var="id",
       x.var=c("baseline","changing"),n_basis=8,degree=3,
+      random_intercept=TRUE,
       n.chains=3,n.iter=20000,n.burn=10000,n.thin=5,n.adapt=5000)
     saveRDS(fit,saved)
   }

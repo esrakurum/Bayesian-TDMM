@@ -14,7 +14,7 @@ identifiers:
 date-released: 2026-10-28
 license: MIT
 repository-code: "https://github.com/esrakurum/Bayesian-TDMM"
-abstract: "TDMM provides Bayesian time-dynamic regression models for Gaussian, Bernoulli, and Poisson outcomes. Coefficients vary smoothly over time, with an optional subject-specific random intercept for repeated observations. Models without a random intercept support independent observations."
+abstract: "TDMM provides Bayesian time-dynamic models with optional mixed effects for Gaussian, Bernoulli, and Poisson outcomes. Coefficients vary smoothly over time. A subject-specific random intercept supports repeated observations; without it, the model supports independent observations. In the independent setting, time may represent age, time since an event, or time relative to an event."
 keywords:
   - Bayesian modeling
   - longitudinal data

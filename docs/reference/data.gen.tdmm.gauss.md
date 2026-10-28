@@ -61,7 +61,8 @@ errors are independent normal with variance `sigma2.e`.
 
 ``` r
 set.seed(1)
-d <- data.gen.tdmm.gauss(n.subject = 5, n.time = 4)
+d <- data.gen.tdmm.gauss(n.subject = 5, n.time = 4,
+  random_intercept = TRUE)
 d.independent <- data.gen.tdmm.gauss(n.subject = 10,
   random_intercept = FALSE, seed = 1)
 ```

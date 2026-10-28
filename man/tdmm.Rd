@@ -1,7 +1,7 @@
 \name{tdmm}
 \alias{tdmm}
-\title{Fit a Bayesian time-dynamic regression model}
-\description{Fit Bayesian time-dynamic regression models for Gaussian, Bernoulli, or Poisson outcomes. Regression coefficients vary smoothly over time; a subject-specific random intercept is optional.}
+\title{Fit a Bayesian time-dynamic model with optional mixed effects}
+\description{Fit Bayesian time-dynamic models with optional mixed effects for Gaussian, Bernoulli, or Poisson outcomes. Regression coefficients vary smoothly over time. A subject-specific random intercept supports repeated observations; models without it support independent observations.}
 \usage{
 tdmm(data, family = c("gaussian", "bernoulli", "poisson"), nknots = NULL, subject.var = "subject.ID", 
     time.var = "time", y.var = "y", x.var = NULL, degree = 3, n.chains = 3, n.iter = 10000, n.burn = 3000, 
@@ -47,7 +47,7 @@ my_long_data <- do.call(rbind, lapply(seq_len(20), function(id) {
 }))
 fit <- tdmm(my_long_data, family = "gaussian", subject.var = "id",
             time.var = "time", y.var = "y", x.var = c("baseline", "changing"),
-            control = tdmm_control(seed = 42))
+            random_intercept = TRUE, control = tdmm_control(seed = 42))
 summary(fit)
 plot(fit)
 }
